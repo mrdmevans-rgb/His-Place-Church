@@ -15,22 +15,22 @@ const navItems = [
 const upcomingEvents = [
   {
     title: 'Sunday Worship Gathering',
-    time: 'Sundays at 10:30 AM',
+    time: 'Sundays Coming Soon',
     location: 'Amelia / Beechmont area',
     description:
       'A welcoming service centered on Christ, biblical teaching, worship, prayer, and authentic community.',
   },
   {
     title: 'Midweek Bible Study',
-    time: 'Wednesdays at 6:30 PM',
+    time: 'Wednesdays Coming Soon',
     location: 'Community group setting',
     description:
       'A deeper look at Scripture with discussion, encouragement, and prayer for everyday life.',
   },
   {
-    title: 'Prayer Night',
-    time: 'First Thursday of each month',
-    location: 'Church family gathering',
+    title: 'Fellowship Breakfast',
+    time: 'First Saturday of each month-Coming Soon',
+    location: ,
     description:
       'A focused evening to seek the Lord together and pray for families, healing, salvation, and our community.',
   },
