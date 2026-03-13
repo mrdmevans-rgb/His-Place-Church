@@ -30,9 +30,9 @@ const upcomingEvents = [
   {
     title: 'Fellowship Breakfast',
     time: 'First Saturday of each month-Coming Soon',
-    location: ,
+    location: Amela / Beechont area',
     description:
-      'A focused evening to seek the Lord together and pray for families, healing, salvation, and our community.',
+      'A time to break bread, grow closer together and to God.',
   },
 ]
 
