@@ -432,7 +432,7 @@ function PrayerPage() {
               const name = encodeURIComponent(data.get('name') || '')
               const email = encodeURIComponent(data.get('email') || '')
               const request = encodeURIComponent(data.get('request') || '')
-              window.location.href = `mailto:info@hisplacecommunitychurch.com?subject=Prayer%20Request%20from%20${name}&body=Name:%20${name}%0AEmail:%20${email}%0A%0APrayer%20Request:%0A${request}`
+              window.location.href = `mailto:info@hpcchurch.church?subject=Prayer%20Request%20from%20${name}&body=Name:%20${name}%0AEmail:%20${email}%0A%0APrayer%20Request:%0A${request}`
             }}
           >
             <input name="name" type="text" placeholder="Your name" required />
@@ -482,7 +482,7 @@ function Footer() {
           <div className="footer-heading">Connect</div>
           <div className="footer-contact-list">
             <div className="footer-contact-item"><MapPin size={16} className="icon-red" /> Amelia / Beechmont, Ohio</div>
-            <div className="footer-contact-item"><Mail size={16} className="icon-red" /> info@hisplacecommunitychurch.com</div>
+            <div className="footer-contact-item"><Mail size={16} className="icon-red" /> info@hpcchurch.church</div>
           </div>
         </div>
       </div>
