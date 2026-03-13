@@ -282,20 +282,20 @@ function AboutPage() {
 
         <div className="two-col-about">
           <ShellCard className="image-card overflow-hidden">
-            <img src={pastorPhotoSrc} alt="Pastor David Evans with family" className="about-image" />
+            <img src={pastorPhotoSrc} alt="Pastor Dave Evans with family" className="about-image" />
           </ShellCard>
           <ShellCard className="bio-card">
             <div className="section-label">Meet the Pastor</div>
-            <h2>Pastor David Evans</h2>
+            <h2>Pastor Dave Evans</h2>
             <div className="stack-md muted-copy">
               <p>
-                Pastor David Evans is passionate about helping people encounter Jesus in a real way and grow deeper in their understanding of God’s Word. He has a heart for biblical preaching, meaningful discipleship, prayer, and creating a church culture where people feel seen, loved, and welcomed.
+                Pastor Dave Evans is passionate about helping people encounter Jesus in a real way and grow deeper in their understanding of God’s Word. He has a heart for biblical preaching, meaningful discipleship, prayer, and creating a church culture where people feel seen, loved, and welcomed.
               </p>
               <p>
                 His vision for His Place Community Church is simple: to build a Christ centered church family where truth is taught clearly, grace is extended freely, and people are encouraged to follow Jesus wholeheartedly in everyday life.
               </p>
               <p>
-                David cares deeply about reaching people who may feel overlooked, worn down, or spiritually hungry. He desires for His Place to be a church where people can find hope, healing, purpose, and a genuine sense of belonging.
+                Dave cares deeply about reaching people who may feel overlooked, worn down, or spiritually hungry. He desires for His Place to be a church where people can find hope, healing, purpose, and a genuine sense of belonging.
               </p>
             </div>
           </ShellCard>
