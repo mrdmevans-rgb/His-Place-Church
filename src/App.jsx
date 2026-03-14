@@ -12,7 +12,7 @@ const navItems = [
   { to: '/prayer', label: 'Prayer' },
 ]
 
-const EVENTS_SHEET_URL = ''
+const EVENTS_SHEET_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Sheet1'
 
 const fallbackEvents = [
   {
