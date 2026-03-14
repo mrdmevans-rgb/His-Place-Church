@@ -16,24 +16,24 @@ const EVENTS_SHEET_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDb
 
 const fallbackEvents = [
   {
-    title: 'Sunday Worship Gathering',
-    time: 'Sundays at 10:30 AM',
-    location: 'Amelia / Beechmont area',
-    description:
+    Title: 'Sunday Worship Gathering',
+    Time: 'Sundays at 10:30 AM',
+    Location: 'Amelia / Beechmont area',
+    Description:
       'A welcoming service centered on Christ, biblical teaching, worship, prayer, and authentic community.',
   },
   {
-    title: 'Midweek Bible Study',
-    time: 'Wednesdays at 6:30 PM',
-    location: 'Community group setting',
-    description:
+    Title: 'Midweek Bible Study',
+    Time: 'Wednesdays at 6:30 PM',
+    Location: 'Community group setting',
+    Description:
       'A deeper look at Scripture with discussion, encouragement, and prayer for everyday life.',
   },
   {
-    title: 'Prayer Night',
-    time: 'First Thursday of each month',
-    location: 'Church family gathering',
-    description:
+    Title: 'Prayer Night',
+    Time: 'First Thursday of each month',
+    Location: 'Church family gathering',
+    Description:
       'A focused evening to seek the Lord together and pray for families, healing, salvation, and our community.',
   },
 ]
