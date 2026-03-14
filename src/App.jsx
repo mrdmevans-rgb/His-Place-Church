@@ -71,6 +71,22 @@ const fallbackEvents = [
     </div>
   </div>
 </section>
+const fallbackAnnouncements = [
+  {
+    title: 'Welcome to His Place',
+    date: 'Coming Soon',
+    text: 'We are excited to welcome new families as we grow together in Christ.',
+  },
+]
+
+const fallbackSermons = [
+  {
+    title: 'Latest Sermon Coming Soon',
+    speaker: 'Pastor Dave Evans',
+    date: 'Coming Soon',
+    youtube: '',
+  },
+]
 const groups = [
   {
     icon: Users,
