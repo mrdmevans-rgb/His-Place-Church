@@ -13,21 +13,6 @@ const navItems = [
   { to: '/sermons', label: 'Sermons' },
   { to: '/prayer', label: 'Prayer' },
 ]
-useEffect(() => {
-  fetch(ANNOUNCEMENTS_URL)
-    .then((res) => res.json())
-    .then((data) => setAnnouncements(Array.isArray(data) ? data : []))
-    .catch(() => setAnnouncements([]))
-}, [])
-
-useEffect(() => {
-  fetch(SERMONS_URL)
-    .then((res) => res.json())
-    .then((data) => setSermons(Array.isArray(data) ? data : []))
-    .catch(() => setSermons([]))
-}, [])
-const [announcements, setAnnouncements] = useState([])
-const [sermons, setSermons] = useState([])
 
 const EVENTS_SHEET_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Events'
 const ANNOUNCEMENTS_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Announcements'
@@ -46,7 +31,7 @@ const fallbackEvents = [
     time: 'Wednesdays at 6:30 PM',
     location: 'Community group setting',
     description:
-     'A deeper look at Scripture with discussion, encouragement, and prayer for everyday life.',
+      'A deeper look at Scripture with discussion, encouragement, and prayer for everyday life.',
   },
   {
     title: 'Prayer Night',
@@ -57,20 +42,6 @@ const fallbackEvents = [
   },
 ]
 
-<section className="section">
-  <div className="container">
-    <h2>Announcements</h2>
-    <div className="events-grid">
-      {announcements.map((item, index) => (
-        <ShellCard key={index} className="event-card">
-          <h3>{item.title}</h3>
-          <p>{item.date}</p>
-          <p>{item.text}</p>
-        </ShellCard>
-      ))}
-    </div>
-  </div>
-</section>
 const fallbackAnnouncements = [
   {
     title: 'Welcome to His Place',
@@ -87,6 +58,7 @@ const fallbackSermons = [
     youtube: '',
   },
 ]
+
 const groups = [
   {
     icon: Users,
@@ -107,23 +79,7 @@ const groups = [
       'A place for people who want to stand in the gap for others and believe God for breakthrough, comfort, and hope.',
   },
 ]
-<section className="section">
-  <div className="container">
-    <h2>Latest Sermons</h2>
-    <div className="events-grid">
-      {sermons.map((sermon, index) => (
-        <ShellCard key={index} className="event-card">
-          <h3>{sermon.title}</h3>
-          <p>{sermon.speaker}</p>
-          <p>{sermon.date}</p>
-          <a href={sermon.youtube} target="_blank" rel="noopener noreferrer">
-            Watch Sermon
-          </a>
-        </ShellCard>
-      ))}
-    </div>
-  </div>
-</section>
+
 const faithItems = [
   {
     title: 'The Bible',
@@ -230,6 +186,79 @@ function NavBar() {
 
 function HomePage() {
   const navigate = useNavigate()
+  const [announcements, setAnnouncements] = useState(fallbackAnnouncements)
+  const [sermons, setSermons] = useState(fallbackSermons)
+  const [announcementsLoaded, setAnnouncementsLoaded] = useState(false)
+  const [sermonsLoaded, setSermonsLoaded] = useState(false)
+
+  useEffect(() => {
+    if (!ANNOUNCEMENTS_URL) {
+      setAnnouncementsLoaded(true)
+      return
+    }
+
+    let cancelled = false
+
+    fetch(ANNOUNCEMENTS_URL)
+      .then((res) => res.json())
+      .then((rows) => {
+        if (cancelled || !Array.isArray(rows)) return
+
+        const normalized = rows
+          .map((row, index) => ({
+            id: row.id || row.ID || `${row.title || row.Title || 'announcement'}-${index}`,
+            title: row.title || row.Title || '',
+            date: row.date || row.Date || '',
+            text: row.text || row.Text || '',
+          }))
+          .filter((row) => row.title)
+
+        if (normalized.length) setAnnouncements(normalized)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setAnnouncementsLoaded(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!SERMONS_URL) {
+      setSermonsLoaded(true)
+      return
+    }
+
+    let cancelled = false
+
+    fetch(SERMONS_URL)
+      .then((res) => res.json())
+      .then((rows) => {
+        if (cancelled || !Array.isArray(rows)) return
+
+        const normalized = rows
+          .map((row, index) => ({
+            id: row.id || row.ID || `${row.title || row.Title || 'sermon'}-${index}`,
+            title: row.title || row.Title || '',
+            speaker: row.speaker || row.Speaker || '',
+            date: row.date || row.Date || '',
+            youtube: row.youtube || row.YouTube || row.Youtube || '',
+          }))
+          .filter((row) => row.title)
+
+        if (normalized.length) setSermons(normalized)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setSermonsLoaded(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <>
@@ -308,6 +337,67 @@ function HomePage() {
               <p>{item.text}</p>
             </ShellCard>
           ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container stack-lg">
+          <div className="page-intro max-3xl">
+            <div className="eyebrow-pill">Announcements</div>
+            <h2>Latest Announcements</h2>
+            <p>Stay up to date with what is happening at His Place Community Church.</p>
+          </div>
+
+          <div className="events-grid">
+            {announcements.slice(0, 3).map((item) => (
+              <ShellCard key={item.id} className="event-card">
+                <div className="event-meta-wrap">
+                  <div className="event-time-pill">{item.date || 'Update'}</div>
+                </div>
+                <div>
+                  <h3>{item.title}</h3>
+                  <p>{item.text || 'More details coming soon.'}</p>
+                </div>
+              </ShellCard>
+            ))}
+          </div>
+
+          {!announcementsLoaded && <p className="events-helper-text">Loading announcements...</p>}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container stack-lg">
+          <div className="page-intro max-3xl">
+            <div className="eyebrow-pill">Sermons</div>
+            <h2>Latest Sermons</h2>
+            <p>Watch and revisit recent messages from His Place Community Church.</p>
+          </div>
+
+          <div className="events-grid">
+            {sermons.slice(0, 3).map((sermon) => (
+              <ShellCard key={sermon.id} className="event-card">
+                <div className="event-meta-wrap">
+                  <div className="event-time-pill">{sermon.date || 'Latest Message'}</div>
+                  <div className="event-location">{sermon.speaker || 'His Place Community Church'}</div>
+                </div>
+                <div>
+                  <h3>{sermon.title}</h3>
+                  {sermon.youtube ? (
+                    <p>
+                      <a href={sermon.youtube} target="_blank" rel="noopener noreferrer">
+                        Watch Sermon
+                      </a>
+                    </p>
+                  ) : (
+                    <p>Video link coming soon.</p>
+                  )}
+                </div>
+              </ShellCard>
+            ))}
+          </div>
+
+          {!sermonsLoaded && <p className="events-helper-text">Loading sermons...</p>}
         </div>
       </section>
 
@@ -509,59 +599,6 @@ function GroupsPage() {
   )
 }
 
-function PrayerPage() {
-  return (
-    <section className="section page-section">
-      <div className="container prayer-grid">
-        <div className="stack-lg">
-          <div className="page-intro max-3xl">
-            <div className="eyebrow-pill">Prayer</div>
-            <h1>How can we pray for you?</h1>
-            <p>
-              We believe prayer matters. Whether you are walking through grief, uncertainty, illness, family struggles, or you simply need encouragement, we would be honored to pray for you.
-            </p>
-          </div>
-
-          <div className="three-up-grid prayer-points-grid">
-            {[
-              'Prayer is welcomed for any need, big or small.',
-              'Requests can be shared privately with the prayer team.',
-              'We believe God hears, cares, and responds.',
-              'You do not have to have it all together to ask for prayer.',
-            ].map((item) => (
-              <ShellCard key={item} className="prayer-note-card">
-                <p>{item}</p>
-              </ShellCard>
-            ))}
-          </div>
-        </div>
-
-        <ShellCard className="prayer-form-card">
-          <h2>Prayer Request Form</h2>
-          <p>This form can be connected to your email, website platform, or form service.</p>
-          <form
-            className="prayer-form"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const data = new FormData(e.currentTarget)
-              const name = encodeURIComponent(data.get('name') || '')
-              const email = encodeURIComponent(data.get('email') || '')
-              const request = encodeURIComponent(data.get('request') || '')
-              window.location.href = `mailto:info@hpcchurch.church?subject=Prayer%20Request%20from%20${name}&body=Name:%20${name}%0AEmail:%20${email}%0A%0APrayer%20Request:%0A${request}`
-            }}
-          >
-            <input name="name" type="text" placeholder="Your name" required />
-            <input name="email" type="email" placeholder="Email address" required />
-            <textarea name="request" placeholder="How can we pray for you?" rows="8" required />
-            <button type="submit" className="button button-primary full-width">
-              <Send size={16} /> Submit Prayer Request
-            </button>
-          </form>
-        </ShellCard>
-      </div>
-    </section>
-  )
-}
 function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState(fallbackAnnouncements)
   const [loaded, setLoaded] = useState(false)
@@ -630,6 +667,7 @@ function AnnouncementsPage() {
     </section>
   )
 }
+
 function SermonsPage() {
   const [sermons, setSermons] = useState(fallbackSermons)
   const [loaded, setLoaded] = useState(false)
@@ -708,6 +746,61 @@ function SermonsPage() {
     </section>
   )
 }
+
+function PrayerPage() {
+  return (
+    <section className="section page-section">
+      <div className="container prayer-grid">
+        <div className="stack-lg">
+          <div className="page-intro max-3xl">
+            <div className="eyebrow-pill">Prayer</div>
+            <h1>How can we pray for you?</h1>
+            <p>
+              We believe prayer matters. Whether you are walking through grief, uncertainty, illness, family struggles, or you simply need encouragement, we would be honored to pray for you.
+            </p>
+          </div>
+
+          <div className="three-up-grid prayer-points-grid">
+            {[
+              'Prayer is welcomed for any need, big or small.',
+              'Requests can be shared privately with the prayer team.',
+              'We believe God hears, cares, and responds.',
+              'You do not have to have it all together to ask for prayer.',
+            ].map((item) => (
+              <ShellCard key={item} className="prayer-note-card">
+                <p>{item}</p>
+              </ShellCard>
+            ))}
+          </div>
+        </div>
+
+        <ShellCard className="prayer-form-card">
+          <h2>Prayer Request Form</h2>
+          <p>This form can be connected to your email, website platform, or form service.</p>
+          <form
+            className="prayer-form"
+            onSubmit={(e) => {
+              e.preventDefault()
+              const data = new FormData(e.currentTarget)
+              const name = encodeURIComponent(data.get('name') || '')
+              const email = encodeURIComponent(data.get('email') || '')
+              const request = encodeURIComponent(data.get('request') || '')
+              window.location.href = `mailto:info@hpcchurch.church?subject=Prayer%20Request%20from%20${name}&body=Name:%20${name}%0AEmail:%20${email}%0A%0APrayer%20Request:%0A${request}`
+            }}
+          >
+            <input name="name" type="text" placeholder="Your name" required />
+            <input name="email" type="email" placeholder="Email address" required />
+            <textarea name="request" placeholder="How can we pray for you?" rows="8" required />
+            <button type="submit" className="button button-primary full-width">
+              <Send size={16} /> Submit Prayer Request
+            </button>
+          </form>
+        </ShellCard>
+      </div>
+    </section>
+  )
+}
+
 function Footer() {
   const location = useLocation()
   const atHome = useMemo(() => location.pathname === '/', [location.pathname])
@@ -743,11 +836,11 @@ function Footer() {
           <div className="footer-contact-list">
             <div className="footer-contact-item"><MapPin size={16} className="icon-red" /> Amelia / Beechmont, Ohio</div>
             <div className="footer-contact-item"><Mail size={16} className="icon-red" /> info@hpcchurch.church</div>
-<div className="footer-contact-item">
-  <a href="https://www.facebook.com/profile.php?id=61583261639613" target="_blank" rel="noopener noreferrer">
-    Follow us on Facebook
-  </a>
-</div>
+            <div className="footer-contact-item">
+              <a href="https://www.facebook.com/profile.php?id=61583261639613" target="_blank" rel="noopener noreferrer">
+                Follow us on Facebook
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -765,9 +858,9 @@ export default function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/faith" element={<FaithPage />} />
           <Route path="/groups" element={<GroupsPage />} />
+          <Route path="/announcements" element={<AnnouncementsPage />} />
+          <Route path="/sermons" element={<SermonsPage />} />
           <Route path="/prayer" element={<PrayerPage />} />
-<Route path="/announcements" element={<AnnouncementsPage />} />
-<Route path="/sermons" element={<SermonsPage />} />
         </Routes>
       </main>
       <Footer />
