@@ -11,10 +11,25 @@ const navItems = [
   { to: '/groups', label: 'Groups & Events' },
   { to: '/prayer', label: 'Prayer' },
 ]
+useEffect(() => {
+  fetch(ANNOUNCEMENTS_URL)
+    .then((res) => res.json())
+    .then((data) => setAnnouncements(Array.isArray(data) ? data : []))
+    .catch(() => setAnnouncements([]))
+}, [])
+
+useEffect(() => {
+  fetch(SERMONS_URL)
+    .then((res) => res.json())
+    .then((data) => setSermons(Array.isArray(data) ? data : []))
+    .catch(() => setSermons([]))
+}, [])
+const [announcements, setAnnouncements] = useState([])
+const [sermons, setSermons] = useState([])
 
 const EVENTS_SHEET_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Events'
-const ANNOUNCEMENTS_URL = 'https://opensheet.elk.sh/SPREADSHEETID/Announcements'
-const SERMONS_URL = 'https://opensheet.elk.sh/SPREADSHEETID/Sermons'
+const ANNOUNCEMENTS_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Announcements'
+const SERMONS_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Sermons'
 
 const fallbackEvents = [
   {
@@ -40,6 +55,20 @@ const fallbackEvents = [
   },
 ]
 
+<section className="section">
+  <div className="container">
+    <h2>Announcements</h2>
+    <div className="events-grid">
+      {announcements.map((item, index) => (
+        <ShellCard key={index} className="event-card">
+          <h3>{item.title}</h3>
+          <p>{item.date}</p>
+          <p>{item.text}</p>
+        </ShellCard>
+      ))}
+    </div>
+  </div>
+</section>
 const groups = [
   {
     icon: Users,
@@ -60,7 +89,23 @@ const groups = [
       'A place for people who want to stand in the gap for others and believe God for breakthrough, comfort, and hope.',
   },
 ]
-
+<section className="section">
+  <div className="container">
+    <h2>Latest Sermons</h2>
+    <div className="events-grid">
+      {sermons.map((sermon, index) => (
+        <ShellCard key={index} className="event-card">
+          <h3>{sermon.title}</h3>
+          <p>{sermon.speaker}</p>
+          <p>{sermon.date}</p>
+          <a href={sermon.youtube} target="_blank" rel="noopener noreferrer">
+            Watch Sermon
+          </a>
+        </ShellCard>
+      ))}
+    </div>
+  </div>
+</section>
 const faithItems = [
   {
     title: 'The Bible',
