@@ -562,7 +562,74 @@ function PrayerPage() {
     </section>
   )
 }
+function AnnouncementsPage() {
+  const [announcements, setAnnouncements] = useState(fallbackAnnouncements)
+  const [loaded, setLoaded] = useState(false)
 
+  useEffect(() => {
+    if (!ANNOUNCEMENTS_URL) {
+      setLoaded(true)
+      return
+    }
+
+    let cancelled = false
+
+    fetch(ANNOUNCEMENTS_URL)
+      .then((res) => res.json())
+      .then((rows) => {
+        if (cancelled || !Array.isArray(rows)) return
+
+        const normalized = rows
+          .map((row, index) => ({
+            id: row.id || row.ID || `${row.title || row.Title || 'announcement'}-${index}`,
+            title: row.title || row.Title || '',
+            date: row.date || row.Date || '',
+            text: row.text || row.Text || '',
+          }))
+          .filter((row) => row.title)
+
+        if (normalized.length) setAnnouncements(normalized)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoaded(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  return (
+    <section className="section page-section">
+      <div className="container stack-lg">
+        <div className="page-intro max-3xl">
+          <div className="eyebrow-pill">Announcements</div>
+          <h1>Latest Announcements</h1>
+          <p>
+            Stay up to date with what is happening at His Place Community Church.
+          </p>
+        </div>
+
+        <div className="events-grid">
+          {announcements.map((item) => (
+            <ShellCard key={item.id} className="event-card">
+              <div className="event-meta-wrap">
+                <div className="event-time-pill">{item.date || 'Update'}</div>
+              </div>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.text || 'More details coming soon.'}</p>
+              </div>
+            </ShellCard>
+          ))}
+        </div>
+
+        {!loaded && <p className="events-helper-text">Loading announcements...</p>}
+      </div>
+    </section>
+  )
+}
 function Footer() {
   const location = useLocation()
   const atHome = useMemo(() => location.pathname === '/', [location.pathname])
