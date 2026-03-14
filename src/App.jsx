@@ -766,6 +766,8 @@ export default function App() {
           <Route path="/faith" element={<FaithPage />} />
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/prayer" element={<PrayerPage />} />
+<Route path="/announcements" element={<AnnouncementsPage />} />
+<Route path="/sermons" element={<SermonsPage />} />
         </Routes>
       </main>
       <Footer />
