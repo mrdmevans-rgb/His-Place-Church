@@ -630,6 +630,84 @@ function AnnouncementsPage() {
     </section>
   )
 }
+function SermonsPage() {
+  const [sermons, setSermons] = useState(fallbackSermons)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    if (!SERMONS_URL) {
+      setLoaded(true)
+      return
+    }
+
+    let cancelled = false
+
+    fetch(SERMONS_URL)
+      .then((res) => res.json())
+      .then((rows) => {
+        if (cancelled || !Array.isArray(rows)) return
+
+        const normalized = rows
+          .map((row, index) => ({
+            id: row.id || row.ID || `${row.title || row.Title || 'sermon'}-${index}`,
+            title: row.title || row.Title || '',
+            speaker: row.speaker || row.Speaker || '',
+            date: row.date || row.Date || '',
+            youtube: row.youtube || row.YouTube || row.Youtube || '',
+          }))
+          .filter((row) => row.title)
+
+        if (normalized.length) setSermons(normalized)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoaded(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  return (
+    <section className="section page-section">
+      <div className="container stack-lg">
+        <div className="page-intro max-3xl">
+          <div className="eyebrow-pill">Sermons</div>
+          <h1>Latest Sermons</h1>
+          <p>
+            Watch and revisit recent messages from His Place Community Church.
+          </p>
+        </div>
+
+        <div className="events-grid">
+          {sermons.map((sermon) => (
+            <ShellCard key={sermon.id} className="event-card">
+              <div className="event-meta-wrap">
+                <div className="event-time-pill">{sermon.date || 'Latest Message'}</div>
+                <div className="event-location">{sermon.speaker || 'His Place Community Church'}</div>
+              </div>
+              <div>
+                <h3>{sermon.title}</h3>
+                {sermon.youtube ? (
+                  <p>
+                    <a href={sermon.youtube} target="_blank" rel="noopener noreferrer">
+                      Watch Sermon
+                    </a>
+                  </p>
+                ) : (
+                  <p>Video link coming soon.</p>
+                )}
+              </div>
+            </ShellCard>
+          ))}
+        </div>
+
+        {!loaded && <p className="events-helper-text">Loading sermons...</p>}
+      </div>
+    </section>
+  )
+}
 function Footer() {
   const location = useLocation()
   const atHome = useMemo(() => location.pathname === '/', [location.pathname])
