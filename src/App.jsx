@@ -9,6 +9,8 @@ const navItems = [
   { to: '/about', label: 'About' },
   { to: '/faith', label: 'Statement of Faith' },
   { to: '/groups', label: 'Groups & Events' },
+  { to: '/announcements', label: 'Announcements' },
+  { to: '/sermons', label: 'Sermons' },
   { to: '/prayer', label: 'Prayer' },
 ]
 useEffect(() => {
