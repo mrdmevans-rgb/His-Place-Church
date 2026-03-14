@@ -533,6 +533,11 @@ function Footer() {
           <div className="footer-contact-list">
             <div className="footer-contact-item"><MapPin size={16} className="icon-red" /> Amelia / Beechmont, Ohio</div>
             <div className="footer-contact-item"><Mail size={16} className="icon-red" /> info@hpcchurch.church</div>
+<div className="footer-contact-item">
+  <a href="https://facebook.com/https://www.facebook.com/profile.php?id=61583261639613" target="_blank" rel="noopener noreferrer">
+    Follow us on Facebook
+  </a>
+</div>
           </div>
         </div>
       </div>
