@@ -1,8 +1,25 @@
-import { Heart, CalendarDays, Users, HandHeart, Church, ChevronRight, Mail, MapPin, Clock, Cross, BookOpen, Send, Menu, X } from 'lucide-react'
+import {
+  Heart,
+  CalendarDays,
+  Users,
+  HandHeart,
+  Church,
+  ChevronRight,
+  Mail,
+  MapPin,
+  Clock,
+  Cross,
+  BookOpen,
+  Send,
+  Menu,
+  X,
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import logoSrc from './assets/logo.jpg'
 import pastorPhotoSrc from './assets/pastor-family.jpg'
+
+const VENMO_LINK = 'https://venmo.com/u/David-Evans-441'
 
 const navItems = [
   { to: '/', label: 'Home' },
@@ -14,9 +31,12 @@ const navItems = [
   { to: '/prayer', label: 'Prayer' },
 ]
 
-const EVENTS_SHEET_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Events'
-const ANNOUNCEMENTS_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Announcements'
-const SERMONS_URL = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Sermons'
+const EVENTS_SHEET_URL =
+  'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Events'
+const ANNOUNCEMENTS_URL =
+  'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Announcements'
+const SERMONS_URL =
+  'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Sermons'
 
 const fallbackEvents = [
   {
@@ -156,10 +176,21 @@ function NavBar() {
               {item.label}
             </NavLink>
           ))}
-          <a className="button button-primary nav-give" href="https://venmo.com/u/David-Evans-441?fbclid=IwY2xjawQqxNZleHRuA2FlbQIxMABicmlkETFZV3ZTN1hUQTg3WEtyOHd5c3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHoMyTLO7YiJkcyF1cHlp9xNM-dDza4bbs9pzNCjTdyc683ainQJsuO3mFVat_aem_a8FuzjkXse8d35IU4clUgA"
+          <a
+            className="button button-primary nav-give"
+            href={VENMO_LINK}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Give
+          </a>
         </nav>
 
-        <button className="menu-button" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
+        <button
+          className="menu-button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle menu"
+        >
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
@@ -176,7 +207,14 @@ function NavBar() {
                 {item.label}
               </NavLink>
             ))}
-            <a className="button button-primary mobile-give" href="#giving">Give</a>
+            <a
+              className="button button-primary mobile-give"
+              href={VENMO_LINK}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Give
+            </a>
           </div>
         </div>
       )}
@@ -274,7 +312,9 @@ function HomePage() {
               A place to <span>belong</span>, believe, and grow in Christ.
             </h1>
             <p>
-              His Place Community Church is a welcoming church family rooted in Scripture, centered on Jesus, and passionate about prayer, discipleship, and authentic community.
+              His Place Community Church is a welcoming church family rooted in Scripture,
+              centered on Jesus, and passionate about prayer, discipleship, and authentic
+              community.
             </p>
             <div className="hero-actions">
               <button className="button button-primary" onClick={() => navigate('/groups')}>
@@ -283,7 +323,14 @@ function HomePage() {
               <button className="button button-secondary" onClick={() => navigate('/prayer')}>
                 Submit a Prayer Request
               </button>
-              <a className="button button-light" href="#giving">Give</a>
+              <a
+                className="button button-light"
+                href={VENMO_LINK}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Give
+              </a>
             </div>
 
             <div className="feature-grid">
@@ -302,10 +349,16 @@ function HomePage() {
 
           <div className="hero-image-wrap fade-in">
             <div className="hero-image-card">
-              <img src={pastorPhotoSrc} alt="His Place Community Church family" className="hero-image" />
+              <img
+                src={pastorPhotoSrc}
+                alt="His Place Community Church family"
+                className="hero-image"
+              />
               <div className="hero-overlay-card">
                 <div className="hero-overlay-top">Welcome Home</div>
-                <div className="hero-overlay-title">Come as you are. Meet Jesus. Find community.</div>
+                <div className="hero-overlay-title">
+                  Come as you are. Meet Jesus. Find community.
+                </div>
               </div>
             </div>
           </div>
@@ -362,7 +415,9 @@ function HomePage() {
             ))}
           </div>
 
-          {!announcementsLoaded && <p className="events-helper-text">Loading announcements...</p>}
+          {!announcementsLoaded && (
+            <p className="events-helper-text">Loading announcements...</p>
+          )}
         </div>
       </section>
 
@@ -379,7 +434,9 @@ function HomePage() {
               <ShellCard key={sermon.id} className="event-card">
                 <div className="event-meta-wrap">
                   <div className="event-time-pill">{sermon.date || 'Latest Message'}</div>
-                  <div className="event-location">{sermon.speaker || 'His Place Community Church'}</div>
+                  <div className="event-location">
+                    {sermon.speaker || 'His Place Community Church'}
+                  </div>
                 </div>
                 <div>
                   <h3>{sermon.title}</h3>
@@ -409,13 +466,23 @@ function HomePage() {
             </div>
             <h2>Partner with what God is building through His Place.</h2>
             <p>
-              Your generosity helps support ministry, outreach, discipleship, prayer, and the practical needs of building a healthy local church. Every gift makes a difference.
+              Your generosity helps support ministry, outreach, discipleship, prayer, and
+              the practical needs of building a healthy local church. Every gift makes a
+              difference.
             </p>
           </div>
           <ShellCard className="giving-card">
             <h3>Online Giving</h3>
-            <p>Add your church giving link here to connect visitors to your preferred giving platform.</p>
-            <a className="button button-primary full-width" href="https://example.com/give" target="_blank" rel="noreferrer">
+            <p>
+              Give securely through Venmo to support the mission and ministry of His Place
+              Community Church.
+            </p>
+            <a
+              className="button button-primary full-width"
+              href={VENMO_LINK}
+              target="_blank"
+              rel="noreferrer"
+            >
               Give Now
             </a>
           </ShellCard>
@@ -433,26 +500,41 @@ function AboutPage() {
           <div className="eyebrow-pill">About His Place Community Church</div>
           <h1>A church family built on truth, grace, and the presence of Jesus.</h1>
           <p>
-            His Place Community Church exists to help people know Jesus, understand the Bible, grow in their faith, and experience real Christian community. We believe church should be a place where people are welcomed, discipled, prayed for, and encouraged to walk closely with God.
+            His Place Community Church exists to help people know Jesus, understand the
+            Bible, grow in their faith, and experience real Christian community. We believe
+            church should be a place where people are welcomed, discipled, prayed for, and
+            encouraged to walk closely with God.
           </p>
         </div>
 
         <div className="two-col-about">
           <ShellCard className="image-card overflow-hidden">
-            <img src={pastorPhotoSrc} alt="Pastor Dave Evans with family" className="about-image" />
+            <img
+              src={pastorPhotoSrc}
+              alt="Pastor Dave Evans with family"
+              className="about-image"
+            />
           </ShellCard>
           <ShellCard className="bio-card">
             <div className="section-label">Meet the Pastor</div>
             <h2>Pastor Dave Evans</h2>
             <div className="stack-md muted-copy">
               <p>
-                Pastor Dave Evans is passionate about helping people encounter Jesus in a real way and grow deeper in their understanding of God’s Word. He has a heart for biblical preaching, meaningful discipleship, prayer, and creating a church culture where people feel seen, loved, and welcomed.
+                Pastor Dave Evans is passionate about helping people encounter Jesus in a
+                real way and grow deeper in their understanding of God’s Word. He has a
+                heart for biblical preaching, meaningful discipleship, prayer, and creating
+                a church culture where people feel seen, loved, and welcomed.
               </p>
               <p>
-                His vision for His Place Community Church is simple: to build a Christ centered church family where truth is taught clearly, grace is extended freely, and people are encouraged to follow Jesus wholeheartedly in everyday life.
+                His vision for His Place Community Church is simple: to build a Christ
+                centered church family where truth is taught clearly, grace is extended
+                freely, and people are encouraged to follow Jesus wholeheartedly in everyday
+                life.
               </p>
               <p>
-                Dave cares deeply about reaching people who may feel overlooked, worn down, or spiritually hungry. He desires for His Place to be a church where people can find hope, healing, purpose, and a genuine sense of belonging.
+                Dave cares deeply about reaching people who may feel overlooked, worn down,
+                or spiritually hungry. He desires for His Place to be a church where people
+                can find hope, healing, purpose, and a genuine sense of belonging.
               </p>
             </div>
           </ShellCard>
@@ -460,9 +542,18 @@ function AboutPage() {
 
         <div className="three-up-grid">
           {[
-            ['Our Mission', 'To point people to Jesus, teach the Bible faithfully, and build a loving church family that reflects the heart of God.'],
-            ['Our Vision', 'To be a healthy, growing community church where lives are transformed through the gospel and the power of the Holy Spirit.'],
-            ['Our Culture', 'Warm, prayerful, biblical, welcoming, and centered on authentic relationships rather than performance.'],
+            [
+              'Our Mission',
+              'To point people to Jesus, teach the Bible faithfully, and build a loving church family that reflects the heart of God.',
+            ],
+            [
+              'Our Vision',
+              'To be a healthy, growing community church where lives are transformed through the gospel and the power of the Holy Spirit.',
+            ],
+            [
+              'Our Culture',
+              'Warm, prayerful, biblical, welcoming, and centered on authentic relationships rather than performance.',
+            ],
           ].map(([title, text]) => (
             <ShellCard key={title}>
               <h3>{title}</h3>
@@ -483,7 +574,9 @@ function FaithPage() {
           <div className="eyebrow-pill">Statement of Faith</div>
           <h1>What we believe</h1>
           <p>
-            His Place Community Church is a non denominational, Bible based, Jesus following church. These core convictions shape our preaching, discipleship, prayer, and mission.
+            His Place Community Church is a non denominational, Bible based, Jesus
+            following church. These core convictions shape our preaching, discipleship,
+            prayer, and mission.
           </p>
         </div>
 
@@ -551,7 +644,8 @@ function GroupsPage() {
           <div className="eyebrow-pill">Groups and Events</div>
           <h1>Grow together in community</h1>
           <p>
-            We believe life change happens not only in worship gatherings, but also in smaller spaces where people can learn, pray, share, and support one another.
+            We believe life change happens not only in worship gatherings, but also in
+            smaller spaces where people can learn, pray, share, and support one another.
           </p>
         </div>
 
@@ -583,7 +677,9 @@ function GroupsPage() {
                   <div className="event-time-pill">
                     <CalendarDays size={16} /> {event.time || 'See details'}
                   </div>
-                  <div className="event-location">{event.location || 'His Place Community Church'}</div>
+                  <div className="event-location">
+                    {event.location || 'His Place Community Church'}
+                  </div>
                 </div>
                 <div>
                   <h3>{event.title}</h3>
@@ -643,9 +739,7 @@ function AnnouncementsPage() {
         <div className="page-intro max-3xl">
           <div className="eyebrow-pill">Announcements</div>
           <h1>Latest Announcements</h1>
-          <p>
-            Stay up to date with what is happening at His Place Community Church.
-          </p>
+          <p>Stay up to date with what is happening at His Place Community Church.</p>
         </div>
 
         <div className="events-grid">
@@ -713,9 +807,7 @@ function SermonsPage() {
         <div className="page-intro max-3xl">
           <div className="eyebrow-pill">Sermons</div>
           <h1>Latest Sermons</h1>
-          <p>
-            Watch and revisit recent messages from His Place Community Church.
-          </p>
+          <p>Watch and revisit recent messages from His Place Community Church.</p>
         </div>
 
         <div className="events-grid">
@@ -723,7 +815,9 @@ function SermonsPage() {
             <ShellCard key={sermon.id} className="event-card">
               <div className="event-meta-wrap">
                 <div className="event-time-pill">{sermon.date || 'Latest Message'}</div>
-                <div className="event-location">{sermon.speaker || 'His Place Community Church'}</div>
+                <div className="event-location">
+                  {sermon.speaker || 'His Place Community Church'}
+                </div>
               </div>
               <div>
                 <h3>{sermon.title}</h3>
@@ -756,7 +850,9 @@ function PrayerPage() {
             <div className="eyebrow-pill">Prayer</div>
             <h1>How can we pray for you?</h1>
             <p>
-              We believe prayer matters. Whether you are walking through grief, uncertainty, illness, family struggles, or you simply need encouragement, we would be honored to pray for you.
+              We believe prayer matters. Whether you are walking through grief, uncertainty,
+              illness, family struggles, or you simply need encouragement, we would be
+              honored to pray for you.
             </p>
           </div>
 
@@ -817,7 +913,8 @@ function Footer() {
             </div>
           </div>
           <p className="footer-copy">
-            Building a Christ centered community of worship, discipleship, prayer, and love in the Amelia and Beechmont area.
+            Building a Christ centered community of worship, discipleship, prayer, and love
+            in the Amelia and Beechmont area.
           </p>
         </div>
         <div>
@@ -828,16 +925,28 @@ function Footer() {
                 {item.label}
               </NavLink>
             ))}
-            {!atHome && <a href="/#giving" className="footer-link">Give</a>}
+            {!atHome && (
+              <a href={VENMO_LINK} className="footer-link" target="_blank" rel="noreferrer">
+                Give
+              </a>
+            )}
           </div>
         </div>
         <div>
           <div className="footer-heading">Connect</div>
           <div className="footer-contact-list">
-            <div className="footer-contact-item"><MapPin size={16} className="icon-red" /> Amelia / Beechmont, Ohio</div>
-            <div className="footer-contact-item"><Mail size={16} className="icon-red" /> info@hpcchurch.church</div>
             <div className="footer-contact-item">
-              <a href="https://www.facebook.com/profile.php?id=61583261639613" target="_blank" rel="noopener noreferrer">
+              <MapPin size={16} className="icon-red" /> Amelia / Beechmont, Ohio
+            </div>
+            <div className="footer-contact-item">
+              <Mail size={16} className="icon-red" /> info@hpcchurch.church
+            </div>
+            <div className="footer-contact-item">
+              <a
+                href="https://www.facebook.com/profile.php?id=61583261639613"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Follow us on Facebook
               </a>
             </div>
