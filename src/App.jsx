@@ -156,7 +156,7 @@ function NavBar() {
               {item.label}
             </NavLink>
           ))}
-          <a className="button button-primary nav-give" href="#giving">Give</a>
+          <a className="button button-primary nav-give" href="https://venmo.com/u/David-Evans-441?fbclid=IwY2xjawQqxNZleHRuA2FlbQIxMABicmlkETFZV3ZTN1hUQTg3WEtyOHd5c3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHoMyTLO7YiJkcyF1cHlp9xNM-dDza4bbs9pzNCjTdyc683ainQJsuO3mFVat_aem_a8FuzjkXse8d35IU4clUgA"
         </nav>
 
         <button className="menu-button" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
