@@ -16,10 +16,12 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import logoSrc from './assets/logo.jpg'
+import logoSrc from './assets/Logo.jpg'
 import pastorPhotoSrc from './assets/pastor-family.jpg'
 
 const VENMO_LINK = 'https://venmo.com/u/David-Evans-441'
+const CHURCH_ADDRESS = '523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244'
+const SUNDAY_SERVICE_TIME = 'Sundays at 11:00 AM'
 
 const navItems = [
   { to: '/', label: 'Home' },
@@ -41,22 +43,22 @@ const SERMONS_URL =
 const fallbackEvents = [
   {
     title: 'Sunday Worship Gathering',
-    time: 'Sundays at 10:30 AM',
-    location: 'Amelia / Beechmont area',
+    time: SUNDAY_SERVICE_TIME,
+    location: CHURCH_ADDRESS,
     description:
-      'A welcoming service centered on Christ, biblical teaching, worship, prayer, and authentic community.',
+      'Join us for worship, biblical preaching, prayer, and authentic community every Sunday morning.',
   },
   {
     title: 'Midweek Bible Study',
     time: 'Wednesdays at 6:30 PM',
-    location: 'Community group setting',
+    location: CHURCH_ADDRESS,
     description:
       'A deeper look at Scripture with discussion, encouragement, and prayer for everyday life.',
   },
   {
     title: 'Prayer Night',
     time: 'First Thursday of each month',
-    location: 'Church family gathering',
+    location: CHURCH_ADDRESS,
     description:
       'A focused evening to seek the Lord together and pray for families, healing, salvation, and our community.',
   },
@@ -65,8 +67,8 @@ const fallbackEvents = [
 const fallbackAnnouncements = [
   {
     title: 'Welcome to His Place',
-    date: 'Coming Soon',
-    text: 'We are excited to welcome new families as we grow together in Christ.',
+    date: 'Join Us This Sunday',
+    text: `We would love to welcome you this Sunday at 11:00 AM at ${CHURCH_ADDRESS}.`,
   },
 ]
 
@@ -314,7 +316,7 @@ function HomePage() {
             <p>
               His Place Community Church is a welcoming church family rooted in Scripture,
               centered on Jesus, and passionate about prayer, discipleship, and authentic
-              community.
+              community. Join us every Sunday at 11:00 AM at {CHURCH_ADDRESS}.
             </p>
             <div className="hero-actions">
               <button className="button button-primary" onClick={() => navigate('/groups')}>
@@ -335,8 +337,8 @@ function HomePage() {
 
             <div className="feature-grid">
               {[
-                ['Christ Centered', 'Everything we do points to Jesus.'],
-                ['Bible Based', 'We teach and live by God’s Word.'],
+                ['Sunday Service', 'Join us Sundays at 11:00 AM.'],
+                ['Location', CHURCH_ADDRESS],
                 ['Community Focused', 'We care for people deeply and genuinely.'],
               ].map(([title, text]) => (
                 <ShellCard key={title}>
@@ -370,13 +372,13 @@ function HomePage() {
           {[
             {
               icon: MapPin,
-              title: 'Location',
-              text: 'Serving families in the Amelia, Beechmont, Cherry Grove, and State Route 125 area.',
+              title: 'Address',
+              text: CHURCH_ADDRESS,
             },
             {
               icon: Clock,
-              title: 'Gatherings',
-              text: 'Sunday worship, Bible study, prayer, and community focused connection opportunities.',
+              title: 'Sunday Service',
+              text: 'Every Sunday at 11:00 AM.',
             },
             {
               icon: Heart,
@@ -678,7 +680,7 @@ function GroupsPage() {
                     <CalendarDays size={16} /> {event.time || 'See details'}
                   </div>
                   <div className="event-location">
-                    {event.location || 'His Place Community Church'}
+                    {event.location || CHURCH_ADDRESS}
                   </div>
                 </div>
                 <div>
@@ -936,7 +938,10 @@ function Footer() {
           <div className="footer-heading">Connect</div>
           <div className="footer-contact-list">
             <div className="footer-contact-item">
-              <MapPin size={16} className="icon-red" /> Amelia / Beechmont, Ohio
+              <MapPin size={16} className="icon-red" /> {CHURCH_ADDRESS}
+            </div>
+            <div className="footer-contact-item">
+              <Clock size={16} className="icon-red" /> Sundays at 11:00 AM
             </div>
             <div className="footer-contact-item">
               <Mail size={16} className="icon-red" /> info@hpcchurch.church
