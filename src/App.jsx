@@ -22,6 +22,7 @@ import pastorPhotoSrc from './assets/pastor-family.jpg'
 const GIVING_URL = 'https://his-place-community-church-533980.churchcenter.com/giving'
 const CHURCH_ADDRESS = '523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244'
 const SUNDAY_SERVICE_TIME = 'Sundays at 11:00 AM'
+const CHURCH_SLOGAN = 'Real People. Real Hope. Real Jesus.'
 
 const navItems = [
   { to: '/', label: 'Home' },
@@ -285,17 +286,6 @@ function HomePage() {
             <h1>
               A place to <span>belong</span>, believe, and grow in Christ.
             </h1>
-            <p
-              style={{
-                fontSize: '1.35rem',
-                fontWeight: 800,
-                color: '#f87171',
-                marginTop: '1rem',
-                marginBottom: '0.5rem',
-              }}
-            >
-              {CHURCH_SLOGAN}
-            </p>
             <p>
               His Place Community Church is a welcoming church family rooted in Scripture,
               centered on Jesus, and passionate about prayer, discipleship, and authentic
@@ -317,7 +307,7 @@ function HomePage() {
               {[
                 ['Sunday Service', 'Join us Sundays at 11:00 AM.'],
                 ['Location', CHURCH_ADDRESS],
-                ['Our Heart', CHURCH_SLOGAN],
+                ['Community Focused', 'We care for people deeply and genuinely.'],
               ].map(([title, text]) => (
                 <ShellCard key={title}>
                   <h3>{title}</h3>
@@ -333,7 +323,7 @@ function HomePage() {
               <div className="hero-overlay-card">
                 <div className="hero-overlay-top">Welcome Home</div>
                 <div className="hero-overlay-title">
-                  Real People. Real Hope. Real Jesus.
+                  Come as you are. Meet Jesus. Find community.
                 </div>
               </div>
             </div>
@@ -358,12 +348,12 @@ function HomePage() {
           <div
             style={{
               width: '100%',
-              maxWidth: '760px',
+              maxWidth: '860px',
               textAlign: 'center',
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '28px',
-              padding: '2rem 1.5rem',
+              padding: '2.5rem 1.5rem',
               boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
             }}
           >
@@ -374,24 +364,16 @@ function HomePage() {
                 width: 'min(420px, 82vw)',
                 height: 'auto',
                 display: 'block',
-                margin: '0 auto 1.25rem auto',
+                margin: '0 auto 1.5rem auto',
                 filter: 'drop-shadow(0 18px 40px rgba(0,0,0,0.45))',
               }}
             />
-            <h2
-              style={{
-                margin: '0 0 0.75rem 0',
-                fontSize: 'clamp(1.9rem, 4vw, 2.8rem)',
-                fontWeight: 800,
-              }}
-            >
-              His Place Community Church
-            </h2>
             <p
               style={{
-                margin: '0 0 0.5rem 0',
-                fontSize: '1.2rem',
-                fontWeight: 800,
+                margin: '0 0 1rem 0',
+                fontSize: 'clamp(2.2rem, 6vw, 4.4rem)',
+                fontWeight: 900,
+                lineHeight: 1.08,
                 color: '#f87171',
               }}
             >
@@ -426,7 +408,7 @@ function HomePage() {
             {
               icon: Heart,
               title: 'Our Heart',
-              text: CHURCH_SLOGAN,
+              text: 'To create a place where people can encounter Jesus, grow in faith, and be cared for like family.',
             },
           ].map((item) => (
             <ShellCard key={item.title} className="icon-card">
@@ -914,7 +896,7 @@ function Footer() {
             <img src={logoSrc} alt="His Place logo" className="footer-logo" />
             <div>
               <div className="footer-title">His Place Community Church</div>
-              <div className="footer-subtitle">{CHURCH_SLOGAN}</div>
+              <div className="footer-subtitle">A place to belong, believe, and grow.</div>
             </div>
           </div>
           <p className="footer-copy">
