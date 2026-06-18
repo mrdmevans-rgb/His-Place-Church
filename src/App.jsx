@@ -22,6 +22,7 @@ import pastorPhotoSrc from './assets/pastor-family.jpg'
 const GIVING_URL = 'https://his-place-community-church-533980.churchcenter.com/giving'
 const CHURCH_ADDRESS = '523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244'
 const SUNDAY_SERVICE_TIME = 'Sundays at 11:00 AM'
+const CHURCH_SLOGAN = 'Real People. Real Hope. Real Jesus.'
 
 const navItems = [
   { to: '/', label: 'Home' },
@@ -178,21 +179,12 @@ function NavBar() {
               {item.label}
             </NavLink>
           ))}
-          <a
-            className="button button-primary nav-give"
-            href={GIVING_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a className="button button-primary nav-give" href={GIVING_URL} target="_blank" rel="noreferrer">
             Give
           </a>
         </nav>
 
-        <button
-          className="menu-button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-        >
+        <button className="menu-button" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
@@ -209,12 +201,7 @@ function NavBar() {
                 {item.label}
               </NavLink>
             ))}
-            <a
-              className="button button-primary mobile-give"
-              href={GIVING_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a className="button button-primary mobile-give" href={GIVING_URL} target="_blank" rel="noreferrer">
               Give
             </a>
           </div>
@@ -232,18 +219,12 @@ function HomePage() {
   const [sermonsLoaded, setSermonsLoaded] = useState(false)
 
   useEffect(() => {
-    if (!ANNOUNCEMENTS_URL) {
-      setAnnouncementsLoaded(true)
-      return
-    }
-
     let cancelled = false
 
     fetch(ANNOUNCEMENTS_URL)
       .then((res) => res.json())
       .then((rows) => {
         if (cancelled || !Array.isArray(rows)) return
-
         const normalized = rows
           .map((row, index) => ({
             id: row.id || row.ID || `${row.title || row.Title || 'announcement'}-${index}`,
@@ -252,7 +233,6 @@ function HomePage() {
             text: row.text || row.Text || '',
           }))
           .filter((row) => row.title)
-
         if (normalized.length) setAnnouncements(normalized)
       })
       .catch(() => {})
@@ -266,18 +246,12 @@ function HomePage() {
   }, [])
 
   useEffect(() => {
-    if (!SERMONS_URL) {
-      setSermonsLoaded(true)
-      return
-    }
-
     let cancelled = false
 
     fetch(SERMONS_URL)
       .then((res) => res.json())
       .then((rows) => {
         if (cancelled || !Array.isArray(rows)) return
-
         const normalized = rows
           .map((row, index) => ({
             id: row.id || row.ID || `${row.title || row.Title || 'sermon'}-${index}`,
@@ -287,7 +261,6 @@ function HomePage() {
             youtube: row.youtube || row.YouTube || row.Youtube || '',
           }))
           .filter((row) => row.title)
-
         if (normalized.length) setSermons(normalized)
       })
       .catch(() => {})
@@ -313,6 +286,17 @@ function HomePage() {
             <h1>
               A place to <span>belong</span>, believe, and grow in Christ.
             </h1>
+            <p
+              style={{
+                fontSize: '1.35rem',
+                fontWeight: 800,
+                color: '#f87171',
+                marginTop: '1rem',
+                marginBottom: '0.5rem',
+              }}
+            >
+              {CHURCH_SLOGAN}
+            </p>
             <p>
               His Place Community Church is a welcoming church family rooted in Scripture,
               centered on Jesus, and passionate about prayer, discipleship, and authentic
@@ -325,12 +309,7 @@ function HomePage() {
               <button className="button button-secondary" onClick={() => navigate('/prayer')}>
                 Submit a Prayer Request
               </button>
-              <a
-                className="button button-light"
-                href={GIVING_URL}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a className="button button-light" href={GIVING_URL} target="_blank" rel="noreferrer">
                 Give
               </a>
             </div>
@@ -339,7 +318,7 @@ function HomePage() {
               {[
                 ['Sunday Service', 'Join us Sundays at 11:00 AM.'],
                 ['Location', CHURCH_ADDRESS],
-                ['Community Focused', 'We care for people deeply and genuinely.'],
+                ['Our Heart', CHURCH_SLOGAN],
               ].map(([title, text]) => (
                 <ShellCard key={title}>
                   <h3>{title}</h3>
@@ -351,15 +330,11 @@ function HomePage() {
 
           <div className="hero-image-wrap fade-in">
             <div className="hero-image-card">
-              <img
-                src={pastorPhotoSrc}
-                alt="His Place Community Church family"
-                className="hero-image"
-              />
+              <img src={pastorPhotoSrc} alt="His Place Community Church family" className="hero-image" />
               <div className="hero-overlay-card">
                 <div className="hero-overlay-top">Welcome Home</div>
                 <div className="hero-overlay-title">
-                  Come as you are. Meet Jesus. Find community.
+                  Real People. Real Hope. Real Jesus.
                 </div>
               </div>
             </div>
@@ -416,18 +391,18 @@ function HomePage() {
             <p
               style={{
                 margin: '0 0 0.5rem 0',
-                fontSize: '1.05rem',
-                opacity: 0.9,
+                fontSize: '1.2rem',
+                fontWeight: 800,
+                color: '#f87171',
               }}
             >
-              A place to belong, believe, and grow in Christ.
+              {CHURCH_SLOGAN}
             </p>
             <p
               style={{
                 margin: 0,
                 fontSize: '1rem',
                 fontWeight: 700,
-                color: '#f87171',
               }}
             >
               Sundays at 11:00 AM • {CHURCH_ADDRESS}
@@ -452,7 +427,7 @@ function HomePage() {
             {
               icon: Heart,
               title: 'Our Heart',
-              text: 'To create a place where people can encounter Jesus, grow in faith, and be cared for like family.',
+              text: CHURCH_SLOGAN,
             },
           ].map((item) => (
             <ShellCard key={item.title} className="icon-card">
@@ -486,9 +461,7 @@ function HomePage() {
             ))}
           </div>
 
-          {!announcementsLoaded && (
-            <p className="events-helper-text">Loading announcements...</p>
-          )}
+          {!announcementsLoaded && <p className="events-helper-text">Loading announcements...</p>}
         </div>
       </section>
 
@@ -505,9 +478,7 @@ function HomePage() {
               <ShellCard key={sermon.id} className="event-card">
                 <div className="event-meta-wrap">
                   <div className="event-time-pill">{sermon.date || 'Latest Message'}</div>
-                  <div className="event-location">
-                    {sermon.speaker || 'His Place Community Church'}
-                  </div>
+                  <div className="event-location">{sermon.speaker || 'His Place Community Church'}</div>
                 </div>
                 <div>
                   <h3>{sermon.title}</h3>
@@ -548,12 +519,7 @@ function HomePage() {
               Give securely through Church Center Giving to support the mission and ministry
               of His Place Community Church.
             </p>
-            <a
-              className="button button-primary full-width"
-              href={GIVING_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a className="button button-primary full-width" href={GIVING_URL} target="_blank" rel="noreferrer">
               Give Now
             </a>
           </ShellCard>
@@ -580,11 +546,7 @@ function AboutPage() {
 
         <div className="two-col-about">
           <ShellCard className="image-card overflow-hidden">
-            <img
-              src={pastorPhotoSrc}
-              alt="Pastor Dave Evans with family"
-              className="about-image"
-            />
+            <img src={pastorPhotoSrc} alt="Pastor Dave Evans with family" className="about-image" />
           </ShellCard>
           <ShellCard className="bio-card">
             <div className="section-label">Meet the Pastor</div>
@@ -674,18 +636,12 @@ function GroupsPage() {
   const [eventsLoaded, setEventsLoaded] = useState(false)
 
   useEffect(() => {
-    if (!EVENTS_SHEET_URL) {
-      setEventsLoaded(true)
-      return
-    }
-
     let cancelled = false
 
     fetch(EVENTS_SHEET_URL)
       .then((res) => res.json())
       .then((rows) => {
         if (cancelled || !Array.isArray(rows)) return
-
         const normalized = rows
           .map((row, index) => ({
             id: row.id || row.ID || `${row.Title || row.title || 'event'}-${index}`,
@@ -695,7 +651,6 @@ function GroupsPage() {
             description: row.Description || row.description || '',
           }))
           .filter((row) => row.title)
-
         if (normalized.length) setEvents(normalized)
       })
       .catch(() => {})
@@ -735,9 +690,7 @@ function GroupsPage() {
             <div>
               <h2>Upcoming Events</h2>
               <p className="events-helper-text">
-                {EVENTS_SHEET_URL
-                  ? 'These events can be updated from your Google Sheet.'
-                  : 'Add your Google Sheet URL in src/App.jsx to manage events without editing code.'}
+                These events can be updated from your Google Sheet.
               </p>
             </div>
           </div>
@@ -748,9 +701,7 @@ function GroupsPage() {
                   <div className="event-time-pill">
                     <CalendarDays size={16} /> {event.time || 'See details'}
                   </div>
-                  <div className="event-location">
-                    {event.location || CHURCH_ADDRESS}
-                  </div>
+                  <div className="event-location">{event.location || CHURCH_ADDRESS}</div>
                 </div>
                 <div>
                   <h3>{event.title}</h3>
@@ -771,18 +722,12 @@ function AnnouncementsPage() {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    if (!ANNOUNCEMENTS_URL) {
-      setLoaded(true)
-      return
-    }
-
     let cancelled = false
 
     fetch(ANNOUNCEMENTS_URL)
       .then((res) => res.json())
       .then((rows) => {
         if (cancelled || !Array.isArray(rows)) return
-
         const normalized = rows
           .map((row, index) => ({
             id: row.id || row.ID || `${row.title || row.Title || 'announcement'}-${index}`,
@@ -791,7 +736,6 @@ function AnnouncementsPage() {
             text: row.text || row.Text || '',
           }))
           .filter((row) => row.title)
-
         if (normalized.length) setAnnouncements(normalized)
       })
       .catch(() => {})
@@ -838,18 +782,12 @@ function SermonsPage() {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    if (!SERMONS_URL) {
-      setLoaded(true)
-      return
-    }
-
     let cancelled = false
 
     fetch(SERMONS_URL)
       .then((res) => res.json())
       .then((rows) => {
         if (cancelled || !Array.isArray(rows)) return
-
         const normalized = rows
           .map((row, index) => ({
             id: row.id || row.ID || `${row.title || row.Title || 'sermon'}-${index}`,
@@ -859,7 +797,6 @@ function SermonsPage() {
             youtube: row.youtube || row.YouTube || row.Youtube || '',
           }))
           .filter((row) => row.title)
-
         if (normalized.length) setSermons(normalized)
       })
       .catch(() => {})
@@ -886,9 +823,7 @@ function SermonsPage() {
             <ShellCard key={sermon.id} className="event-card">
               <div className="event-meta-wrap">
                 <div className="event-time-pill">{sermon.date || 'Latest Message'}</div>
-                <div className="event-location">
-                  {sermon.speaker || 'His Place Community Church'}
-                </div>
+                <div className="event-location">{sermon.speaker || 'His Place Community Church'}</div>
               </div>
               <div>
                 <h3>{sermon.title}</h3>
@@ -980,7 +915,7 @@ function Footer() {
             <img src={logoSrc} alt="His Place logo" className="footer-logo" />
             <div>
               <div className="footer-title">His Place Community Church</div>
-              <div className="footer-subtitle">A place to belong, believe, and grow.</div>
+              <div className="footer-subtitle">{CHURCH_SLOGAN}</div>
             </div>
           </div>
           <p className="footer-copy">
