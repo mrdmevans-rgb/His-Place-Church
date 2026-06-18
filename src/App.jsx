@@ -211,7 +211,7 @@ function NavBar() {
             ))}
             <a
               className="button button-primary mobile-give"
-              href={VENMO_LINK}
+              href={GIVING_URL}
               target="_blank"
               rel="noreferrer"
             >
@@ -327,7 +327,7 @@ function HomePage() {
               </button>
               <a
                 className="button button-light"
-                href={VENMO_LINK}
+                href={GIVING_URL}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -363,6 +363,75 @@ function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="section"
+        style={{
+          paddingTop: '1rem',
+          paddingBottom: '1rem',
+        }}
+      >
+        <div
+          className="container"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '760px',
+              textAlign: 'center',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '28px',
+              padding: '2rem 1.5rem',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
+            }}
+          >
+            <img
+              src={logoSrc}
+              alt="His Place Community Church featured logo"
+              style={{
+                width: 'min(420px, 82vw)',
+                height: 'auto',
+                display: 'block',
+                margin: '0 auto 1.25rem auto',
+                filter: 'drop-shadow(0 18px 40px rgba(0,0,0,0.45))',
+              }}
+            />
+            <h2
+              style={{
+                margin: '0 0 0.75rem 0',
+                fontSize: 'clamp(1.9rem, 4vw, 2.8rem)',
+                fontWeight: 800,
+              }}
+            >
+              His Place Community Church
+            </h2>
+            <p
+              style={{
+                margin: '0 0 0.5rem 0',
+                fontSize: '1.05rem',
+                opacity: 0.9,
+              }}
+            >
+              A place to belong, believe, and grow in Christ.
+            </p>
+            <p
+              style={{
+                margin: 0,
+                fontSize: '1rem',
+                fontWeight: 700,
+                color: '#f87171',
+              }}
+            >
+              Sundays at 11:00 AM • {CHURCH_ADDRESS}
+            </p>
           </div>
         </div>
       </section>
@@ -476,12 +545,12 @@ function HomePage() {
           <ShellCard className="giving-card">
             <h3>Online Giving</h3>
             <p>
-              Give securely through Venmo to support the mission and ministry of His Place
-              Community Church.
+              Give securely through Church Center Giving to support the mission and ministry
+              of His Place Community Church.
             </p>
             <a
               className="button button-primary full-width"
-              href={VENMO_LINK}
+              href={GIVING_URL}
               target="_blank"
               rel="noreferrer"
             >
@@ -928,7 +997,7 @@ function Footer() {
               </NavLink>
             ))}
             {!atHome && (
-              <a href={VENMO_LINK} className="footer-link" target="_blank" rel="noreferrer">
+              <a href={GIVING_URL} className="footer-link" target="_blank" rel="noreferrer">
                 Give
               </a>
             )}
