@@ -19,7 +19,7 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-ro
 import logoSrc from './assets/Logo.jpg'
 import pastorPhotoSrc from './assets/pastor-family.jpg'
 
-const GIVING_URL = 'hhttps://his-place-community-church-533980.churchcenter.com/giving'
+const GIVING_URL = 'https://his-place-community-church-533980.churchcenter.com/giving'
 const CHURCH_ADDRESS = '523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244'
 const SUNDAY_SERVICE_TIME = 'Sundays at 11:00 AM'
 
