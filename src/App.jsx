@@ -49,20 +49,6 @@ const fallbackEvents = [
     description:
       'Join us for worship, biblical preaching, prayer, and authentic community every Sunday morning.',
   },
-  {
-    title: 'Midweek Bible Study',
-    time: 'Wednesdays at 6:30 PM',
-    location: CHURCH_ADDRESS,
-    description:
-      'A deeper look at Scripture with discussion, encouragement, and prayer for everyday life.',
-  },
-  {
-    title: 'Prayer Night',
-    time: 'First Thursday of each month',
-    location: CHURCH_ADDRESS,
-    description:
-      'A focused evening to seek the Lord together and pray for families, healing, salvation, and our community.',
-  },
 ]
 
 const fallbackAnnouncements = [
@@ -225,6 +211,7 @@ function HomePage() {
       .then((res) => res.json())
       .then((rows) => {
         if (cancelled || !Array.isArray(rows)) return
+
         const normalized = rows
           .map((row, index) => ({
             id: row.id || row.ID || `${row.title || row.Title || 'announcement'}-${index}`,
@@ -233,6 +220,7 @@ function HomePage() {
             text: row.text || row.Text || '',
           }))
           .filter((row) => row.title)
+
         if (normalized.length) setAnnouncements(normalized)
       })
       .catch(() => {})
@@ -252,6 +240,7 @@ function HomePage() {
       .then((res) => res.json())
       .then((rows) => {
         if (cancelled || !Array.isArray(rows)) return
+
         const normalized = rows
           .map((row, index) => ({
             id: row.id || row.ID || `${row.title || row.Title || 'sermon'}-${index}`,
@@ -261,6 +250,7 @@ function HomePage() {
             youtube: row.youtube || row.YouTube || row.Youtube || '',
           }))
           .filter((row) => row.title)
+
         if (normalized.length) setSermons(normalized)
       })
       .catch(() => {})
@@ -331,61 +321,47 @@ function HomePage() {
         </div>
       </section>
 
-      <section
-        className="section"
-        style={{
-          paddingTop: '1rem',
-          paddingBottom: '1rem',
-        }}
-      >
-        <div
-          className="container"
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
+      <section className="section" style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
           <div
             style={{
               width: '100%',
-              maxWidth: '860px',
+              maxWidth: '900px',
               textAlign: 'center',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '28px',
-              padding: '2.5rem 1.5rem',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025))',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '32px',
+              padding: '2.75rem 1.5rem',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.42)',
             }}
           >
             <img
               src={logoSrc}
               alt="His Place Community Church featured logo"
               style={{
-                width: 'min(420px, 82vw)',
+                width: 'min(430px, 82vw)',
                 height: 'auto',
                 display: 'block',
                 margin: '0 auto 1.5rem auto',
-                filter: 'drop-shadow(0 18px 40px rgba(0,0,0,0.45))',
+                filter: 'drop-shadow(0 18px 40px rgba(0,0,0,0.5))',
               }}
             />
             <p
               style={{
                 margin: '0 0 1rem 0',
-                fontSize: 'clamp(2.2rem, 6vw, 4.4rem)',
-                fontWeight: 900,
-                lineHeight: 1.08,
-                color: '#f87171',
+                fontSize: 'clamp(2.3rem, 6.5vw, 5rem)',
+                fontWeight: 950,
+                lineHeight: 1.05,
+                letterSpacing: '-0.04em',
+                background: 'linear-gradient(180deg, #ffffff 0%, #d9d9d9 35%, #a8a8a8 70%, #f5f5f5 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 2px 14px rgba(255,255,255,0.16)',
               }}
             >
               {CHURCH_SLOGAN}
             </p>
-            <p
-              style={{
-                margin: 0,
-                fontSize: '1rem',
-                fontWeight: 700,
-              }}
-            >
+            <p style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
               Sundays at 11:00 AM • {CHURCH_ADDRESS}
             </p>
           </div>
@@ -395,16 +371,8 @@ function HomePage() {
       <section className="section">
         <div className="container three-up-grid">
           {[
-            {
-              icon: MapPin,
-              title: 'Address',
-              text: CHURCH_ADDRESS,
-            },
-            {
-              icon: Clock,
-              title: 'Sunday Service',
-              text: 'Every Sunday at 11:00 AM.',
-            },
+            { icon: MapPin, title: 'Address', text: CHURCH_ADDRESS },
+            { icon: Clock, title: 'Sunday Service', text: 'Every Sunday at 11:00 AM.' },
             {
               icon: Heart,
               title: 'Our Heart',
@@ -417,6 +385,33 @@ function HomePage() {
               <p>{item.text}</p>
             </ShellCard>
           ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container stack-lg">
+          <div className="page-intro max-3xl">
+            <div className="eyebrow-pill">What to Expect</div>
+            <h2>A welcoming Sunday morning centered on Jesus.</h2>
+            <p>
+              You do not have to have it all together to come to His Place. Come as you are,
+              bring your family, and expect biblical teaching, worship, prayer, and a church
+              family that is glad you are here.
+            </p>
+          </div>
+
+          <div className="three-up-grid">
+            {[
+              ['Biblical Teaching', 'Messages are rooted in Scripture and focused on helping people know and follow Jesus.'],
+              ['Warm Community', 'We want every guest to feel seen, welcomed, and treated like family.'],
+              ['Simple Next Steps', 'Prayer, connection, groups, and serving opportunities help people grow at a healthy pace.'],
+            ].map(([title, text]) => (
+              <ShellCard key={title}>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </ShellCard>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -535,20 +530,17 @@ function AboutPage() {
             <div className="stack-md muted-copy">
               <p>
                 Pastor Dave Evans is passionate about helping people encounter Jesus in a
-                real way and grow deeper in their understanding of God’s Word. He has a
-                heart for biblical preaching, meaningful discipleship, prayer, and creating
-                a church culture where people feel seen, loved, and welcomed.
+                real way and grow deeper in their understanding of God’s Word.
               </p>
               <p>
                 His vision for His Place Community Church is simple: to build a Christ
                 centered church family where truth is taught clearly, grace is extended
-                freely, and people are encouraged to follow Jesus wholeheartedly in everyday
-                life.
+                freely, and people are encouraged to follow Jesus wholeheartedly.
               </p>
               <p>
                 Dave cares deeply about reaching people who may feel overlooked, worn down,
-                or spiritually hungry. He desires for His Place to be a church where people
-                can find hope, healing, purpose, and a genuine sense of belonging.
+                or spiritually hungry. His heart is for people to find hope, healing,
+                purpose, and a genuine sense of belonging.
               </p>
             </div>
           </ShellCard>
@@ -556,18 +548,9 @@ function AboutPage() {
 
         <div className="three-up-grid">
           {[
-            [
-              'Our Mission',
-              'To point people to Jesus, teach the Bible faithfully, and build a loving church family that reflects the heart of God.',
-            ],
-            [
-              'Our Vision',
-              'To be a healthy, growing community church where lives are transformed through the gospel and the power of the Holy Spirit.',
-            ],
-            [
-              'Our Culture',
-              'Warm, prayerful, biblical, welcoming, and centered on authentic relationships rather than performance.',
-            ],
+            ['Our Mission', 'To point people to Jesus, teach the Bible faithfully, and build a loving church family that reflects the heart of God.'],
+            ['Our Vision', 'To be a healthy, growing community church where lives are transformed through the gospel and the power of the Holy Spirit.'],
+            ['Our Culture', 'Warm, prayerful, biblical, welcoming, and centered on authentic relationships rather than performance.'],
           ].map(([title, text]) => (
             <ShellCard key={title}>
               <h3>{title}</h3>
@@ -588,9 +571,7 @@ function FaithPage() {
           <div className="eyebrow-pill">Statement of Faith</div>
           <h1>What we believe</h1>
           <p>
-            His Place Community Church is a non denominational, Bible based, Jesus
-            following church. These core convictions shape our preaching, discipleship,
-            prayer, and mission.
+            His Place Community Church is a non denominational, Bible based, Jesus following church.
           </p>
         </div>
 
