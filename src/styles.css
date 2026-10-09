@@ -380,3 +380,70 @@ main { flex: 1; }
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
+
+/* ---------- Added: accessibility ---------- */
+.skip-link {
+  position: absolute; left: 12px; top: -48px; z-index: 100;
+  background: var(--oxblood); color: #fff; padding: 10px 14px; border-radius: var(--radius-sm);
+}
+.skip-link:focus { top: 12px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }
+
+.fact-link { color: var(--ink); }
+.two-col-photo { max-height: 620px; }
+
+/* ---------- Added: sermons ---------- */
+.video-frame {
+  position: relative; width: 100%; aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md); overflow: hidden; background: var(--ink);
+}
+.video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.featured-sermon { display: grid; grid-template-columns: 1.6fr 1fr; gap: 32px; align-items: center; }
+@media (max-width: 800px) { .featured-sermon { grid-template-columns: 1fr; gap: 18px; } }
+.featured-sermon-title { font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+.featured-sermon-meta { color: var(--ink-faint); font-size: 14px; }
+.sermon-thumb { position: relative; display: block; border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 16 / 9; background: var(--paper-dark); }
+.sermon-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.sermon-thumb-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #fff; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
+
+/* ---------- Added: groups / CTA ---------- */
+.group-card { display: flex; flex-direction: column; gap: 8px; }
+.group-link { margin-top: auto; padding-top: 8px; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+.cta-card { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.photo-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.photo-strip img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius-sm); }
+@media (max-width: 600px) { .photo-strip { grid-template-columns: repeat(2, 1fr); } .photo-strip img:nth-child(3) { display: none; } }
+.prayer-photo { border-radius: var(--radius-md); width: 100%; max-height: 420px; object-fit: cover; object-position: center 30%; }
+
+/* ---------- Added: visit map ---------- */
+.map-frame { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--stone-border); aspect-ratio: 4 / 3; background: var(--paper-dark); }
+.map-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+.visit-map-row h2 { font-size: clamp(1.3rem, 2.4vw, 1.7rem); }
+
+/* ---------- Added: photo gallery ---------- */
+.gallery-grid { columns: 3 280px; column-gap: 10px; }
+.gallery-item {
+  display: block; width: 100%; margin: 0 0 10px; padding: 0; border: 0; background: none;
+  cursor: zoom-in; break-inside: avoid; border-radius: var(--radius-sm); overflow: hidden;
+}
+.gallery-item img { width: 100%; height: auto; transition: transform .3s ease; }
+.gallery-item:hover img { transform: scale(1.03); }
+.lightbox {
+  position: fixed; inset: 0; z-index: 200; background: rgba(20,16,14,0.94);
+  display: flex; align-items: center; justify-content: center; padding: 56px 16px;
+}
+.lightbox figure { margin: 0; max-width: 100%; max-height: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.lightbox figure img { max-width: min(1100px, 100%); max-height: calc(100vh - 140px); object-fit: contain; border-radius: var(--radius-sm); }
+.lightbox figcaption { color: rgba(255,255,255,0.85); font-size: 14px; text-align: center; }
+.lightbox-btn {
+  position: absolute; background: rgba(255,255,255,0.12); color: #fff; border: 0;
+  width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.lightbox-btn:hover { background: rgba(255,255,255,0.24); }
+.lightbox-close { top: 14px; right: 14px; }
+.lightbox-prev { left: 14px; top: 50%; transform: translateY(-50%); }
+.lightbox-next { right: 14px; top: 50%; transform: translateY(-50%); }
+
+.footer-bottom { margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 12px; color: rgba(255,255,255,0.5); }
+
+@media (max-width: 1080px) and (min-width: 901px) { .nav-desktop { gap: 14px; } .nav-link { font-size: 13px; } }

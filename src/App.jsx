@@ -4,6 +4,7 @@ import {
   Users,
   HandHeart,
   ChevronRight,
+  ChevronLeft,
   Mail,
   MapPin,
   Clock,
@@ -12,43 +13,111 @@ import {
   Send,
   Menu,
   X,
+  PlayCircle,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import logoSrc from './assets/Logo.jpg'
-import pastorPhotoSrc from './assets/pastor-family.jpg'
-import porchWelcomeSrc from './assets/porch-welcome.jpg'
-import sundayGatheringSrc from './assets/sunday-gathering.jpg'
-import pastorPreachingSrc from './assets/pastor-preaching.jpg'
-import worshipMusicSrc from './assets/worship-music.jpg'
-import stoneWallSrc from './assets/stone-wall-gathering.jpg'
-import kidsMinistrySrc from './assets/kids-ministry.jpg'
-import fellowshipChatSrc from './assets/fellowship-chat.jpg'
+import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
 
+/* ------------------------------------------------------------------
+   Site settings. Change these in one place and the whole site updates.
+------------------------------------------------------------------- */
+const SITE_URL = 'https://www.hpcchurch.church'
 const GIVING_URL = 'https://his-place-community-church-533980.churchcenter.com/giving'
+const FACEBOOK_URL = 'https://www.facebook.com/profile.php?id=61583261639613'
 const CHURCH_ADDRESS = '523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244'
 const SUNDAY_SERVICE_TIME = 'Sundays at 11:00 AM'
-const PRAYER_EMAIL = 'info@hpcchurch.church'
+const CONTACT_EMAIL = 'info@hpcchurch.church'
+// Add the church phone number here (for example '(513) 555-1234') and it
+// will appear in the footer and on the Plan Your Visit page.
+const CHURCH_PHONE = ''
 
+const SHEET_BASE = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74'
+const EVENTS_SHEET_URL = `${SHEET_BASE}/Events`
+const ANNOUNCEMENTS_URL = `${SHEET_BASE}/Announcements`
+const SERMONS_URL = `${SHEET_BASE}/Sermons`
+
+const mailto = (subject) => `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`
+const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(CHURCH_ADDRESS)}`
+
+/* ------------------------------------------------------------------
+   Photos. Every image in src/assets/gallery is loaded automatically and
+   shown on the Photos page. To add pictures, upload them to that folder.
+   Optional: add a caption below using the file name (without .jpg).
+------------------------------------------------------------------- */
+const photoCaptions = {
+  'worship-together': 'Worshiping together on a Sunday morning',
+  'worship-leader-singing': 'Leading the church in worship',
+  'praying-together': 'Praying for one another',
+  'newborn-blessing': 'Welcoming the newest member of the family',
+  'moment-to-respond': 'A moment to respond to the message',
+  'upside-down-kingdom': 'Upside Down Kingdom: a series in the Beatitudes',
+  'pastor-dave-teaching': 'Pastor Dave teaching from the Word',
+  'worship-singer': 'Singing praise to Jesus',
+  'kids-snuggle': 'Little ones in the arms of our church family',
+  'little-one-smiling': 'All smiles on Sunday',
+  'welcoming-little-ones': 'Every generation is welcome here',
+  'porch-welcome': 'Catching up on the porch after service',
+  'sunday-gathering': 'Sunday worship gathering',
+  'stone-wall-gathering': 'Gathered for worship',
+  'pastor-preaching': 'Pastor Dave preaching on a Sunday morning',
+  'pastor-family': 'Pastor Dave Evans and his wife',
+  'fellowship-chat': 'Fellowship after service',
+  'kids-ministry': 'His Kids ministry activities',
+  'worship-music': 'Worship and music',
+}
+
+const galleryModules = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', {
+  eager: true,
+  import: 'default',
+})
+
+const captionOrder = Object.keys(photoCaptions)
+const photos = Object.entries(galleryModules)
+  .map(([path, src]) => {
+    const key = path.split('/').pop().replace(/\.[^.]+$/, '')
+    const fallback = key.replace(/[-_]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase())
+    return { key, src, alt: photoCaptions[key] || fallback }
+  })
+  .sort((a, b) => {
+    const ia = captionOrder.indexOf(a.key)
+    const ib = captionOrder.indexOf(b.key)
+    // Photos without a caption entry (newly uploaded) show first.
+    return (ia === -1 ? -1 : ia) - (ib === -1 ? -1 : ib) || a.key.localeCompare(b.key)
+  })
+
+const photo = (key) => photos.find((p) => p.key === key) || { src: '', alt: '' }
+
+function Photo({ name, className, style }) {
+  const p = photo(name)
+  if (!p.src) return null
+  return <img src={p.src} alt={p.alt} className={className} style={style} loading="lazy" decoding="async" />
+}
+
+/* ------------------------------------------------------------------
+   Navigation
+------------------------------------------------------------------- */
 const navItems = [
   { to: '/', label: 'Home' },
   { to: '/visit', label: 'Plan Your Visit' },
   { to: '/about', label: 'About' },
-  { to: '/faith', label: 'Statement of Faith' },
+  { to: '/sermons', label: 'Sermons' },
   { to: '/groups', label: 'Groups & Events' },
   { to: '/announcements', label: 'Announcements' },
-  { to: '/sermons', label: 'Sermons' },
+  { to: '/photos', label: 'Photos' },
   { to: '/prayer', label: 'Prayer' },
 ]
 
-const EVENTS_SHEET_URL =
-  'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Events'
-const ANNOUNCEMENTS_URL =
-  'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Announcements'
-const SERMONS_URL =
-  'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74/Sermons'
+const footerItems = [
+  ...navItems.slice(0, 3),
+  { to: '/faith', label: 'Statement of Faith' },
+  ...navItems.slice(3),
+]
 
+/* ------------------------------------------------------------------
+   Fallback content (shown if the Google Sheet cannot be reached)
+------------------------------------------------------------------- */
 const fallbackEvents = [
   {
     title: 'Sunday Worship Gathering',
@@ -71,7 +140,7 @@ const fallbackSermons = [
   {
     title: 'Latest Sermon Coming Soon',
     speaker: 'Pastor Dave Evans',
-    date: 'Coming Soon',
+    date: '',
     youtube: '',
   },
 ]
@@ -124,13 +193,19 @@ const visitFaqs = [
   { title: 'What should I wear?', text: 'Come as you are. You will see everything from jeans to Sunday best.' },
   { title: 'What about my kids?', text: 'Children are always welcome in the main service, and our His Kids team would love to help you get settled.' },
   { title: 'Where do I park?', text: `Parking is available on-site at ${CHURCH_ADDRESS}. Look for a greeter near the entrance.` },
+  { title: 'Will I be singled out?', text: 'No. We are glad you came, and you are free to simply sit, listen, and take it all in.' },
 ]
 
+/* ------------------------------------------------------------------
+   Helpers
+------------------------------------------------------------------- */
 function useDocumentHead({ title, description }) {
+  const { pathname } = useLocation()
+
   useEffect(() => {
     const fullTitle = title
       ? `${title} | His Place Community Church`
-      : 'His Place Community Church — Amelia, Beechmont & Cherry Grove, OH'
+      : 'His Place Community Church | Amelia, Beechmont & Cherry Grove, OH'
     document.title = fullTitle
 
     const setMeta = (attrName, attrValue, content) => {
@@ -148,81 +223,47 @@ function useDocumentHead({ title, description }) {
       setMeta('property', 'og:description', description)
     }
     setMeta('property', 'og:title', fullTitle)
-    setMeta('property', 'og:type', 'website')
-  }, [title, description])
+    setMeta('property', 'og:url', `${SITE_URL}${pathname}`)
+
+    // Each page gets its own canonical address so search engines index it.
+    let canonical = document.querySelector('link[rel="canonical"]')
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.setAttribute('rel', 'canonical')
+      document.head.appendChild(canonical)
+    }
+    canonical.setAttribute('href', `${SITE_URL}${pathname === '/' ? '/' : pathname}`)
+  }, [title, description, pathname])
+}
+
+// Accepts M/D/YYYY, M/D/YY, or anything Date can read. Returns a friendly date.
+function formatDate(value) {
+  if (!value) return ''
+  const m = String(value).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/)
+  let d
+  if (m) {
+    const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3])
+    d = new Date(year, Number(m[1]) - 1, Number(m[2]))
+  } else {
+    d = new Date(value)
+  }
+  if (Number.isNaN(d.getTime())) return String(value)
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+}
+
+function getYouTubeId(url) {
+  if (!url) return ''
+  const m = String(url).match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|live\/|shorts\/|v\/))([A-Za-z0-9_-]{11})/
+  )
+  return m ? m[1] : ''
 }
 
 function ShellCard({ children, className = '' }) {
   return <div className={`card ${className}`.trim()}>{children}</div>
 }
 
-function NavBar() {
-  const [open, setOpen] = useState(false)
-  const location = useLocation()
-
-  useEffect(() => {
-    setOpen(false)
-  }, [location.pathname])
-
-  return (
-    <header className="site-header">
-      <div className="container nav-wrap">
-        <Link to="/" className="brand" aria-label="His Place Community Church home">
-          <img src={logoSrc} alt="His Place Community Church logo" className="brand-logo" />
-          <div>
-            <div className="brand-top">His Place</div>
-            <div className="brand-bottom">Community Church</div>
-          </div>
-        </Link>
-
-        <nav className="nav-desktop" aria-label="Main navigation">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`.trim()}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-          <a className="button button-primary nav-give" href={GIVING_URL} target="_blank" rel="noreferrer">
-            Give
-          </a>
-        </nav>
-
-        <button
-          className="menu-button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-          aria-expanded={open}
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
-      </div>
-
-      {open && (
-        <div className="mobile-menu">
-          <div className="container mobile-menu-inner">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`.trim()}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-            <a className="button button-primary mobile-give" href={GIVING_URL} target="_blank" rel="noreferrer">
-              Give
-            </a>
-          </div>
-        </div>
-      )}
-    </header>
-  )
-}
-
-function useSheetData(url, fallback, mapRow) {
+function useSheetData(url, fallback, mapRow, { newestFirst = false } = {}) {
   const [data, setData] = useState(fallback)
   const [status, setStatus] = useState('loading')
 
@@ -236,7 +277,10 @@ function useSheetData(url, fallback, mapRow) {
       })
       .then((rows) => {
         if (cancelled || !Array.isArray(rows)) return
-        const normalized = rows.map(mapRow).filter((row) => row.title)
+        let normalized = rows.map(mapRow).filter((row) => row.title)
+        // New rows are added to the bottom of the sheet, so flip the list
+        // to show the most recent first.
+        if (newestFirst) normalized = normalized.reverse()
         if (normalized.length) setData(normalized)
         setStatus('loaded')
       })
@@ -283,6 +327,136 @@ function SheetStatusNote({ status, emptyLabel }) {
   return null
 }
 
+/* ------------------------------------------------------------------
+   Shared pieces
+------------------------------------------------------------------- */
+function NavBar() {
+  const [open, setOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => {
+    setOpen(false)
+  }, [location.pathname])
+
+  return (
+    <header className="site-header">
+      <div className="container nav-wrap">
+        <Link to="/" className="brand" aria-label="His Place Community Church home">
+          <img src={logoSrc} alt="" className="brand-logo" width="42" height="42" />
+          <div>
+            <div className="brand-top">His Place</div>
+            <div className="brand-bottom">Community Church</div>
+          </div>
+        </Link>
+
+        <nav className="nav-desktop" aria-label="Main navigation">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`.trim()}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+          <a className="button button-primary nav-give" href={GIVING_URL} target="_blank" rel="noreferrer">
+            Give
+          </a>
+        </nav>
+
+        <button
+          className="menu-button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+        >
+          {open ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
+
+      {open && (
+        <div className="mobile-menu">
+          <div className="container mobile-menu-inner">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`.trim()}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+            <a className="button button-primary mobile-give" href={GIVING_URL} target="_blank" rel="noreferrer">
+              Give
+            </a>
+          </div>
+        </div>
+      )}
+    </header>
+  )
+}
+
+function SermonVideo({ sermon }) {
+  const id = getYouTubeId(sermon.youtube)
+  if (!id) return null
+  return (
+    <div className="video-frame">
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${id}`}
+        title={`Sermon: ${sermon.title}`}
+        loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />
+    </div>
+  )
+}
+
+function SermonCard({ sermon }) {
+  const id = getYouTubeId(sermon.youtube)
+  return (
+    <ShellCard className="event-card sermon-card">
+      {id && (
+        <a href={sermon.youtube} target="_blank" rel="noopener noreferrer" className="sermon-thumb" aria-label={`Watch ${sermon.title} on YouTube`}>
+          <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" loading="lazy" decoding="async" />
+          <PlayCircle size={42} className="sermon-thumb-play" aria-hidden="true" />
+        </a>
+      )}
+      <div className="event-meta-wrap">
+        <div className="event-time-pill">{formatDate(sermon.date) || 'Recent message'}</div>
+        <div className="event-location">{sermon.speaker || 'Pastor Dave Evans'}</div>
+      </div>
+      <h3>{sermon.title}</h3>
+      {sermon.youtube ? (
+        <p><a href={sermon.youtube} target="_blank" rel="noopener noreferrer">Watch on YouTube</a></p>
+      ) : (
+        <p>Video link coming soon.</p>
+      )}
+    </ShellCard>
+  )
+}
+
+function FeaturedSermon({ sermon }) {
+  return (
+    <div className="featured-sermon">
+      <SermonVideo sermon={sermon} />
+      <div>
+        <div className="section-label">Latest message</div>
+        <h3 className="featured-sermon-title">{sermon.title}</h3>
+        <p className="featured-sermon-meta">
+          {[sermon.speaker || 'Pastor Dave Evans', formatDate(sermon.date)].filter(Boolean).join(' · ')}
+        </p>
+        {!getYouTubeId(sermon.youtube) && <p>Video link coming soon.</p>}
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------
+   Pages
+------------------------------------------------------------------- */
 function HomePage() {
   const navigate = useNavigate()
   useDocumentHead({
@@ -295,11 +469,14 @@ function HomePage() {
     fallbackAnnouncements,
     mapAnnouncementRow
   )
-  const { data: sermons, status: sermonsStatus } = useSheetData(SERMONS_URL, fallbackSermons, mapSermonRow)
+  const { data: sermons, status: sermonsStatus } = useSheetData(SERMONS_URL, fallbackSermons, mapSermonRow, {
+    newestFirst: true,
+  })
+  const [latest, ...recent] = sermons
 
   return (
     <>
-      <section className="hero-photo" style={{ backgroundImage: `url(${porchWelcomeSrc})` }}>
+      <section className="hero-photo" style={{ backgroundImage: `url(${photo('porch-welcome').src})` }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">A Bible based, Jesus following church</div>
           <h1>A place to belong, believe, and grow in Christ.</h1>
@@ -312,12 +489,12 @@ function HomePage() {
             <button className="button button-primary" onClick={() => navigate('/visit')}>
               Plan Your Visit <ChevronRight size={16} />
             </button>
+            <button className="button button-light" onClick={() => navigate('/sermons')}>
+              Watch the Latest Sermon
+            </button>
             <button className="button button-light" onClick={() => navigate('/prayer')}>
               Submit a Prayer Request
             </button>
-            <a className="button button-light" href={GIVING_URL} target="_blank" rel="noreferrer">
-              Give
-            </a>
           </div>
         </div>
       </section>
@@ -330,7 +507,9 @@ function HomePage() {
           </div>
           <div className="fact-item">
             <div className="fact-label">Where to find us</div>
-            <div className="fact-value">{CHURCH_ADDRESS}</div>
+            <div className="fact-value">
+              <a href={directionsUrl} target="_blank" rel="noreferrer" className="fact-link">{CHURCH_ADDRESS}</a>
+            </div>
           </div>
           <div className="fact-item">
             <div className="fact-label">What to expect</div>
@@ -341,20 +520,25 @@ function HomePage() {
 
       <section className="section">
         <div className="container">
-          <div className="section-label">A morning at His Place</div>
-          <h2 className="section-intro">Real people, real worship, real community.</h2>
+          <div className="events-heading-row" style={{ marginBottom: 28 }}>
+            <div>
+              <div className="section-label">A morning at His Place</div>
+              <h2 style={{ margin: 0 }}>Real people, real worship, real community.</h2>
+            </div>
+            <Link to="/photos" className="button button-secondary">See more photos</Link>
+          </div>
           <div className="essay-grid">
             <div className="essay-item wide">
-              <img src={sundayGatheringSrc} alt="Congregation gathered for Sunday worship" />
-              <div className="essay-caption">Sunday worship gathering</div>
+              <Photo name="worship-together" />
+              <div className="essay-caption">Sunday worship</div>
             </div>
             <div className="essay-item">
-              <img src={worshipMusicSrc} alt="Worship leader playing keyboard during service" />
+              <Photo name="worship-leader-singing" />
               <div className="essay-caption">Worship & music</div>
             </div>
             <div className="essay-item">
-              <img src={kidsMinistrySrc} alt="Kids ministry table with coloring and activities" />
-              <div className="essay-caption">His Kids ministry</div>
+              <Photo name="praying-together" />
+              <div className="essay-caption">Praying for one another</div>
             </div>
           </div>
         </div>
@@ -362,7 +546,7 @@ function HomePage() {
 
       <section className="section-tight">
         <div className="container two-col">
-          <img src={fellowshipChatSrc} alt="Two church members talking after service" />
+          <Photo name="newborn-blessing" className="two-col-photo" />
           <div>
             <div className="section-label">What to expect</div>
             <h2>You do not have to have it all together to come to His Place.</h2>
@@ -382,16 +566,37 @@ function HomePage() {
       <section className="section">
         <div className="container stack-lg">
           <div className="events-heading-row">
-            <div className="section-intro" style={{ marginBottom: 0 }}>
+            <div>
+              <div className="section-label">Sermons</div>
+              <h2 style={{ margin: 0 }}>Watch this week's message</h2>
+            </div>
+            <Link to="/sermons" className="button button-secondary">All sermons</Link>
+          </div>
+          {latest && <FeaturedSermon sermon={latest} />}
+          {recent.length > 0 && (
+            <div className="events-grid">
+              {recent.slice(0, 3).map((sermon) => (
+                <SermonCard key={sermon.id || sermon.title} sermon={sermon} />
+              ))}
+            </div>
+          )}
+          <SheetStatusNote status={sermonsStatus} emptyLabel="Check back soon for the latest message." />
+        </div>
+      </section>
+
+      <section className="section-tight">
+        <div className="container stack-lg">
+          <div className="events-heading-row">
+            <div>
               <div className="section-label">Announcements</div>
-              <h2>Latest announcements</h2>
+              <h2 style={{ margin: 0 }}>Latest announcements</h2>
             </div>
             <Link to="/announcements" className="button button-secondary">See all</Link>
           </div>
 
           <div className="events-grid">
             {announcements.slice(0, 3).map((item) => (
-              <ShellCard key={item.id} className="event-card">
+              <ShellCard key={item.id || item.title} className="event-card">
                 <div className="event-time-pill">{item.date || 'Update'}</div>
                 <h3>{item.title}</h3>
                 <p>{item.text || 'More details coming soon.'}</p>
@@ -399,36 +604,6 @@ function HomePage() {
             ))}
           </div>
           <SheetStatusNote status={announcementsStatus} emptyLabel="Check back soon for updates." />
-        </div>
-      </section>
-
-      <section className="section-tight">
-        <div className="container stack-lg">
-          <div className="events-heading-row">
-            <div className="section-intro" style={{ marginBottom: 0 }}>
-              <div className="section-label">Sermons</div>
-              <h2>Latest sermons</h2>
-            </div>
-            <Link to="/sermons" className="button button-secondary">See all</Link>
-          </div>
-
-          <div className="events-grid">
-            {sermons.slice(0, 3).map((sermon) => (
-              <ShellCard key={sermon.id} className="event-card">
-                <div className="event-meta-wrap">
-                  <div className="event-time-pill">{sermon.date || 'Latest Message'}</div>
-                  <div className="event-location">{sermon.speaker || 'Pastor Dave Evans'}</div>
-                </div>
-                <h3>{sermon.title}</h3>
-                {sermon.youtube ? (
-                  <p><a href={sermon.youtube} target="_blank" rel="noopener noreferrer">Watch sermon</a></p>
-                ) : (
-                  <p>Video link coming soon.</p>
-                )}
-              </ShellCard>
-            ))}
-          </div>
-          <SheetStatusNote status={sermonsStatus} emptyLabel="Check back soon for the latest message." />
         </div>
       </section>
 
@@ -459,7 +634,6 @@ function HomePage() {
 }
 
 function VisitPage() {
-  const navigate = useNavigate()
   useDocumentHead({
     title: 'Plan Your Visit',
     description:
@@ -468,7 +642,7 @@ function VisitPage() {
 
   return (
     <>
-      <section className="hero-photo" style={{ backgroundImage: `url(${stoneWallSrc})`, minHeight: 340 }}>
+      <section className="hero-photo" style={{ backgroundImage: `url(${photo('worship-together').src})`, minHeight: 360 }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">Plan your visit</div>
           <h1>We would love to meet you this Sunday.</h1>
@@ -498,18 +672,36 @@ function VisitPage() {
             ))}
           </div>
 
-          <div className="hero-actions">
-            <button className="button button-primary" onClick={() => navigate('/prayer')}>
-              Have a question first? Reach out <ChevronRight size={16} />
-            </button>
-            <a
-              className="button button-secondary"
-              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(CHURCH_ADDRESS)}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Get Directions
-            </a>
+          <div className="two-col visit-map-row">
+            <div className="map-frame">
+              <iframe
+                title="Map to His Place Community Church"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(CHURCH_ADDRESS)}&z=15&output=embed`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+            <div>
+              <div className="section-label">Finding us</div>
+              <h2>{CHURCH_ADDRESS}</h2>
+              <p>
+                Parking is on-site, and a greeter will be near the entrance to help you find
+                your way in.
+              </p>
+              <div className="hero-actions">
+                <a className="button button-primary" href={directionsUrl} target="_blank" rel="noreferrer">
+                  Get Directions <ChevronRight size={16} />
+                </a>
+                <a className="button button-secondary" href={mailto('Question about visiting His Place')}>
+                  Have a question? Email us
+                </a>
+                {CHURCH_PHONE && (
+                  <a className="button button-secondary" href={`tel:${CHURCH_PHONE.replace(/[^\d+]/g, '')}`}>
+                    Call {CHURCH_PHONE}
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -536,7 +728,7 @@ function AboutPage() {
         </div>
 
         <div className="two-col">
-          <img src={pastorPhotoSrc} alt="Pastor Dave Evans with his wife" />
+          <Photo name="pastor-family" className="two-col-photo" />
           <div>
             <div className="section-label">Meet the Pastor</div>
             <h2>Pastor Dave Evans</h2>
@@ -552,9 +744,16 @@ function AboutPage() {
           <div>
             <div className="section-label">Sunday mornings</div>
             <h2>Teaching that's clear, practical, and rooted in Scripture.</h2>
-            <p>Every message works through the Bible verse by verse, so you can follow along and take it home with you.</p>
+            <p>
+              Every message opens the Bible and brings it home to everyday life, often through
+              series like <em>Upside Down Kingdom</em>, a walk through the Beatitudes. Each
+              Sunday ends with a moment to respond, so you can take the Word home with you.
+            </p>
+            <Link to="/sermons" className="button button-secondary">
+              Watch recent sermons <ChevronRight size={16} />
+            </Link>
           </div>
-          <img src={pastorPreachingSrc} alt="Pastor Dave preaching on a Sunday morning" />
+          <Photo name="moment-to-respond" className="two-col-photo" />
         </div>
 
         <div className="three-up-grid">
@@ -566,6 +765,16 @@ function AboutPage() {
             <ShellCard key={title}><h3>{title}</h3><p>{text}</p></ShellCard>
           ))}
         </div>
+
+        <ShellCard className="cta-card">
+          <div>
+            <h3>What we believe</h3>
+            <p>We are a non denominational, Bible based, Jesus following church. Read our full statement of faith.</p>
+          </div>
+          <Link to="/faith" className="button button-primary">
+            Statement of Faith <ChevronRight size={16} />
+          </Link>
+        </ShellCard>
       </div>
     </section>
   )
@@ -610,6 +819,12 @@ function GroupsPage() {
 
   const { data: events, status } = useSheetData(EVENTS_SHEET_URL, fallbackEvents, mapEventRow)
 
+  const groups = [
+    { icon: Users, title: 'Life Groups', text: "Small groups where people can grow in faith, build friendships, and walk through life together around God's Word." },
+    { icon: BookOpen, title: 'Bible Study', text: 'A deeper look at Scripture with discussion, encouragement, and prayer that helps you apply it to everyday life.' },
+    { icon: Heart, title: 'Prayer Team', text: 'A place for people who want to stand in the gap for others and believe God for breakthrough, comfort, and hope.' },
+  ]
+
   return (
     <section className="section page-section">
       <div className="container stack-lg">
@@ -623,37 +838,38 @@ function GroupsPage() {
         </div>
 
         <div className="two-col">
-          <img src={hisKidsLogoSrc} alt="His Kids ministry logo" style={{ borderRadius: '14px' }} />
+          <img src={hisKidsLogoSrc} alt="His Kids ministry logo" style={{ borderRadius: '14px' }} loading="lazy" />
           <div>
             <div className="section-label">His Kids</div>
             <h2>Loved. Known. Made for more.</h2>
             <p>Our kids ministry gives children a safe, fun place to learn about Jesus during the Sunday gathering, with games, crafts, and Bible stories geared for their age.</p>
+            <a className="button button-secondary" href={mailto('His Kids question')}>
+              Ask about His Kids <ChevronRight size={16} />
+            </a>
           </div>
+        </div>
+
+        <div className="photo-strip">
+          <Photo name="kids-snuggle" />
+          <Photo name="little-one-smiling" />
+          <Photo name="kids-ministry" />
         </div>
 
         <div className="three-up-grid">
-          <ShellCard>
-            <Users size={22} className="icon-red" />
-            <h3>Life Groups</h3>
-            <p>Small groups where people can grow in faith, build friendships, and walk through life together around God's Word.</p>
-          </ShellCard>
-          <ShellCard>
-            <BookOpen size={22} className="icon-red" />
-            <h3>Bible Study</h3>
-            <p>Verse by verse study that helps people understand Scripture clearly and apply it faithfully.</p>
-          </ShellCard>
-          <ShellCard>
-            <Heart size={22} className="icon-red" />
-            <h3>Prayer Team</h3>
-            <p>A place for people who want to stand in the gap for others and believe God for breakthrough, comfort, and hope.</p>
-          </ShellCard>
+          {groups.map(({ icon: Icon, title, text }) => (
+            <ShellCard key={title} className="group-card">
+              <Icon size={22} className="icon-red" />
+              <h3>{title}</h3>
+              <p>{text}</p>
+              <a className="group-link" href={mailto(`I'm interested in ${title}`)}>
+                Get connected <ChevronRight size={14} />
+              </a>
+            </ShellCard>
+          ))}
         </div>
 
         <div className="stack-md">
-          <div className="events-heading-row">
-            <h2 style={{ margin: 0 }}>Upcoming Events</h2>
-            <p className="events-helper-text">Updated from our Google Sheet.</p>
-          </div>
+          <h2 style={{ margin: 0 }}>Upcoming Events</h2>
           <div className="events-grid">
             {events.map((event) => (
               <ShellCard key={event.id || event.title} className="event-card">
@@ -684,7 +900,7 @@ function AnnouncementsPage() {
         </div>
         <div className="events-grid">
           {announcements.map((item) => (
-            <ShellCard key={item.id} className="event-card">
+            <ShellCard key={item.id || item.title} className="event-card">
               <div className="event-time-pill">{item.date || 'Update'}</div>
               <h3>{item.title}</h3>
               <p>{item.text || 'More details coming soon.'}</p>
@@ -698,34 +914,89 @@ function AnnouncementsPage() {
 }
 
 function SermonsPage() {
-  useDocumentHead({ title: 'Sermons', description: 'Watch and revisit recent messages from His Place Community Church.' })
-  const { data: sermons, status } = useSheetData(SERMONS_URL, fallbackSermons, mapSermonRow)
+  useDocumentHead({ title: 'Sermons', description: 'Watch and revisit recent messages from Pastor Dave Evans and His Place Community Church.' })
+  const { data: sermons, status } = useSheetData(SERMONS_URL, fallbackSermons, mapSermonRow, { newestFirst: true })
+  const [latest, ...rest] = sermons
 
   return (
     <section className="section page-section">
       <div className="container stack-lg">
         <div className="section-intro">
           <div className="section-label">Sermons</div>
-          <h1>Latest Sermons</h1>
+          <h1>Messages from His Place</h1>
+          <p>Missed a Sunday or want to hear it again? Watch the latest message below.</p>
         </div>
-        <div className="events-grid">
-          {sermons.map((sermon) => (
-            <ShellCard key={sermon.id} className="event-card">
-              <div className="event-meta-wrap">
-                <div className="event-time-pill">{sermon.date || 'Latest Message'}</div>
-                <div className="event-location">{sermon.speaker || 'Pastor Dave Evans'}</div>
-              </div>
-              <h3>{sermon.title}</h3>
-              {sermon.youtube ? (
-                <p><a href={sermon.youtube} target="_blank" rel="noopener noreferrer">Watch sermon</a></p>
-              ) : (
-                <p>Video link coming soon.</p>
-              )}
-            </ShellCard>
-          ))}
-        </div>
+        {latest && <FeaturedSermon sermon={latest} />}
+        {rest.length > 0 && (
+          <>
+            <h2 style={{ margin: 0 }}>Recent messages</h2>
+            <div className="events-grid">
+              {rest.map((sermon) => (
+                <SermonCard key={sermon.id || sermon.title} sermon={sermon} />
+              ))}
+            </div>
+          </>
+        )}
         <SheetStatusNote status={status} emptyLabel="Check back soon for the latest message." />
       </div>
+    </section>
+  )
+}
+
+function PhotosPage() {
+  useDocumentHead({ title: 'Photos', description: 'Photos of worship, prayer, kids ministry, and life together at His Place Community Church.' })
+  const [active, setActive] = useState(null)
+
+  const close = useCallback(() => setActive(null), [])
+  const step = useCallback(
+    (dir) => setActive((i) => (i === null ? i : (i + dir + photos.length) % photos.length)),
+    []
+  )
+
+  useEffect(() => {
+    if (active === null) return undefined
+    const onKey = (e) => {
+      if (e.key === 'Escape') close()
+      if (e.key === 'ArrowRight') step(1)
+      if (e.key === 'ArrowLeft') step(-1)
+    }
+    window.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [active, close, step])
+
+  return (
+    <section className="section page-section">
+      <div className="container stack-lg">
+        <div className="section-intro">
+          <div className="section-label">Photos</div>
+          <h1>Life at His Place</h1>
+          <p>Worship, prayer, little ones, and a church family glad to be together.</p>
+        </div>
+
+        <div className="gallery-grid">
+          {photos.map((p, i) => (
+            <button key={p.key} className="gallery-item" onClick={() => setActive(i)} aria-label={`Open photo: ${p.alt}`}>
+              <img src={p.src} alt={p.alt} loading="lazy" decoding="async" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {active !== null && (
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label={photos[active].alt} onClick={close}>
+          <button className="lightbox-btn lightbox-close" onClick={close} aria-label="Close photo"><X size={22} /></button>
+          <button className="lightbox-btn lightbox-prev" onClick={(e) => { e.stopPropagation(); step(-1) }} aria-label="Previous photo"><ChevronLeft size={26} /></button>
+          <figure onClick={(e) => e.stopPropagation()}>
+            <img src={photos[active].src} alt={photos[active].alt} />
+            <figcaption>{photos[active].alt}</figcaption>
+          </figure>
+          <button className="lightbox-btn lightbox-next" onClick={(e) => { e.stopPropagation(); step(1) }} aria-label="Next photo"><ChevronRight size={26} /></button>
+        </div>
+      )}
     </section>
   )
 }
@@ -748,7 +1019,7 @@ function PrayerPage() {
     const subject = encodeURIComponent(`Prayer Request from ${name}`)
     const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nPrayer Request:\n${request}`)
 
-    window.location.href = `mailto:${PRAYER_EMAIL}?subject=${subject}&body=${body}`
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`
     setSubmitted(true)
   }
 
@@ -776,22 +1047,24 @@ function PrayerPage() {
               <div className="card prayer-note-card" key={item}><p>{item}</p></div>
             ))}
           </div>
+
+          <Photo name="praying-together" className="prayer-photo" />
         </div>
 
         <ShellCard className="prayer-form-card">
           <h2>Prayer Request Form</h2>
           <p>
-            This opens an email to {PRAYER_EMAIL} with your request pre-filled. Prefer to
-            email us directly instead? <a href={`mailto:${PRAYER_EMAIL}`}>Click here</a>.
+            This opens an email to {CONTACT_EMAIL} with your request filled in. Prefer to
+            email us directly instead? <a href={`mailto:${CONTACT_EMAIL}`}>Click here</a>.
           </p>
           <form className="prayer-form" onSubmit={handleSubmit}>
             <div className="form-field">
               <label htmlFor="prayer-name">Your name</label>
-              <input id="prayer-name" name="name" type="text" required />
+              <input id="prayer-name" name="name" type="text" autoComplete="name" required />
             </div>
             <div className="form-field">
               <label htmlFor="prayer-email">Email address</label>
-              <input id="prayer-email" name="email" type="email" required />
+              <input id="prayer-email" name="email" type="email" autoComplete="email" required />
             </div>
             <div className="form-field">
               <label htmlFor="prayer-request">How can we pray for you?</label>
@@ -802,7 +1075,7 @@ function PrayerPage() {
             </button>
             {submitted && (
               <p className="events-helper-text" role="status">
-                Your email app should be opening now. If nothing happens, please email {PRAYER_EMAIL} directly.
+                Your email app should be opening now. If nothing happens, please email {CONTACT_EMAIL} directly.
               </p>
             )}
           </form>
@@ -812,16 +1085,30 @@ function PrayerPage() {
   )
 }
 
-function Footer() {
-  const location = useLocation()
-  const atHome = useMemo(() => location.pathname === '/', [location.pathname])
+function NotFoundPage() {
+  useDocumentHead({ title: 'Page Not Found' })
+  return (
+    <section className="section page-section">
+      <div className="container section-intro">
+        <div className="section-label">Page not found</div>
+        <h1>We couldn't find that page.</h1>
+        <p>It may have moved, but you are always welcome here.</p>
+        <div className="hero-actions">
+          <Link to="/" className="button button-primary">Go to the home page</Link>
+          <Link to="/visit" className="button button-secondary">Plan your visit</Link>
+        </div>
+      </div>
+    </section>
+  )
+}
 
+function Footer() {
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
         <div>
           <div className="footer-brand">
-            <img src={logoSrc} alt="His Place logo" className="footer-logo" />
+            <img src={logoSrc} alt="" className="footer-logo" width="36" height="36" loading="lazy" />
             <div>
               <div className="footer-title">His Place Community Church</div>
               <div className="footer-subtitle">A place to belong, believe, and grow.</div>
@@ -835,27 +1122,33 @@ function Footer() {
         <div>
           <div className="footer-heading">Explore</div>
           <div className="footer-links">
-            {navItems.map((item) => (
-              <NavLink key={item.to} to={item.to} className="footer-link">{item.label}</NavLink>
+            {footerItems.map((item) => (
+              <NavLink key={item.to} to={item.to} end={item.to === '/'} className="footer-link">{item.label}</NavLink>
             ))}
-            {!atHome && (
-              <a href={GIVING_URL} className="footer-link" target="_blank" rel="noreferrer">Give</a>
-            )}
+            <a href={GIVING_URL} className="footer-link" target="_blank" rel="noreferrer">Give</a>
           </div>
         </div>
         <div>
           <div className="footer-heading">Connect</div>
           <div className="footer-contact-list">
-            <div className="footer-contact-item"><MapPin size={15} /> {CHURCH_ADDRESS}</div>
-            <div className="footer-contact-item"><Clock size={15} /> Sundays at 11:00 AM</div>
-            <div className="footer-contact-item"><Mail size={15} /> <a href={`mailto:${PRAYER_EMAIL}`}>{PRAYER_EMAIL}</a></div>
             <div className="footer-contact-item">
-              <a href="https://www.facebook.com/profile.php?id=61583261639613" target="_blank" rel="noopener noreferrer">
-                Follow us on Facebook
-              </a>
+              <MapPin size={15} /> <a href={directionsUrl} target="_blank" rel="noreferrer">{CHURCH_ADDRESS}</a>
+            </div>
+            <div className="footer-contact-item"><Clock size={15} /> {SUNDAY_SERVICE_TIME}</div>
+            <div className="footer-contact-item"><Mail size={15} /> <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></div>
+            {CHURCH_PHONE && (
+              <div className="footer-contact-item">
+                <a href={`tel:${CHURCH_PHONE.replace(/[^\d+]/g, '')}`}>{CHURCH_PHONE}</a>
+              </div>
+            )}
+            <div className="footer-contact-item">
+              <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer">Follow us on Facebook</a>
             </div>
           </div>
         </div>
+      </div>
+      <div className="container footer-bottom">
+        © {new Date().getFullYear()} His Place Community Church
       </div>
     </footer>
   )
@@ -870,8 +1163,9 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <a href="#main" className="skip-link">Skip to content</a>
       <NavBar />
-      <main>
+      <main id="main">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/visit" element={<VisitPage />} />
@@ -880,7 +1174,9 @@ export default function App() {
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/sermons" element={<SermonsPage />} />
+          <Route path="/photos" element={<PhotosPage />} />
           <Route path="/prayer" element={<PrayerPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
       <Footer />
