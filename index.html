@@ -4,23 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>His Place Community Church</title>
-    <meta name="description" content="His Place Community Church is a Bible based, Jesus following church serving Amelia, Beechmont, Cherry Grove, Bethel, and the State Route 125 area." />
-    <meta name="theme-color" content="#0f172a" />
+    <title>His Place Community Church | Amelia, Beechmont & Cherry Grove, OH</title>
+    <meta name="description" content="His Place Community Church is a Bible based, Jesus following church serving Amelia, Beechmont, Cherry Grove, Bethel, and the State Route 125 area. Join us Sundays at 11:00 AM." />
+    <meta name="theme-color" content="#2B2420" />
 
-    <!-- Favicon. Place the referenced files in the /public folder — Vite serves
-         anything in /public from the site root, so /favicon.png maps to
-         public/favicon.png. -->
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <!-- Icons live in the /public folder and are served from the site root. -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- Canonical URL. Update the domain here if it ever changes. -->
     <link rel="canonical" href="https://www.hpcchurch.church/" />
 
-    <!-- Open Graph defaults (used when a page is shared on Facebook, iMessage,
-         Slack, etc.). App.jsx overrides og:title and og:description per page
-         at runtime; og:image and og:url stay the same across the site unless
-         you add per-page images later. -->
+    <!-- Link previews on Facebook, texts, etc. og-image.jpg is in /public. -->
     <meta property="og:site_name" content="His Place Community Church" />
     <meta property="og:title" content="His Place Community Church" />
     <meta property="og:description" content="A Bible based, Jesus following church serving Amelia, Beechmont, Cherry Grove, Bethel, and the State Route 125 area. Join us Sundays at 11:00 AM." />
@@ -29,15 +24,48 @@
     <meta property="og:image" content="https://www.hpcchurch.church/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The His Place Community Church family worshiping together on a Sunday morning" />
 
-    <!-- Twitter/X card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="His Place Community Church" />
     <meta name="twitter:description" content="A Bible based, Jesus following church serving Amelia, Beechmont, Cherry Grove, Bethel, and the State Route 125 area." />
     <meta name="twitter:image" content="https://www.hpcchurch.church/og-image.jpg" />
+
+    <!-- Helps Google show the church's address and service time in search. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Church",
+        "name": "His Place Community Church",
+        "url": "https://www.hpcchurch.church/",
+        "logo": "https://www.hpcchurch.church/favicon.png",
+        "image": "https://www.hpcchurch.church/og-image.jpg",
+        "email": "info@hpcchurch.church",
+        "description": "A Bible based, Jesus following church serving Amelia, Beechmont, Cherry Grove, Bethel, and the State Route 125 area.",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "523 Cincinnati-Batavia Pike",
+          "addressLocality": "Cincinnati",
+          "addressRegion": "OH",
+          "postalCode": "45244",
+          "addressCountry": "US"
+        },
+        "openingHoursSpecification": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "https://schema.org/Sunday",
+          "opens": "11:00",
+          "closes": "12:15"
+        },
+        "sameAs": ["https://www.facebook.com/profile.php?id=61583261639613"]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      His Place Community Church meets Sundays at 11:00 AM at 523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244.
+      Email info@hpcchurch.church. Please enable JavaScript to view the full site.
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
