@@ -25,6 +25,9 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-ro
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
 import { knowJesus } from './knowJesusContent'
+import mensLogoSrc from './assets/mens-ministry-logo.jpg'
+// Temporary women's logo. Replace this file with the real one when it's ready.
+import womensLogoSrc from './assets/womens-ministry-logo.svg'
 
 /* ------------------------------------------------------------------
    Site settings. Change these in one place and the whole site updates.
@@ -1287,7 +1290,8 @@ function GroupsPage() {
 
         <div className="ministry-grid">
           <ShellCard className="ministry-card">
-            <div className="section-label">Men's Ministry</div>
+            <img src={mensLogoSrc} alt="Iron and Light Men's Ministry logo" className="ministry-logo" loading="lazy" />
+            <div className="section-label">Iron &amp; Light Men's Ministry</div>
             <h2>Men's Breakfast and Bible Study</h2>
             <div className="ministry-when">
               <span><CalendarDays size={15} /> Last Saturday of every month</span>
@@ -1305,6 +1309,7 @@ function GroupsPage() {
           </ShellCard>
 
           <ShellCard className="ministry-card">
+            <img src={womensLogoSrc} alt="Women's Ministry logo" className="ministry-logo" loading="lazy" />
             <div className="section-label">Women's Ministry</div>
             <h2>Women's Book and Bible Study</h2>
             <div className="ministry-when">
