@@ -386,6 +386,17 @@ function nextMensBreakfast(from = new Date()) {
   return null
 }
 
+// Women's study: every other Wednesday at 6:30 PM. To fix the schedule,
+// change WOMENS_STUDY_ANCHOR to any Wednesday the women actually met.
+const WOMENS_STUDY_ANCHOR = new Date(2026, 10, 11, 18, 30) // Wednesday, November 11, 2026
+
+function nextWomensStudy(from = new Date()) {
+  const d = new Date(WOMENS_STUDY_ANCHOR)
+  // Step in two-week jumps by calendar date so daylight saving can't shift it.
+  while (d.getTime() + 2 * 3600e3 <= from.getTime()) d.setDate(d.getDate() + 14)
+  return d
+}
+
 function nextSunday() {
   const d = new Date()
   d.setDate(d.getDate() + ((7 - d.getDay()) % 7))
@@ -1219,6 +1230,15 @@ function GroupsPage() {
     location: CHURCH_ADDRESS,
     description: "Breakfast and Bible study for the men of His Place. Last Saturday of the month at 9:30 AM.",
   }
+  const womensNext = nextWomensStudy()
+  const womensNextLabel = womensNext.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const womensEvent = {
+    id: 'womens-study',
+    title: "Women's Book and Bible Study",
+    start: `${womensNext.getMonth() + 1}/${womensNext.getDate()}/${womensNext.getFullYear()} 6:30 PM`,
+    location: CHURCH_ADDRESS,
+    description: "Book and Bible study for the women of His Place. Every other Wednesday at 6:30 PM.",
+  }
 
   const groups = [
     { icon: Users, title: 'Life Groups', text: "Small groups where people can grow in faith, build friendships, and walk through life together around God's Word." },
@@ -1268,8 +1288,10 @@ function GroupsPage() {
               Women gathering to read, study the Bible, and encourage one another. Whether
               you've been coming for years or you're brand new, there's a seat for you.
             </p>
+            <p className="ministry-next">Next gathering: <strong>{womensNextLabel}</strong></p>
+            <AddToCalendar event={womensEvent} />
             <a className="group-link" href={mailto("I'm interested in the Women's Study")}>
-              Ask which Wednesday is next <ChevronRight size={14} />
+              Ask about the women's study <ChevronRight size={14} />
             </a>
           </ShellCard>
         </div>
