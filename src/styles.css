@@ -553,4 +553,5 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .know-cta h3 { font-size: clamp(1.2rem, 2.2vw, 1.5rem); }
 .know-hero::after { background: linear-gradient(90deg, rgba(43,36,32,0.88) 0%, rgba(43,36,32,0.7) 55%, rgba(43,36,32,0.45) 100%); }
 .know-hero .hero-sub { color: rgba(255,255,255,0.92); }
-.ministry-logo { width: 140px; height: 140px; border-radius: var(--radius-md); object-fit: cover; margin-bottom: 6px; }
+.ministry-logo { width: 180px; height: 180px; border-radius: var(--radius-md); object-fit: cover; margin-bottom: 6px; }
+.ministry-tagline { margin: 0; font-family: 'Fraunces', serif; font-style: italic; color: var(--oxblood); }

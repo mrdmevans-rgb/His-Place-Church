@@ -26,8 +26,7 @@ import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
 import { knowJesus } from './knowJesusContent'
 import mensLogoSrc from './assets/mens-ministry-logo.jpg'
-// Temporary women's logo. Replace this file with the real one when it's ready.
-import womensLogoSrc from './assets/womens-ministry-logo.svg'
+import womensLogoSrc from './assets/womens-ministry-logo.jpg'
 
 /* ------------------------------------------------------------------
    Site settings. Change these in one place and the whole site updates.
@@ -1309,9 +1308,10 @@ function GroupsPage() {
           </ShellCard>
 
           <ShellCard className="ministry-card">
-            <img src={womensLogoSrc} alt="Women's Ministry logo" className="ministry-logo" loading="lazy" />
+            <img src={womensLogoSrc} alt="His Place Community Church Women's Ministry logo" className="ministry-logo" loading="lazy" />
             <div className="section-label">Women's Ministry</div>
             <h2>Women's Book and Bible Study</h2>
+            <p className="ministry-tagline">Real women. Real faith. Together.</p>
             <div className="ministry-when">
               <span><CalendarDays size={15} /> Every other Wednesday</span>
               <span><Clock size={15} /> 6:30 PM</span>
