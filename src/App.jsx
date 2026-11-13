@@ -1289,8 +1289,8 @@ function GroupsPage() {
 
         <div className="ministry-grid">
           <ShellCard className="ministry-card">
-            <img src={mensLogoSrc} alt="Iron and Light Men's Ministry logo" className="ministry-logo" loading="lazy" />
-            <div className="section-label">Iron &amp; Light Men's Ministry</div>
+            <img src={mensLogoSrc} alt="His Place Community Church Men's Ministry logo" className="ministry-logo" loading="lazy" />
+            <div className="section-label">Men's Ministry</div>
             <h2>Men's Breakfast and Bible Study</h2>
             <div className="ministry-when">
               <span><CalendarDays size={15} /> Last Saturday of every month</span>
