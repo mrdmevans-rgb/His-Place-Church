@@ -64,7 +64,6 @@ const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${enco
    Optional: add a caption below using the file name (without .jpg).
 ------------------------------------------------------------------- */
 const photoCaptions = {
-  'church-family': 'Our church family',
   'sunday-full-room': 'A full room on a Sunday morning',
   'worship-hands-raised': 'Lifting our hands in worship',
   'worship-eyes-closed': 'Singing to Jesus with everything we have',
@@ -146,6 +145,7 @@ function Photo({ name, className, style }) {
 const navItems = [
   { to: '/', label: 'Home' },
   { to: '/visit', label: 'Plan Your Visit' },
+  { to: '/know-jesus', label: 'Know Jesus' },
   { to: '/about', label: 'About' },
   { to: '/sermons', label: 'Sermons' },
   { to: '/kids', label: 'His Kids' },
@@ -160,7 +160,6 @@ const footerItems = [
   ...navItems.slice(3),
   { to: '/announcements', label: 'Announcements' },
   { to: '/serve', label: 'Serve With Us' },
-  { to: '/know-jesus', label: 'Know Jesus' },
 ]
 
 const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
@@ -695,7 +694,7 @@ function WelcomeVideo() {
               allowFullScreen
             />
           ) : (
-            <video src={WELCOME_VIDEO} controls playsInline preload="metadata" poster={photo('church-family').src} />
+            <video src={WELCOME_VIDEO} controls playsInline preload="metadata" poster={photo('sunday-full-room').src} />
           )}
         </div>
       </div>
@@ -725,7 +724,7 @@ function HomePage() {
 
   return (
     <>
-      <section className="hero-photo hero-home" style={{ backgroundImage: `url(${photo('church-family').src})` }}>
+      <section className="hero-photo hero-home" style={{ backgroundImage: `url(${photo('sunday-full-room').src})` }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">A Bible based, Jesus following church</div>
           <h1>A place to belong, believe, and grow in Christ.</h1>
@@ -954,7 +953,7 @@ function VisitPage() {
 
   return (
     <>
-      <section className="hero-photo" style={{ backgroundImage: `url(${photo('sunday-full-room').src})`, minHeight: 360 }}>
+      <section className="hero-photo" style={{ backgroundImage: `url(${photo('porch-welcome').src})`, minHeight: 360 }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">Plan your visit</div>
           <h1>We would love to meet you this Sunday.</h1>
