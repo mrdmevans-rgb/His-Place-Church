@@ -19,6 +19,7 @@ import {
   CalendarPlus,
   Smile,
   Shield,
+  Star,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
@@ -39,6 +40,12 @@ import womensLogoSrc from './assets/womens-ministry-logo.jpg'
 const SITE_URL = 'https://www.hpcchurch.church'
 const GIVING_URL = 'https://his-place-community-church-533980.churchcenter.com/giving'
 const FACEBOOK_URL = 'https://www.facebook.com/profile.php?id=61583261639613'
+// The church's Google Business Profile.
+const GOOGLE_PROFILE_URL = 'https://www.google.com/search?kgmid=/g/11zcs2m5nk&q=His+Place+Community+Church'
+// Paste the review link from Google Business Profile (Get more reviews, then copy
+// the link, it looks like https://g.page/r/...). A "Leave us a review" button
+// then appears on Plan Your Visit and in the footer. Leave '' to hide it.
+const GOOGLE_REVIEW_URL = ''
 const CHURCH_ADDRESS = '523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244'
 const SUNDAY_SERVICE_TIME = 'Sundays at 11:00 AM'
 const CONTACT_EMAIL = 'info@hpcchurch.church'
@@ -1026,6 +1033,14 @@ function VisitPage() {
                 {CHURCH_PHONE && (
                   <a className="button button-secondary" href={telHref(CHURCH_PHONE)}>
                     Call {CHURCH_PHONE}
+                  </a>
+                )}
+                <a className="button button-secondary" href={GOOGLE_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+                  <Star size={15} /> See us on Google
+                </a>
+                {GOOGLE_REVIEW_URL && (
+                  <a className="button button-secondary" href={GOOGLE_REVIEW_URL} target="_blank" rel="noopener noreferrer">
+                    Leave us a review
                   </a>
                 )}
               </div>
@@ -2300,6 +2315,9 @@ function Footer() {
             )}
             <div className="footer-contact-item">
               <Radio size={15} /> <a href={LIVESTREAM_URL} target="_blank" rel="noopener noreferrer">Watch live Sundays on Facebook</a>
+            </div>
+            <div className="footer-contact-item">
+              <Star size={15} /> <a href={GOOGLE_REVIEW_URL || GOOGLE_PROFILE_URL} target="_blank" rel="noopener noreferrer">{GOOGLE_REVIEW_URL ? 'Leave us a Google review' : 'Find us on Google'}</a>
             </div>
           </div>
         </div>
