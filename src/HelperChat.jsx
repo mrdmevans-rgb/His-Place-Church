@@ -116,7 +116,7 @@ export function buildNodes({ phone, email, serviceTime, address }) {
     bible: {
       text: "The Bible can feel big at first, but you don't have to figure it out alone. A great place to start is the Gospel of John. Read one chapter a day and ask, what does this show me about Jesus? Before you read, ask God to help you understand. Then think about how it applies to your life.",
       extra: "Have questions as you read? We'd love to talk. Our groups also study the Bible together.",
-      links: [{ to: '/groups', label: 'See our groups and Bible studies' }],
+      links: [{ to: '/study', label: 'How to study the Bible' }, { to: '/groups', label: 'See our groups and Bible studies' }],
       choices: [['jesus', 'Who is Jesus?'], ['person', 'Talk to a real person'], ['start', 'Main menu']],
     },
     jesus: {
