@@ -14,6 +14,11 @@ import {
   Menu,
   X,
   PlayCircle,
+  Phone,
+  Radio,
+  CalendarPlus,
+  Smile,
+  Shield,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
@@ -29,9 +34,20 @@ const FACEBOOK_URL = 'https://www.facebook.com/profile.php?id=61583261639613'
 const CHURCH_ADDRESS = '523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244'
 const SUNDAY_SERVICE_TIME = 'Sundays at 11:00 AM'
 const CONTACT_EMAIL = 'info@hpcchurch.church'
-// Add the church phone number here (for example '(513) 555-1234') and it
-// will appear in the footer and on the Plan Your Visit page.
-const CHURCH_PHONE = ''
+// The church phone number. It appears in the footer, on Plan Your Visit,
+// His Kids, and Serve. Clear it ('') to hide it everywhere.
+const CHURCH_PHONE = '(513) 374-9799'
+
+// Where people watch the Sunday livestream. Right now that's the church
+// Facebook page. During Sunday service a "We're live" banner appears at the
+// top of every page linking here.
+const LIVESTREAM_URL = FACEBOOK_URL
+const LIVE_WINDOW = { day: 0, startMinutes: 10 * 60 + 45, endMinutes: 12 * 60 + 45 } // Sunday 10:45 AM to 12:45 PM Eastern
+
+// Pastor's welcome video for the home page. Paste a YouTube link
+// (an Unlisted upload works great) or put a small .mp4 in the public folder
+// and write its path here, like '/welcome.mp4'. Leave '' to hide the section.
+const WELCOME_VIDEO = ''
 
 const SHEET_BASE = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74'
 const EVENTS_SHEET_URL = `${SHEET_BASE}/Events`
@@ -47,6 +63,34 @@ const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${enco
    Optional: add a caption below using the file name (without .jpg).
 ------------------------------------------------------------------- */
 const photoCaptions = {
+  'church-family': 'Our church family',
+  'sunday-full-room': 'A full room on a Sunday morning',
+  'worship-hands-raised': 'Lifting our hands in worship',
+  'worship-eyes-closed': 'Singing to Jesus with everything we have',
+  'worship-with-the-band': 'Worship with the band',
+  'it-is-well': 'It is well with my soul',
+  'preaching-open-arms': 'Opening up the Word on a Sunday morning',
+  'preaching-with-passion': 'Preaching with passion',
+  'praying-over-one-another': 'Praying over one another',
+  'listening-together': 'Leaning in to the message',
+  'child-dedication-family': 'A child dedication Sunday',
+  'welcome-hug': 'Hugs are part of the welcome here',
+  'big-hugs': 'Big hugs from little ones',
+  'embrace-after-service': 'Holding on to one another',
+  'smiles-after-service': 'Smiles after service',
+  'you-belong-here-friends': 'You belong here',
+  'his-kids-you-belong-here': 'His Kids in their You Belong Here shirts',
+  'nursery-smiles': 'Happy little ones in the nursery',
+  'toddlers-dancing': 'Toddlers dancing in His Kids',
+  'nursery-play-time': 'Play time in the nursery',
+  'nursery-building-blocks': 'Building blocks and big imaginations',
+  'kids-fruit-of-the-spirit-craft': 'Learning the fruit of the Spirit',
+  'kids-table-grins': 'Grins around the His Kids table',
+  'back-to-school-prayer-circle': 'Praying together at the Back to School outreach',
+  'back-to-school-supplies': 'School supplies ready for families',
+  'back-to-school-notebooks': 'Stacks of notebooks for the new school year',
+  'back-to-school-haircuts': 'Fresh haircuts for back to school',
+  'fall-cookout': 'Sharing a meal together outside',
   'worship-together': 'Worshiping together on a Sunday morning',
   'worship-leader-singing': 'Leading the church in worship',
   'praying-together': 'Praying for one another',
@@ -103,8 +147,8 @@ const navItems = [
   { to: '/visit', label: 'Plan Your Visit' },
   { to: '/about', label: 'About' },
   { to: '/sermons', label: 'Sermons' },
+  { to: '/kids', label: 'His Kids' },
   { to: '/groups', label: 'Groups & Events' },
-  { to: '/announcements', label: 'Announcements' },
   { to: '/photos', label: 'Photos' },
   { to: '/prayer', label: 'Prayer' },
 ]
@@ -113,7 +157,11 @@ const footerItems = [
   ...navItems.slice(0, 3),
   { to: '/faith', label: 'Statement of Faith' },
   ...navItems.slice(3),
+  { to: '/announcements', label: 'Announcements' },
+  { to: '/serve', label: 'Serve With Us' },
 ]
+
+const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
 
 /* ------------------------------------------------------------------
    Fallback content (shown if the Google Sheet cannot be reached)
@@ -191,7 +239,8 @@ const faithItems = [
 const visitFaqs = [
   { title: 'How long is the service?', text: 'About 75 minutes, including worship, teaching, and prayer.' },
   { title: 'What should I wear?', text: 'Come as you are. You will see everything from jeans to Sunday best.' },
-  { title: 'What about my kids?', text: 'Children are always welcome in the main service, and our His Kids team would love to help you get settled.' },
+  { title: 'What about my kids?', text: 'Children are always welcome in the main service, and our His Kids team would love to help you get settled. See the His Kids page for more.' },
+  { title: 'Can I watch online first?', text: 'Absolutely. We stream every Sunday at 11:00 AM on our Facebook page, so you can get a feel for us before you come.' },
   { title: 'Where do I park?', text: `Parking is available on-site at ${CHURCH_ADDRESS}. Look for a greeter near the entrance.` },
   { title: 'Will I be singled out?', text: 'No. We are glad you came, and you are free to simply sit, listen, and take it all in.' },
 ]
@@ -259,6 +308,134 @@ function getYouTubeId(url) {
   return m ? m[1] : ''
 }
 
+/* ---------- Livestream ---------- */
+function easternNow() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23',
+  }).formatToParts(new Date())
+  const get = (t) => parts.find((p) => p.type === t)?.value
+  const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday'))
+  return { day, minutes: Number(get('hour')) * 60 + Number(get('minute')) }
+}
+
+function useIsLive() {
+  const check = () => {
+    const { day, minutes } = easternNow()
+    return day === LIVE_WINDOW.day && minutes >= LIVE_WINDOW.startMinutes && minutes < LIVE_WINDOW.endMinutes
+  }
+  const [live, setLive] = useState(check)
+  useEffect(() => {
+    const id = setInterval(() => setLive(check()), 60 * 1000)
+    return () => clearInterval(id)
+  }, [])
+  return live
+}
+
+function LiveBanner() {
+  const live = useIsLive()
+  if (!live || !LIVESTREAM_URL) return null
+  return (
+    <a className="live-banner" href={LIVESTREAM_URL} target="_blank" rel="noopener noreferrer">
+      <span className="live-dot" aria-hidden="true" /> We're live right now. Tap to worship with us on Facebook.
+    </a>
+  )
+}
+
+/* ---------- Calendar ---------- */
+const pad = (n) => String(n).padStart(2, '0')
+const icsStamp = (d) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`
+const utcStamp = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+const icsText = (s) => String(s || '').replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n')
+
+// Reads dates like "11/22/2026 6:00 PM", "11/22/26 6pm", or "11/22/2026".
+function parseEventStart(value) {
+  if (!value) return null
+  const m = String(value).match(/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})(?:[^\d]+(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?)?/i)
+  if (!m) return null
+  const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3])
+  let hour = m[4] ? Number(m[4]) % 12 : 0
+  if (m[6] && m[6].toLowerCase() === 'p') hour += 12
+  const d = new Date(year, Number(m[1]) - 1, Number(m[2]), hour, Number(m[5] || 0))
+  if (Number.isNaN(d.getTime())) return null
+  return { date: d, allDay: !m[4] }
+}
+
+function downloadIcs(filename, lines) {
+  const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//His Place Community Church//Website//EN', ...lines, 'END:VCALENDAR'].join('\r\n')
+  const url = URL.createObjectURL(new Blob([body], { type: 'text/calendar;charset=utf-8' }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+function nextSunday() {
+  const d = new Date()
+  d.setDate(d.getDate() + ((7 - d.getDay()) % 7))
+  d.setHours(11, 0, 0, 0)
+  return d
+}
+
+function addSundayToCalendar() {
+  const start = nextSunday()
+  downloadIcs('his-place-sunday-worship.ics', [
+    'BEGIN:VEVENT',
+    `UID:sunday-worship@hpcchurch.church`,
+    `DTSTAMP:${utcStamp(new Date())}`,
+    `DTSTART;TZID=America/New_York:${icsStamp(start)}`,
+    'DURATION:PT1H15M',
+    'RRULE:FREQ=WEEKLY;BYDAY=SU',
+    'SUMMARY:Sunday Worship at His Place',
+    `LOCATION:${icsText(CHURCH_ADDRESS)}`,
+    `DESCRIPTION:${icsText(`Come as you are. ${SITE_URL}/visit`)}`,
+    'END:VEVENT',
+  ])
+}
+
+function AddToCalendar({ event }) {
+  const parsed = parseEventStart(event.start || event.time)
+  if (!parsed) return null
+  const { date, allDay } = parsed
+  const end = allDay ? new Date(date.getTime() + 24 * 3600e3) : new Date(date.getTime() + 90 * 60e3)
+  const dayStamp = (d) => icsStamp(d).slice(0, 8)
+  const location = event.location || CHURCH_ADDRESS
+  const google = new URL('https://calendar.google.com/calendar/render')
+  google.searchParams.set('action', 'TEMPLATE')
+  google.searchParams.set('text', event.title)
+  google.searchParams.set('dates', allDay ? `${dayStamp(date)}/${dayStamp(end)}` : `${utcStamp(date)}/${utcStamp(end)}`)
+  google.searchParams.set('details', event.description || '')
+  google.searchParams.set('location', location)
+
+  const ics = () =>
+    downloadIcs(`${event.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.ics`, [
+      'BEGIN:VEVENT',
+      `UID:${event.id || event.title}-${dayStamp(date)}@hpcchurch.church`,
+      `DTSTAMP:${utcStamp(new Date())}`,
+      allDay ? `DTSTART;VALUE=DATE:${dayStamp(date)}` : `DTSTART:${utcStamp(date)}`,
+      allDay ? `DTEND;VALUE=DATE:${dayStamp(end)}` : `DTEND:${utcStamp(end)}`,
+      `SUMMARY:${icsText(event.title)}`,
+      `LOCATION:${icsText(location)}`,
+      `DESCRIPTION:${icsText(event.description)}`,
+      'END:VEVENT',
+    ])
+
+  return (
+    <div className="calendar-links">
+      <CalendarPlus size={14} aria-hidden="true" />
+      <a href={google.toString()} target="_blank" rel="noopener noreferrer">Google Calendar</a>
+      <button type="button" className="link-button" onClick={ics}>Apple or Outlook</button>
+    </div>
+  )
+}
+
+/* ---------- Simple email forms ---------- */
+function openEmail(subject, lines) {
+  window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`
+}
+
 function ShellCard({ children, className = '' }) {
   return <div className={`card ${className}`.trim()}>{children}</div>
 }
@@ -317,6 +494,9 @@ const mapEventRow = (row, index) => ({
   time: row.Time || row.time || '',
   location: row.Location || row.location || '',
   description: row.Description || row.description || '',
+  // Optional sheet column. Put a date like 11/22/2026 6:00 PM here (or in the
+  // Time column) and the event gets "add to calendar" buttons.
+  start: row.Start || row.start || row.Date || row.date || '',
 })
 
 function SheetStatusNote({ status, emptyLabel }) {
@@ -454,6 +634,38 @@ function FeaturedSermon({ sermon }) {
   )
 }
 
+function WelcomeVideo() {
+  if (!WELCOME_VIDEO) return null
+  const id = getYouTubeId(WELCOME_VIDEO)
+  return (
+    <section className="section-tight">
+      <div className="container welcome-video-row">
+        <div>
+          <div className="section-label">A welcome from Pastor Dave</div>
+          <h2>We'd love to meet you.</h2>
+          <p>Take a minute to hear from our pastor before your first Sunday. We're saving you a seat.</p>
+          <Link to="/visit" className="button button-secondary">
+            Plan your visit <ChevronRight size={16} />
+          </Link>
+        </div>
+        <div className="video-frame">
+          {id ? (
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${id}`}
+              title="A welcome from Pastor Dave"
+              loading="lazy"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          ) : (
+            <video src={WELCOME_VIDEO} controls playsInline preload="metadata" poster={photo('church-family').src} />
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 /* ------------------------------------------------------------------
    Pages
 ------------------------------------------------------------------- */
@@ -476,7 +688,7 @@ function HomePage() {
 
   return (
     <>
-      <section className="hero-photo" style={{ backgroundImage: `url(${photo('porch-welcome').src})` }}>
+      <section className="hero-photo hero-home" style={{ backgroundImage: `url(${photo('church-family').src})` }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">A Bible based, Jesus following church</div>
           <h1>A place to belong, believe, and grow in Christ.</h1>
@@ -492,9 +704,9 @@ function HomePage() {
             <button className="button button-light" onClick={() => navigate('/sermons')}>
               Watch the Latest Sermon
             </button>
-            <button className="button button-light" onClick={() => navigate('/prayer')}>
-              Submit a Prayer Request
-            </button>
+            <a className="button button-light" href={LIVESTREAM_URL} target="_blank" rel="noopener noreferrer">
+              <Radio size={16} /> Watch Live Sundays
+            </a>
           </div>
         </div>
       </section>
@@ -529,24 +741,26 @@ function HomePage() {
           </div>
           <div className="essay-grid">
             <div className="essay-item wide">
-              <Photo name="worship-together" />
+              <Photo name="sunday-full-room" />
               <div className="essay-caption">Sunday worship</div>
             </div>
             <div className="essay-item">
-              <Photo name="worship-leader-singing" />
+              <Photo name="worship-hands-raised" />
               <div className="essay-caption">Worship & music</div>
             </div>
             <div className="essay-item">
-              <Photo name="praying-together" />
+              <Photo name="praying-over-one-another" />
               <div className="essay-caption">Praying for one another</div>
             </div>
           </div>
         </div>
       </section>
 
+      <WelcomeVideo />
+
       <section className="section-tight">
         <div className="container two-col">
-          <Photo name="newborn-blessing" className="two-col-photo" />
+          <Photo name="big-hugs" className="two-col-photo" />
           <div>
             <div className="section-label">What to expect</div>
             <h2>You do not have to have it all together to come to His Place.</h2>
@@ -561,6 +775,47 @@ function HomePage() {
         </div>
       </section>
 
+      <section className="section-tight">
+        <div className="container two-col reverse-on-mobile">
+          <div>
+            <img src={hisKidsLogoSrc} alt="His Kids" className="kids-logo-small" loading="lazy" />
+            <div className="section-label">His Kids</div>
+            <h2>A safe, happy place for your kids to meet Jesus.</h2>
+            <p>
+              From the nursery play mat to the craft table, our kids learn Bible stories, sing,
+              play, and find out just how much God loves them.
+            </p>
+            <Link to="/kids" className="button button-secondary">
+              Meet His Kids <ChevronRight size={16} />
+            </Link>
+          </div>
+          <Photo name="his-kids-you-belong-here" className="two-col-photo" />
+        </div>
+      </section>
+
+      <section className="section-tight">
+        <div className="container stack-lg">
+          <div>
+            <div className="section-label">Loving our neighbors</div>
+            <h2 style={{ margin: 0 }}>Church doesn't stop at the door.</h2>
+            <p className="section-sub">
+              Like this summer's Back to School outreach, where we prayed with families and
+              helped send kids back with notebooks, supplies, and fresh haircuts.
+            </p>
+          </div>
+          <div className="photo-strip">
+            <Photo name="back-to-school-prayer-circle" />
+            <Photo name="back-to-school-notebooks" />
+            <Photo name="back-to-school-haircuts" />
+          </div>
+          <div className="hero-actions" style={{ marginTop: 0 }}>
+            <Link to="/serve" className="button button-primary">
+              Serve with us <ChevronRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <hr className="divider" />
 
       <section className="section">
@@ -570,7 +825,12 @@ function HomePage() {
               <div className="section-label">Sermons</div>
               <h2 style={{ margin: 0 }}>Watch this week's message</h2>
             </div>
-            <Link to="/sermons" className="button button-secondary">All sermons</Link>
+            <div className="hero-actions" style={{ marginTop: 0 }}>
+              <a className="button button-secondary" href={LIVESTREAM_URL} target="_blank" rel="noopener noreferrer">
+                <Radio size={15} /> Watch live
+              </a>
+              <Link to="/sermons" className="button button-secondary">All sermons</Link>
+            </div>
           </div>
           {latest && <FeaturedSermon sermon={latest} />}
           {recent.length > 0 && (
@@ -642,10 +902,18 @@ function VisitPage() {
 
   return (
     <>
-      <section className="hero-photo" style={{ backgroundImage: `url(${photo('worship-together').src})`, minHeight: 360 }}>
+      <section className="hero-photo" style={{ backgroundImage: `url(${photo('sunday-full-room').src})`, minHeight: 360 }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">Plan your visit</div>
           <h1>We would love to meet you this Sunday.</h1>
+          <div className="hero-actions">
+            <a className="button button-primary" href="#coming">
+              Let us know you're coming <ChevronRight size={16} />
+            </a>
+            <button type="button" className="button button-light" onClick={addSundayToCalendar}>
+              <CalendarPlus size={16} /> Add Sundays to my calendar
+            </button>
+          </div>
         </div>
       </section>
 
@@ -696,7 +964,7 @@ function VisitPage() {
                   Have a question? Email us
                 </a>
                 {CHURCH_PHONE && (
-                  <a className="button button-secondary" href={`tel:${CHURCH_PHONE.replace(/[^\d+]/g, '')}`}>
+                  <a className="button button-secondary" href={telHref(CHURCH_PHONE)}>
                     Call {CHURCH_PHONE}
                   </a>
                 )}
@@ -705,7 +973,108 @@ function VisitPage() {
           </div>
         </div>
       </section>
+
+      <section id="coming" className="section section-alt">
+        <div className="container prayer-grid">
+          <div className="stack-lg">
+            <div className="section-intro" style={{ marginBottom: 0 }}>
+              <div className="section-label">Let us know you're coming</div>
+              <h2>We'll be watching for you.</h2>
+              <p>
+                Walking into a new church can feel like a lot. Tell us when you're planning to
+                come and we'll have someone ready to say hello, save you a seat, and help your
+                kids get settled.
+              </p>
+            </div>
+            <Photo name="welcome-hug" className="prayer-photo" />
+          </div>
+          <PlanVisitForm />
+        </div>
+      </section>
     </>
+  )
+}
+
+function PlanVisitForm() {
+  const [submitted, setSubmitted] = useState(false)
+  const sunday = nextSunday()
+  const sundays = [0, 1, 2, 3].map((w) => {
+    const d = new Date(sunday)
+    d.setDate(d.getDate() + w * 7)
+    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  })
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    const f = new FormData(event.currentTarget)
+    const v = (k) => (f.get(k) || '').toString().trim()
+    openEmail(`Planning a visit: ${v('name')}`, [
+      `Name: ${v('name')}`,
+      `Email: ${v('email')}`,
+      `Phone: ${v('phone') || 'Not given'}`,
+      `Planning to come: ${v('when')}`,
+      `Adults: ${v('adults') || '1'}`,
+      `Kids and ages: ${v('kids') || 'None'}`,
+      '',
+      'Anything we should know:',
+      v('notes') || 'Nothing else',
+    ])
+    setSubmitted(true)
+  }
+
+  return (
+    <ShellCard className="prayer-form-card">
+      <h2>Plan your visit</h2>
+      <p>This opens an email to us with your answers filled in. Just hit send.</p>
+      <form className="prayer-form" onSubmit={handleSubmit}>
+        <div className="form-row">
+          <div className="form-field">
+            <label htmlFor="visit-name">Your name</label>
+            <input id="visit-name" name="name" type="text" autoComplete="name" required />
+          </div>
+          <div className="form-field">
+            <label htmlFor="visit-email">Email</label>
+            <input id="visit-email" name="email" type="email" autoComplete="email" required />
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-field">
+            <label htmlFor="visit-phone">Phone (optional)</label>
+            <input id="visit-phone" name="phone" type="tel" autoComplete="tel" />
+          </div>
+          <div className="form-field">
+            <label htmlFor="visit-when">Which Sunday?</label>
+            <select id="visit-when" name="when" defaultValue={sundays[0]}>
+              {sundays.map((s) => <option key={s}>{s}</option>)}
+              <option>Not sure yet</option>
+            </select>
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-field">
+            <label htmlFor="visit-adults">How many adults?</label>
+            <input id="visit-adults" name="adults" type="number" min="1" max="20" defaultValue="1" />
+          </div>
+          <div className="form-field">
+            <label htmlFor="visit-kids">Kids and their ages</label>
+            <input id="visit-kids" name="kids" type="text" placeholder="For example: 2, ages 4 and 7" />
+          </div>
+        </div>
+        <div className="form-field">
+          <label htmlFor="visit-notes">Anything we should know? (optional)</label>
+          <textarea id="visit-notes" name="notes" rows="3" placeholder="Accessibility needs, questions, anything at all" />
+        </div>
+        <button type="submit" className="button button-primary full-width">
+          <Send size={15} /> Let us know you're coming
+        </button>
+        {submitted && (
+          <p className="events-helper-text" role="status">
+            Your email app should be opening now. If nothing happens, email {CONTACT_EMAIL}
+            {CHURCH_PHONE ? ` or call ${CHURCH_PHONE}` : ''}.
+          </p>
+        )}
+      </form>
+    </ShellCard>
   )
 }
 
@@ -843,16 +1212,16 @@ function GroupsPage() {
             <div className="section-label">His Kids</div>
             <h2>Loved. Known. Made for more.</h2>
             <p>Our kids ministry gives children a safe, fun place to learn about Jesus during the Sunday gathering, with games, crafts, and Bible stories geared for their age.</p>
-            <a className="button button-secondary" href={mailto('His Kids question')}>
-              Ask about His Kids <ChevronRight size={16} />
-            </a>
+            <Link to="/kids" className="button button-secondary">
+              Visit the His Kids page <ChevronRight size={16} />
+            </Link>
           </div>
         </div>
 
         <div className="photo-strip">
-          <Photo name="kids-snuggle" />
-          <Photo name="little-one-smiling" />
-          <Photo name="kids-ministry" />
+          <Photo name="toddlers-dancing" />
+          <Photo name="kids-table-grins" />
+          <Photo name="nursery-smiles" />
         </div>
 
         <div className="three-up-grid">
@@ -877,11 +1246,209 @@ function GroupsPage() {
                 <div className="event-location">{event.location || CHURCH_ADDRESS}</div>
                 <h3>{event.title}</h3>
                 <p>{event.description || 'More details coming soon.'}</p>
+                <AddToCalendar event={event} />
               </ShellCard>
             ))}
           </div>
           <SheetStatusNote status={status} emptyLabel="Check back soon for upcoming events." />
         </div>
+
+        <ShellCard className="cta-card">
+          <div>
+            <h3>Want to serve?</h3>
+            <p>Greeting, His Kids, worship, tech, hospitality, outreach. There's a place for you on the team.</p>
+          </div>
+          <Link to="/serve" className="button button-primary">
+            Serve with us <ChevronRight size={16} />
+          </Link>
+        </ShellCard>
+      </div>
+    </section>
+  )
+}
+
+function KidsPage() {
+  useDocumentHead({
+    title: 'His Kids',
+    description:
+      'His Kids is the children\'s ministry of His Place Community Church. A safe, fun place for kids to learn about Jesus every Sunday at 11:00 AM.',
+  })
+
+  const kidsFaqs = [
+    { title: 'Can my kids stay with me in the service?', text: 'Of course. Kids are always welcome in the main service. Whatever helps your family feel at home is what we want.' },
+    { title: 'What will my kids do in His Kids?', text: 'Bible stories, worship, crafts, and plenty of play, all geared for their age. The little ones have a nursery space with toys and play mats.' },
+    { title: 'What should I do on our first Sunday?', text: 'Let us know you\'re coming and we\'ll have someone ready to meet you, show you the kids area, and answer your questions.' },
+    { title: 'Who do I talk to with questions?', text: `Email us at ${CONTACT_EMAIL}${CHURCH_PHONE ? ` or call ${CHURCH_PHONE}` : ''}. No question is too small when it comes to your kids.` },
+  ]
+
+  return (
+    <>
+      <section className="section page-section">
+        <div className="container stack-lg">
+          <div className="two-col">
+            <div>
+              <img src={hisKidsLogoSrc} alt="His Kids ministry logo" className="kids-logo" />
+              <div className="section-label">His Kids</div>
+              <h1>Loved. Known. Made for more.</h1>
+              <p>
+                His Kids is where the youngest members of our church family learn who Jesus is
+                and how much He loves them. Every Sunday at 11:00 AM, kids get a safe, joyful place
+                to hear Bible stories, sing, create, and make friends.
+              </p>
+              <div className="hero-actions">
+                <Link to="/visit#coming" className="button button-primary">
+                  Let us know you're coming <ChevronRight size={16} />
+                </Link>
+                <a className="button button-secondary" href={mailto('His Kids question')}>
+                  <Mail size={15} /> Ask a question
+                </a>
+              </div>
+            </div>
+            <Photo name="his-kids-you-belong-here" className="two-col-photo" />
+          </div>
+
+          <div className="three-up-grid">
+            <ShellCard className="group-card">
+              <Smile size={22} className="icon-red" />
+              <h3>Little ones</h3>
+              <p>Babies and toddlers get a cozy nursery space with toys, blocks, and play mats, cared for by people who love them.</p>
+            </ShellCard>
+            <ShellCard className="group-card">
+              <BookOpen size={22} className="icon-red" />
+              <h3>Bigger kids</h3>
+              <p>Bible stories, crafts, and activities that bring God's Word to life, like learning the fruit of the Spirit from Galatians 5.</p>
+            </ShellCard>
+            <ShellCard className="group-card">
+              <Shield size={22} className="icon-red" />
+              <h3>Safe and cared for</h3>
+              <p>Your kids matter to us. If you ever have a question about how we care for them, just ask. We're happy to walk you through it.</p>
+            </ShellCard>
+          </div>
+
+          <div className="kids-gallery">
+            <Photo name="toddlers-dancing" />
+            <Photo name="kids-fruit-of-the-spirit-craft" />
+            <Photo name="nursery-smiles" />
+            <Photo name="kids-table-grins" />
+            <Photo name="nursery-building-blocks" />
+            <Photo name="nursery-play-time" />
+          </div>
+
+          <div className="stack-md">
+            <div>
+              <div className="section-label">For parents</div>
+              <h2>Questions parents ask</h2>
+            </div>
+            <div className="faq-list">
+              {kidsFaqs.map((item) => (
+                <div className="faq-row" key={item.title}>
+                  <h3>{item.title}</h3>
+                  <p>{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
+
+const serveAreas = [
+  { key: 'Greeting and welcome', text: 'Be the first smile people see on Sunday morning.' },
+  { key: 'His Kids', text: 'Help kids and little ones learn about Jesus.' },
+  { key: 'Worship and music', text: 'Sing or play as part of the worship team.' },
+  { key: 'Tech and livestream', text: 'Run slides, sound, or the Sunday Facebook stream.' },
+  { key: 'Hospitality and setup', text: 'Coffee, snacks, chairs, and getting the room ready.' },
+  { key: 'Prayer team', text: 'Pray with people and for the needs shared with us.' },
+  { key: 'Outreach events', text: 'Help with community events like Back to School.' },
+]
+
+function ServePage() {
+  useDocumentHead({
+    title: 'Serve With Us',
+    description: 'Find your place on the team at His Place Community Church. Greeting, His Kids, worship, tech, hospitality, prayer, and outreach.',
+  })
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    const f = new FormData(event.currentTarget)
+    const v = (k) => (f.get(k) || '').toString().trim()
+    const picked = f.getAll('areas').map(String)
+    openEmail(`I'd like to serve: ${v('name')}`, [
+      `Name: ${v('name')}`,
+      `Email: ${v('email')}`,
+      `Phone: ${v('phone') || 'Not given'}`,
+      '',
+      `Interested in: ${picked.length ? picked.join(', ') : 'Not sure yet, show me where I fit'}`,
+      '',
+      'A little about me:',
+      v('notes') || 'Nothing else',
+    ])
+    setSubmitted(true)
+  }
+
+  return (
+    <section className="section page-section">
+      <div className="container prayer-grid">
+        <div className="stack-lg">
+          <div className="section-intro" style={{ marginBottom: 0 }}>
+            <div className="section-label">Serve with us</div>
+            <h1>There's a place for you on the team.</h1>
+            <p>
+              Church is a family, and families pitch in. You don't need experience, just a
+              willing heart. Pick anything that sounds like you and we'll reach out to help
+              you get started.
+            </p>
+          </div>
+          <div className="photo-strip two">
+            <Photo name="back-to-school-supplies" />
+            <Photo name="worship-with-the-band" />
+          </div>
+        </div>
+
+        <ShellCard className="prayer-form-card">
+          <h2>I'd like to serve</h2>
+          <p>This opens an email to us with your answers filled in. Just hit send.</p>
+          <form className="prayer-form" onSubmit={handleSubmit}>
+            <fieldset className="serve-options">
+              <legend>Where would you like to help?</legend>
+              {serveAreas.map((a) => (
+                <label key={a.key} className="serve-option">
+                  <input type="checkbox" name="areas" value={a.key} />
+                  <span><strong>{a.key}</strong><small>{a.text}</small></span>
+                </label>
+              ))}
+            </fieldset>
+            <div className="form-row">
+              <div className="form-field">
+                <label htmlFor="serve-name">Your name</label>
+                <input id="serve-name" name="name" type="text" autoComplete="name" required />
+              </div>
+              <div className="form-field">
+                <label htmlFor="serve-email">Email</label>
+                <input id="serve-email" name="email" type="email" autoComplete="email" required />
+              </div>
+            </div>
+            <div className="form-field">
+              <label htmlFor="serve-phone">Phone (optional)</label>
+              <input id="serve-phone" name="phone" type="tel" autoComplete="tel" />
+            </div>
+            <div className="form-field">
+              <label htmlFor="serve-notes">Tell us a little about yourself (optional)</label>
+              <textarea id="serve-notes" name="notes" rows="3" />
+            </div>
+            <button type="submit" className="button button-primary full-width">
+              <Send size={15} /> Send
+            </button>
+            {submitted && (
+              <p className="events-helper-text" role="status">
+                Your email app should be opening now. If nothing happens, email {CONTACT_EMAIL} directly.
+              </p>
+            )}
+          </form>
+        </ShellCard>
       </div>
     </section>
   )
@@ -926,6 +1493,15 @@ function SermonsPage() {
           <h1>Messages from His Place</h1>
           <p>Missed a Sunday or want to hear it again? Watch the latest message below.</p>
         </div>
+        <ShellCard className="cta-card live-card">
+          <div>
+            <h3><Radio size={18} className="icon-red" style={{ verticalAlign: '-3px', marginRight: 6 }} />Worship with us live</h3>
+            <p>We stream every Sunday at 11:00 AM on our Facebook page. Join us from wherever you are.</p>
+          </div>
+          <a className="button button-primary" href={LIVESTREAM_URL} target="_blank" rel="noopener noreferrer">
+            Watch live on Facebook
+          </a>
+        </ShellCard>
         {latest && <FeaturedSermon sermon={latest} />}
         {rest.length > 0 && (
           <>
@@ -1138,11 +1714,11 @@ function Footer() {
             <div className="footer-contact-item"><Mail size={15} /> <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></div>
             {CHURCH_PHONE && (
               <div className="footer-contact-item">
-                <a href={`tel:${CHURCH_PHONE.replace(/[^\d+]/g, '')}`}>{CHURCH_PHONE}</a>
+                <Phone size={15} /> <a href={telHref(CHURCH_PHONE)}>{CHURCH_PHONE}</a>
               </div>
             )}
             <div className="footer-contact-item">
-              <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer">Follow us on Facebook</a>
+              <Radio size={15} /> <a href={LIVESTREAM_URL} target="_blank" rel="noopener noreferrer">Watch live Sundays on Facebook</a>
             </div>
           </div>
         </div>
@@ -1158,12 +1734,20 @@ export default function App() {
   const location = useLocation()
 
   useEffect(() => {
+    if (location.hash) {
+      const el = document.getElementById(location.hash.slice(1))
+      if (el) {
+        el.scrollIntoView()
+        return
+      }
+    }
     window.scrollTo(0, 0)
-  }, [location.pathname])
+  }, [location.pathname, location.hash])
 
   return (
     <div className="app-shell">
       <a href="#main" className="skip-link">Skip to content</a>
+      <LiveBanner />
       <NavBar />
       <main id="main">
         <Routes>
@@ -1171,6 +1755,8 @@ export default function App() {
           <Route path="/visit" element={<VisitPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/faith" element={<FaithPage />} />
+          <Route path="/kids" element={<KidsPage />} />
+          <Route path="/serve" element={<ServePage />} />
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/sermons" element={<SermonsPage />} />
