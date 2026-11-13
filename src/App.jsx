@@ -372,6 +372,31 @@ function downloadIcs(filename, lines) {
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
+// Men's breakfast: last Saturday of each month, 9:30 AM, skipping December.
+function nextMensBreakfast(from = new Date()) {
+  for (let i = 0; i < 14; i++) {
+    const y = from.getFullYear()
+    const m = from.getMonth() + i
+    const last = new Date(y, m + 1, 0)
+    last.setDate(last.getDate() - ((last.getDay() + 1) % 7))
+    last.setHours(9, 30, 0, 0)
+    if (last.getMonth() === 11) continue
+    if (last.getTime() + 2 * 3600e3 > from.getTime()) return last
+  }
+  return null
+}
+
+// Women's study: every other Wednesday at 6:30 PM. To fix the schedule,
+// change WOMENS_STUDY_ANCHOR to any Wednesday the women actually met.
+const WOMENS_STUDY_ANCHOR = new Date(2026, 10, 11, 18, 30) // Wednesday, November 11, 2026
+
+function nextWomensStudy(from = new Date()) {
+  const d = new Date(WOMENS_STUDY_ANCHOR)
+  // Step in two-week jumps by calendar date so daylight saving can't shift it.
+  while (d.getTime() + 2 * 3600e3 <= from.getTime()) d.setDate(d.getDate() + 14)
+  return d
+}
+
 function nextSunday() {
   const d = new Date()
   d.setDate(d.getDate() + ((7 - d.getDay()) % 7))
@@ -1192,10 +1217,28 @@ function FaithPage() {
 function GroupsPage() {
   useDocumentHead({
     title: 'Groups & Events',
-    description: 'Find Life Groups, Bible Study, His Kids, the Prayer Team, and upcoming events at His Place Community Church.',
+    description: "Men's breakfast and Bible study, women's book and Bible study, Life Groups, the Prayer Team, and upcoming events at His Place Community Church.",
   })
 
   const { data: events, status } = useSheetData(EVENTS_SHEET_URL, fallbackEvents, mapEventRow)
+  const mensNext = nextMensBreakfast()
+  const mensNextLabel = mensNext.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const mensEvent = {
+    id: 'mens-breakfast',
+    title: "Men's Breakfast and Bible Study",
+    start: `${mensNext.getMonth() + 1}/${mensNext.getDate()}/${mensNext.getFullYear()} 9:30 AM`,
+    location: CHURCH_ADDRESS,
+    description: "Breakfast and Bible study for the men of His Place. Last Saturday of the month at 9:30 AM.",
+  }
+  const womensNext = nextWomensStudy()
+  const womensNextLabel = womensNext.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const womensEvent = {
+    id: 'womens-study',
+    title: "Women's Book and Bible Study",
+    start: `${womensNext.getMonth() + 1}/${womensNext.getDate()}/${womensNext.getFullYear()} 6:30 PM`,
+    location: CHURCH_ADDRESS,
+    description: "Book and Bible study for the women of His Place. Every other Wednesday at 6:30 PM.",
+  }
 
   const groups = [
     { icon: Users, title: 'Life Groups', text: "Small groups where people can grow in faith, build friendships, and walk through life together around God's Word." },
@@ -1215,23 +1258,56 @@ function GroupsPage() {
           </p>
         </div>
 
-        <div className="two-col">
-          <img src={hisKidsLogoSrc} alt="His Kids ministry logo" style={{ borderRadius: '14px' }} loading="lazy" />
-          <div>
-            <div className="section-label">His Kids</div>
-            <h2>Loved. Known. Made for more.</h2>
-            <p>Our kids ministry gives children a safe, fun place to learn about Jesus during the Sunday gathering, with games, crafts, and Bible stories geared for their age.</p>
-            <Link to="/kids" className="button button-secondary">
-              Visit the His Kids page <ChevronRight size={16} />
-            </Link>
-          </div>
+        <div className="ministry-grid">
+          <ShellCard className="ministry-card">
+            <div className="section-label">Men's Ministry</div>
+            <h2>Men's Breakfast and Bible Study</h2>
+            <div className="ministry-when">
+              <span><CalendarDays size={15} /> Last Saturday of every month</span>
+              <span><Clock size={15} /> 9:30 AM</span>
+            </div>
+            <p>
+              Good food, honest conversation, and time in God's Word with other men who want
+              to grow in their faith. We meet every month except December, when we take a break for Christmas.
+            </p>
+            <p className="ministry-next">Next gathering: <strong>{mensNextLabel}</strong></p>
+            <AddToCalendar event={mensEvent} />
+            <a className="group-link" href={mailto("I'm interested in Men's Breakfast")}>
+              Ask about men's breakfast <ChevronRight size={14} />
+            </a>
+          </ShellCard>
+
+          <ShellCard className="ministry-card">
+            <div className="section-label">Women's Ministry</div>
+            <h2>Women's Book and Bible Study</h2>
+            <div className="ministry-when">
+              <span><CalendarDays size={15} /> Every other Wednesday</span>
+              <span><Clock size={15} /> 6:30 PM</span>
+            </div>
+            <p>
+              Women gathering to read, study the Bible, and encourage one another. Whether
+              you've been coming for years or you're brand new, there's a seat for you.
+            </p>
+            <p className="ministry-next">Next gathering: <strong>{womensNextLabel}</strong></p>
+            <AddToCalendar event={womensEvent} />
+            <a className="group-link" href={mailto("I'm interested in the Women's Study")}>
+              Ask about the women's study <ChevronRight size={14} />
+            </a>
+          </ShellCard>
         </div>
 
-        <div className="photo-strip">
-          <Photo name="toddlers-dancing" />
-          <Photo name="kids-table-grins" />
-          <Photo name="nursery-smiles" />
-        </div>
+        <ShellCard className="cta-card kids-link-card">
+          <div className="kids-link-inner">
+            <img src={hisKidsLogoSrc} alt="" className="kids-link-logo" loading="lazy" />
+            <div>
+              <h3>Looking for kids ministry?</h3>
+              <p>His Kids has its own page now, with everything parents want to know.</p>
+            </div>
+          </div>
+          <Link to="/kids" className="button button-secondary">
+            Visit His Kids <ChevronRight size={16} />
+          </Link>
+        </ShellCard>
 
         <div className="three-up-grid">
           {groups.map(({ icon: Icon, title, text }) => (

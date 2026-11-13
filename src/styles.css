@@ -502,3 +502,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .calendar-links { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 12px; font-size: 13px; color: var(--ink-faint); }
 .link-button { background: none; border: 0; padding: 0; font: inherit; color: var(--oxblood); cursor: pointer; }
 .link-button:hover { text-decoration: underline; }
+
+/* ---------- Added: men's and women's ministries ---------- */
+.ministry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 800px) { .ministry-grid { grid-template-columns: 1fr; } }
+.ministry-card { display: flex; flex-direction: column; gap: 10px; padding: 28px; }
+.ministry-card h2 { font-size: clamp(1.3rem, 2.4vw, 1.6rem); margin: 0; }
+.ministry-card .section-label { margin-bottom: 0; }
+.ministry-card p { font-size: 15px; }
+.ministry-when { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; font-weight: 500; color: var(--ink); }
+.ministry-when span { display: inline-flex; align-items: center; gap: 6px; }
+.ministry-when svg { color: var(--oxblood); }
+.ministry-next { color: var(--ink); }
+.ministry-card .calendar-links { margin-top: 0; }
+.kids-link-inner { display: flex; align-items: center; gap: 16px; }
+.kids-link-logo { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; }
