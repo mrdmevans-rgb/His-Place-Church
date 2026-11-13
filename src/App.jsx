@@ -25,6 +25,7 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-ro
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
 import { knowJesus } from './knowJesusContent'
+import { study } from './studyContent'
 import { BIBLE_LABEL, BIBLE_NOTICE } from './scripture'
 import { resources, resourceCategories, RESOURCES_CHECKED } from './resourcesContent'
 import ResourceCard from './ResourceCard'
@@ -167,6 +168,7 @@ const footerItems = [
   ...navItems.slice(3),
   { to: '/announcements', label: 'Announcements' },
   { to: '/serve', label: 'Serve With Us' },
+  { to: '/study', label: 'How to Study the Bible' },
 ]
 
 const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
@@ -1844,6 +1846,195 @@ function ResourcesPage() {
   )
 }
 
+function StudyVerse({ v }) {
+  return (
+    <blockquote className="verse">
+      <p>{v.text}</p>
+      <cite>{v.ref} {v.label || BIBLE_LABEL}</cite>
+    </blockquote>
+  )
+}
+
+function StudyPage() {
+  useDocumentHead({
+    title: 'How to Study the Bible',
+    description:
+      'A simple way to study the Bible: observe, interpret, apply. Why context matters, Greek and Hebrew word studies, how to use Blue Letter Bible, and common misconceptions.',
+  })
+  const s = study
+  const toc = [
+    ['method', 'A simple method'], ['context', 'Context'], ['words', 'Greek and Hebrew'], ['drift', 'Changing English'],
+    ['blb', 'Blue Letter Bible'], ['misconceptions', 'Misconceptions'], ['faqs', 'FAQs'],
+  ]
+  return (
+    <>
+      <section className="section page-section">
+        <div className="container stack-lg">
+          <div className="section-intro" style={{ marginBottom: 0 }}>
+            <div className="section-label">{s.title}</div>
+            <h1>{s.headline}</h1>
+            {s.intro.map((t) => <p key={t}>{t}</p>)}
+          </div>
+          <div className="verse-list study-intro-verses">
+            {s.introVerses.map((v) => <StudyVerse key={v.ref} v={v} />)}
+          </div>
+          <nav className="study-toc" aria-label="On this page">
+            {toc.map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}
+          </nav>
+        </div>
+      </section>
+
+      <section id="method" className="section section-alt">
+        <div className="container stack-lg">
+          <div className="know-narrow">
+            <div className="section-label">Step by step</div>
+            <h2>{s.method.heading}</h2>
+            <p>{s.method.body}</p>
+            <StudyVerse v={s.method.prayerVerse} />
+          </div>
+          <div className="study-steps">
+            {s.method.steps.map((st, i) => (
+              <ShellCard key={st.title} className="study-step">
+                <div className="know-step-num" aria-hidden="true">{i + 1}</div>
+                <h3>{st.title}</h3>
+                <p>{st.text}</p>
+              </ShellCard>
+            ))}
+          </div>
+          <div className="know-narrow">
+            <p>{s.method.closing}</p>
+            <StudyVerse v={s.method.closingVerse} />
+          </div>
+        </div>
+      </section>
+
+      <section id="context" className="section">
+        <div className="container stack-lg">
+          <div className="know-narrow">
+            <div className="section-label">Context</div>
+            <h2>{s.context.heading}</h2>
+            <p>{s.context.body}</p>
+          </div>
+          <div className="three-up-grid">
+            {s.context.items.map((it) => <ShellCard key={it.title}><h3>{it.title}</h3><p>{it.text}</p></ShellCard>)}
+          </div>
+        </div>
+      </section>
+
+      <section id="words" className="section section-alt">
+        <div className="container stack-lg">
+          <div className="know-narrow">
+            <div className="section-label">Original languages</div>
+            <h2>{s.words.heading}</h2>
+            <p>{s.words.body}</p>
+          </div>
+          <div className="word-grid">
+            {s.words.items.map((w) => (
+              <ShellCard key={w.word} className="word-card">
+                <h3>{w.word}</h3>
+                <div className="word-original">{w.original}</div>
+                <p>{w.text}</p>
+                {w.verses && w.verses.map((v) => <StudyVerse key={v.ref} v={v} />)}
+              </ShellCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="drift" className="section">
+        <div className="container stack-lg">
+          <div className="know-narrow">
+            <div className="section-label">Then and now</div>
+            <h2>{s.drift.heading}</h2>
+            <p>{s.drift.body}</p>
+          </div>
+          <div className="three-up-grid">
+            {s.drift.items.map((it) => (
+              <ShellCard key={it.word} className="word-card">
+                <h3>"{it.word}"</h3>
+                <p>{it.text}</p>
+                <StudyVerse v={it.verse} />
+              </ShellCard>
+            ))}
+          </div>
+          <div className="know-narrow">
+            <h3>{s.pitfalls.heading}</h3>
+            <p>{s.pitfalls.body}</p>
+          </div>
+          <div className="three-up-grid">
+            {s.pitfalls.items.map((it) => <ShellCard key={it.title}><h3>{it.title}</h3><p>{it.text}</p></ShellCard>)}
+          </div>
+        </div>
+      </section>
+
+      <section id="blb" className="section section-alt">
+        <div className="container two-col study-blb">
+          <div>
+            <div className="section-label">A favorite free tool</div>
+            <h2>{s.blb.heading}</h2>
+            <p>{s.blb.body}</p>
+            <a className="button button-primary" href={s.blb.url} target="_blank" rel="noopener noreferrer">
+              Open Blue Letter Bible <ChevronRight size={16} />
+            </a>
+          </div>
+          <ol className="blb-steps">
+            {s.blb.steps.map((t) => <li key={t}>{t}</li>)}
+          </ol>
+        </div>
+      </section>
+
+      <section id="misconceptions" className="section">
+        <div className="container stack-lg">
+          <div className="know-narrow">
+            <div className="section-label">Read it in context</div>
+            <h2>{s.misconceptions.heading}</h2>
+          </div>
+          <div className="misconception-list">
+            {s.misconceptions.items.map((m) => (
+              <ShellCard key={m.claim} className="misconception">
+                <div className="misconception-claim">You may have heard: <strong>{m.claim}</strong></div>
+                <p>{m.truth}</p>
+                {m.verses.map((v) => <StudyVerse key={v.ref} v={v} />)}
+              </ShellCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="faqs" className="section section-alt">
+        <div className="container stack-lg">
+          <div className="know-narrow">
+            <div className="section-label">FAQs</div>
+            <h2>{s.faqs.heading}</h2>
+          </div>
+          <div className="faq-list">
+            {s.faqs.items.map((f) => (
+              <div className="faq-row" key={f.q}>
+                <h3>{f.q}</h3>
+                <div>
+                  <p>{f.a}</p>
+                  {f.verses && f.verses.map((v) => <StudyVerse key={v.ref} v={v} />)}
+                </div>
+              </div>
+            ))}
+          </div>
+          <ShellCard className="cta-card">
+            <div>
+              <h3>{s.next.heading}</h3>
+              <p>{s.next.body}</p>
+            </div>
+            <div className="hero-actions" style={{ marginTop: 0 }}>
+              <Link to="/groups" className="button button-primary">See our groups <ChevronRight size={16} /></Link>
+              <a className="button button-secondary" href={mailto('Bible study question')}>Ask a question</a>
+            </div>
+          </ShellCard>
+          <p className="translation-note">{s.notice} King James Version quotations are public domain.</p>
+        </div>
+      </section>
+    </>
+  )
+}
+
 function AnnouncementsPage() {
   useDocumentHead({ title: 'Announcements', description: 'Stay up to date with the latest announcements from His Place Community Church.' })
   const { data: announcements, status } = useSheetData(ANNOUNCEMENTS_URL, fallbackAnnouncements, mapAnnouncementRow)
@@ -2150,6 +2341,7 @@ export default function App() {
           <Route path="/serve" element={<ServePage />} />
           <Route path="/know-jesus" element={<KnowJesusPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/study" element={<StudyPage />} />
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/sermons" element={<SermonsPage />} />

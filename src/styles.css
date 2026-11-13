@@ -645,3 +645,29 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .chat-disclaimer { font-size: 11px; color: var(--ink-faint); text-align: center; padding: 0 12px 8px; background: #fff; }
 .site-footer { padding-bottom: 72px; }
 .footer-notice { margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.45); }
+
+/* ---------- Added: How to Study the Bible ---------- */
+.study-intro-verses { max-width: 760px; }
+.study-toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.study-toc a { font-size: 14px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--stone-border); background: var(--paper-light); color: var(--ink); }
+.study-toc a:hover { border-color: var(--oxblood); text-decoration: none; }
+.study-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 800px) { .study-steps { grid-template-columns: 1fr; } }
+.study-step { display: flex; flex-direction: column; gap: 10px; }
+.study-step p { font-size: 15px; }
+.word-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 800px) { .word-grid { grid-template-columns: 1fr; } }
+.word-card { display: flex; flex-direction: column; gap: 8px; }
+.word-card p { font-size: 15px; }
+.word-card .verse { background: var(--paper); }
+.word-card .verse p { font-size: 16px; }
+.word-original { font-size: 13px; font-weight: 600; color: var(--oxblood); letter-spacing: 0.02em; }
+.blb-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; font-size: 16px; color: var(--ink); }
+.blb-steps li::marker { color: var(--oxblood); font-weight: 700; }
+.study-blb { align-items: start; }
+.misconception-list { display: grid; gap: 16px; }
+.misconception { display: flex; flex-direction: column; gap: 8px; }
+.misconception p { font-size: 15px; }
+.misconception .verse { background: var(--paper); }
+.misconception-claim { font-size: 15px; color: var(--ink-soft); }
+.misconception-claim strong { color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; font-size: 18px; }
