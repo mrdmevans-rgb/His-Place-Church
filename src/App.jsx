@@ -44,10 +44,10 @@ const CHURCH_PHONE = '(513) 374-9799'
 const LIVESTREAM_URL = FACEBOOK_URL
 const LIVE_WINDOW = { day: 0, startMinutes: 10 * 60 + 45, endMinutes: 12 * 60 + 45 } // Sunday 10:45 AM to 12:45 PM Eastern
 
-// Pastor's welcome video for the home page. Paste a YouTube link
-// (an Unlisted upload works great) or put a small .mp4 in the public folder
-// and write its path here, like '/welcome.mp4'. Leave '' to hide the section.
-const WELCOME_VIDEO = ''
+// Pastor's welcome video for the home page. Paste a Facebook video or reel
+// link, a YouTube link, or the path to a small .mp4 in the public folder
+// (like '/welcome.mp4'). Leave '' to hide the section.
+const WELCOME_VIDEO = 'https://www.facebook.com/reel/1788289135656515/'
 
 const SHEET_BASE = 'https://opensheet.elk.sh/1tEU8YmbBWc3Xp6rw4KP8TuSdGZDbcNeRGCFUOMi3m74'
 const EVENTS_SHEET_URL = `${SHEET_BASE}/Events`
@@ -649,7 +649,16 @@ function WelcomeVideo() {
           </Link>
         </div>
         <div className="video-frame">
-          {id ? (
+          {/facebook\.com/.test(WELCOME_VIDEO) ? (
+            <iframe
+              src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(WELCOME_VIDEO)}&show_text=false&width=560&t=0`}
+              title="A welcome from Pastor Dave"
+              loading="lazy"
+              scrolling="no"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          ) : id ? (
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${id}`}
               title="A welcome from Pastor Dave"
