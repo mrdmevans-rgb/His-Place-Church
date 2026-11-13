@@ -111,7 +111,7 @@ main { flex: 1; }
 .mobile-nav-link.active { color: var(--oxblood); }
 .mobile-give { margin-top: 12px; text-align: center; }
 
-@media (max-width: 900px) {
+@media (max-width: 1140px) {
   .nav-desktop { display: none; }
   .menu-button { display: inline-flex; align-items: center; justify-content: center; }
 }
@@ -446,7 +446,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 
 .footer-bottom { margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 12px; color: rgba(255,255,255,0.5); }
 
-@media (max-width: 1080px) and (min-width: 901px) { .nav-desktop { gap: 14px; } .nav-link { font-size: 13px; } }
+@media (max-width: 1260px) and (min-width: 1141px) { .nav-desktop { gap: 16px; } }
 
 /* ---------- Added: livestream banner ---------- */
 .live-banner {
