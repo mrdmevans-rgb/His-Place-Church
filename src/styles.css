@@ -517,3 +517,39 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .ministry-card .calendar-links { margin-top: 0; }
 .kids-link-inner { display: flex; align-items: center; gap: 16px; }
 .kids-link-logo { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; }
+
+/* ---------- Added: Know Jesus ---------- */
+.know-hero .hero-sub { margin-bottom: 8px; }
+.know-steps { display: flex; flex-direction: column; gap: 48px; max-width: 860px; }
+.know-step { display: grid; grid-template-columns: 56px 1fr; gap: 20px; }
+.know-step-num {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--oxblood); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 22px;
+}
+.know-step-body p { font-size: 17px; }
+@media (max-width: 600px) {
+  .know-step { grid-template-columns: 1fr; gap: 10px; }
+  .know-step-num { width: 40px; height: 40px; font-size: 18px; }
+}
+.verse-list { display: grid; gap: 12px; margin-top: 6px; }
+.verse {
+  margin: 0; padding: 14px 18px; background: var(--paper-light);
+  border-left: 3px solid var(--gold); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.verse p { margin: 0 0 6px; font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.5; color: var(--ink); }
+.verse cite { font-style: normal; font-size: 13px; font-weight: 600; color: var(--oxblood); letter-spacing: 0.02em; }
+.know-narrow { max-width: 760px; }
+.prayer-text {
+  margin-top: 8px; padding: 24px 28px; background: #fff; border: 1px solid var(--stone-border);
+  border-radius: var(--radius-md); font-family: 'Fraunces', serif; font-size: 19px; line-height: 1.6; color: var(--ink);
+}
+.promise-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 700px) { .promise-grid { grid-template-columns: 1fr; } }
+.promise-card { display: flex; flex-direction: column; gap: 10px; }
+.promise-card .verse { background: var(--paper); }
+.promise-card .verse p { font-size: 16px; }
+.faq-row .verse { margin-top: 10px; }
+.translation-note { margin-top: 28px; font-size: 12px; color: var(--ink-faint); }
+.know-cta h3 { font-size: clamp(1.2rem, 2.2vw, 1.5rem); }
+.know-hero::after { background: linear-gradient(90deg, rgba(43,36,32,0.88) 0%, rgba(43,36,32,0.7) 55%, rgba(43,36,32,0.45) 100%); }
+.know-hero .hero-sub { color: rgba(255,255,255,0.92); }

@@ -24,6 +24,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
+import { knowJesus } from './knowJesusContent'
 
 /* ------------------------------------------------------------------
    Site settings. Change these in one place and the whole site updates.
@@ -159,6 +160,7 @@ const footerItems = [
   ...navItems.slice(3),
   { to: '/announcements', label: 'Announcements' },
   { to: '/serve', label: 'Serve With Us' },
+  { to: '/know-jesus', label: 'Know Jesus' },
 ]
 
 const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
@@ -242,6 +244,7 @@ const visitFaqs = [
   { title: 'What about my kids?', text: 'Children are always welcome in the main service, and our His Kids team would love to help you get settled. See the His Kids page for more.' },
   { title: 'Can I watch online first?', text: 'Absolutely. We stream every Sunday at 11:00 AM on our Facebook page, so you can get a feel for us before you come.' },
   { title: 'Where do I park?', text: `Parking is available on-site at ${CHURCH_ADDRESS}. Look for a greeter near the entrance.` },
+  { title: 'Is the building accessible?', text: 'Yes. There are no steps at our current location, so it is easy to get in with a wheelchair, walker, or stroller. We also set up our worship and sermon slides with low vision in mind.' },
   { title: 'Will I be singled out?', text: 'No. We are glad you came, and you are free to simply sit, listen, and take it all in.' },
 ]
 
@@ -901,6 +904,21 @@ function HomePage() {
         </div>
       </section>
 
+      <section className="section-tight">
+        <div className="container">
+          <ShellCard className="cta-card know-cta">
+            <div>
+              <div className="section-label">Looking for hope?</div>
+              <h3>Find out who Jesus is and what He's done for you.</h3>
+              <p>No pressure and no strings. Just the good news, straight from the Bible.</p>
+            </div>
+            <Link to="/know-jesus" className="button button-primary">
+              Know Jesus <ChevronRight size={16} />
+            </Link>
+          </ShellCard>
+        </div>
+      </section>
+
       <section id="giving" className="section section-giving">
         <div className="container giving-grid">
           <div>
@@ -1209,6 +1227,16 @@ function FaithPage() {
             </ShellCard>
           ))}
         </div>
+
+        <ShellCard className="cta-card">
+          <div>
+            <h3>What does this mean for me?</h3>
+            <p>See how you can be forgiven, made new, and know God personally through Jesus.</p>
+          </div>
+          <Link to="/know-jesus" className="button button-primary">
+            Know Jesus <ChevronRight size={16} />
+          </Link>
+        </ShellCard>
       </div>
     </section>
   )
@@ -1539,6 +1567,174 @@ function ServePage() {
   )
 }
 
+function VerseBlock({ verse }) {
+  return (
+    <blockquote className="verse">
+      <p>{verse.text}</p>
+      <cite>{verse.ref} ESV</cite>
+    </blockquote>
+  )
+}
+
+function KnowJesusPage() {
+  useDocumentHead({
+    title: 'Know Jesus',
+    description:
+      'The good news of Jesus Christ from the Bible. Learn how you can be forgiven, made new, and have eternal life through faith in Jesus.',
+  })
+  const k = knowJesus
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    const f = new FormData(event.currentTarget)
+    const v = (key) => (f.get(key) || '').toString().trim()
+    const picked = f.getAll('about').map(String)
+    openEmail(`Know Jesus: ${v('name')}`, [
+      `Name: ${v('name')}`,
+      `Email: ${v('email')}`,
+      `Phone: ${v('phone') || 'Not given'}`,
+      '',
+      `About: ${picked.length ? picked.join(', ') : 'Not selected'}`,
+      '',
+      'Message:',
+      v('message') || 'No message',
+    ])
+    setSubmitted(true)
+  }
+
+  return (
+    <>
+      <section className="hero-photo know-hero" style={{ backgroundImage: `url(${photo('listening-together').src})`, minHeight: 420 }}>
+        <div className="hero-photo-inner container">
+          <div className="hero-eyebrow">{k.title}</div>
+          <h1>{k.headline}</h1>
+          {k.intro.map((t) => <p className="hero-sub" key={t}>{t}</p>)}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container know-steps">
+          {k.steps.map((step, i) => (
+            <article className="know-step" key={step.heading}>
+              <div className="know-step-num" aria-hidden="true">{i + 1}</div>
+              <div className="know-step-body">
+                <h2>{step.heading}</h2>
+                {step.body.map((t) => <p key={t}>{t}</p>)}
+                <div className="verse-list">
+                  {step.verses.map((verse) => <VerseBlock key={verse.ref} verse={verse} />)}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section section-alt">
+        <div className="container know-narrow">
+          <div className="section-label">Prayer</div>
+          <h2>{k.prayer.heading}</h2>
+          {k.prayer.body.map((t) => <p key={t}>{t}</p>)}
+          <div className="prayer-text">{k.prayer.text}</div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container stack-lg">
+          <div className="know-narrow">
+            <div className="section-label">New life</div>
+            <h2>{k.promises.heading}</h2>
+            {k.promises.body.map((t) => <p key={t}>{t}</p>)}
+          </div>
+          <div className="promise-grid">
+            {k.promises.items.map((item) => (
+              <ShellCard key={item.title} className="promise-card">
+                <h3>{item.title}</h3>
+                <VerseBlock verse={item} />
+              </ShellCard>
+            ))}
+          </div>
+
+          <div className="know-narrow">
+            <div className="section-label">Growing in faith</div>
+            <h2>{k.nextSteps.heading}</h2>
+          </div>
+          <div className="faq-list">
+            {k.nextSteps.items.map((item) => (
+              <div className="faq-row" key={item.title}>
+                <h3>{item.title}</h3>
+                <div>
+                  <p>{item.text}</p>
+                  {item.verse && <VerseBlock verse={{ ref: item.ref, text: item.verse }} />}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="talk" className="section section-alt">
+        <div className="container prayer-grid">
+          <div className="stack-md">
+            <div className="section-label">Let's talk</div>
+            <h2>{k.notSure.heading}</h2>
+            {k.notSure.body.map((t) => <p key={t}>{t}</p>)}
+            <VerseBlock verse={k.notSure.verse} />
+            {CHURCH_PHONE && (
+              <p>
+                Rather talk to a person? Call <a href={telHref(CHURCH_PHONE)}>{CHURCH_PHONE}</a>.
+              </p>
+            )}
+          </div>
+
+          <ShellCard className="prayer-form-card">
+            <h2>We'd love to hear from you</h2>
+            <p>This opens an email to us with your answers filled in. Just hit send. It's private, and we'll reach out personally.</p>
+            <form className="prayer-form" onSubmit={handleSubmit}>
+              <fieldset className="serve-options">
+                <legend>Check anything that fits</legend>
+                {k.formOptions.map((opt) => (
+                  <label key={opt} className="serve-option">
+                    <input type="checkbox" name="about" value={opt} />
+                    <span><strong>{opt}</strong></span>
+                  </label>
+                ))}
+              </fieldset>
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="kj-name">Your name</label>
+                  <input id="kj-name" name="name" type="text" autoComplete="name" required />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="kj-email">Email</label>
+                  <input id="kj-email" name="email" type="email" autoComplete="email" required />
+                </div>
+              </div>
+              <div className="form-field">
+                <label htmlFor="kj-phone">Phone (optional)</label>
+                <input id="kj-phone" name="phone" type="tel" autoComplete="tel" />
+              </div>
+              <div className="form-field">
+                <label htmlFor="kj-message">Anything you'd like to share or ask? (optional)</label>
+                <textarea id="kj-message" name="message" rows="4" />
+              </div>
+              <button type="submit" className="button button-primary full-width">
+                <Send size={15} /> Send
+              </button>
+              {submitted && (
+                <p className="events-helper-text" role="status">
+                  Your email app should be opening now. If nothing happens, email {CONTACT_EMAIL} directly.
+                </p>
+              )}
+            </form>
+          </ShellCard>
+        </div>
+        <p className="container translation-note">{k.translationNote}</p>
+      </section>
+    </>
+  )
+}
+
 function AnnouncementsPage() {
   useDocumentHead({ title: 'Announcements', description: 'Stay up to date with the latest announcements from His Place Community Church.' })
   const { data: announcements, status } = useSheetData(ANNOUNCEMENTS_URL, fallbackAnnouncements, mapAnnouncementRow)
@@ -1842,6 +2038,7 @@ export default function App() {
           <Route path="/faith" element={<FaithPage />} />
           <Route path="/kids" element={<KidsPage />} />
           <Route path="/serve" element={<ServePage />} />
+          <Route path="/know-jesus" element={<KnowJesusPage />} />
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/sermons" element={<SermonsPage />} />
