@@ -25,6 +25,10 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-ro
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
 import { knowJesus } from './knowJesusContent'
+import { BIBLE_LABEL, BIBLE_NOTICE } from './scripture'
+import { resources, resourceCategories, RESOURCES_CHECKED } from './resourcesContent'
+import ResourceCard from './ResourceCard'
+import HelperChat from './HelperChat'
 import mensLogoSrc from './assets/mens-ministry-logo.jpg'
 import womensLogoSrc from './assets/womens-ministry-logo.jpg'
 
@@ -154,6 +158,7 @@ const navItems = [
   { to: '/groups', label: 'Groups & Events' },
   { to: '/photos', label: 'Photos' },
   { to: '/prayer', label: 'Prayer' },
+  { to: '/resources', label: 'Find Help' },
 ]
 
 const footerItems = [
@@ -1575,7 +1580,7 @@ function VerseBlock({ verse }) {
   return (
     <blockquote className="verse">
       <p>{verse.text}</p>
-      <cite>{verse.ref} ESV</cite>
+      <cite>{verse.ref} {BIBLE_LABEL}</cite>
     </blockquote>
   )
 }
@@ -1669,7 +1674,7 @@ function KnowJesusPage() {
                 <h3>{item.title}</h3>
                 <div>
                   <p>{item.text}</p>
-                  {item.verse && <VerseBlock verse={{ ref: item.ref, text: item.verse }} />}
+                  {item.verse && <VerseBlock verse={item.verse} />}
                 </div>
               </div>
             ))}
@@ -1736,6 +1741,106 @@ function KnowJesusPage() {
         <p className="container translation-note">{k.translationNote}</p>
       </section>
     </>
+  )
+}
+
+function ResourcesPage() {
+  useDocumentHead({
+    title: 'Community Resources',
+    description:
+      'Food pantries, rent and utility help, clothing, health care, recovery, and crisis lines in and around Clermont County, Ohio.',
+  })
+  const location = useLocation()
+  const initial = resourceCategories.some((c) => c.id === location.hash.slice(1)) ? location.hash.slice(1) : 'all'
+  const [cat, setCat] = useState(initial)
+  const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    const h = location.hash.slice(1)
+    if (resourceCategories.some((c) => c.id === h)) {
+      setCat(h)
+      setQuery('')
+    }
+  }, [location.hash])
+
+  const q = query.trim().toLowerCase()
+  const shown = resources.filter((r) => {
+    if (cat !== 'all' && !r.cats.includes(cat)) return false
+    if (!q) return true
+    return [r.name, r.services, r.town, r.address].filter(Boolean).join(' ').toLowerCase().includes(q)
+  })
+  const crisis = resources.filter((r) => ['emergency', '988', 'crisis-hotline', '211'].includes(r.id))
+
+  return (
+    <section className="section page-section">
+      <div className="container stack-lg">
+        <div className="section-intro" style={{ marginBottom: 0 }}>
+          <div className="section-label">Community resources</div>
+          <h1>Help is closer than you think.</h1>
+          <p>
+            Whatever you're facing, you don't have to face it alone. Here are places in and
+            around Clermont County that help with food, rent, utilities, clothing, health care,
+            and more. And if you'd like someone to pray with you, <Link to="/prayer">we'd be honored to</Link>.
+          </p>
+        </div>
+
+        <div className="crisis-box" role="note" aria-label="Crisis help">
+          <h2>In crisis or in danger?</h2>
+          <div className="crisis-lines">
+            {crisis.map((r) => (
+              <a key={r.id} className="crisis-line" href={`tel:${r.phones[0].number.replace(/[^\d]/g, '')}`}>
+                <strong>{r.phones[0].number}</strong>
+                <span>{r.name}</span>
+              </a>
+            ))}
+          </div>
+          <p>Being abused or unsafe at home? Call the YWCA hotline at <a href="tel:5138729259">513-872-9259</a> or call or text Women Helping Women at <a href="tel:5133815610">513-381-5610</a>, any time.</p>
+        </div>
+
+        <div className="resource-controls">
+          <div className="resource-chips" role="group" aria-label="Filter by need">
+            <button type="button" className={`chip${cat === 'all' ? ' active' : ''}`} aria-pressed={cat === 'all'} onClick={() => setCat('all')}>All</button>
+            {resourceCategories.map((c) => (
+              <button key={c.id} type="button" className={`chip${cat === c.id ? ' active' : ''}`} aria-pressed={cat === c.id} onClick={() => setCat(c.id)}>
+                {c.label}
+              </button>
+            ))}
+          </div>
+          <div className="form-field resource-search">
+            <label htmlFor="resource-search">Search by name, town, or need</label>
+            <input id="resource-search" type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="For example: Amelia, diapers, rent" />
+          </div>
+        </div>
+
+        <p className="resource-count" aria-live="polite">
+          Showing {shown.length} {shown.length === 1 ? 'place' : 'places'}
+          {cat !== 'all' ? ` for ${resourceCategories.find((c) => c.id === cat).label.toLowerCase()}` : ''}.
+        </p>
+
+        {shown.length > 0 ? (
+          <div className="resource-grid">
+            {shown.map((r) => <ResourceCard key={r.id} r={r} />)}
+          </div>
+        ) : (
+          <ShellCard>
+            <h3>Nothing matched that search.</h3>
+            <p>Try a different word, or call <a href="tel:211">2-1-1</a> and a real person will help you find what you need.</p>
+          </ShellCard>
+        )}
+
+        <div className="resource-note">
+          <p>
+            <strong>Please call before you go.</strong> Hours, rules, and programs change often.
+            This list comes from Clermont County's official community resource list and was last
+            checked {RESOURCES_CHECKED}. His Place isn't connected with these organizations, but we
+            care about you and want you to get help.
+          </p>
+          <p>
+            Know of a resource we should add, or found something out of date? <a href={mailto('Community resources update')}>Let us know</a>.
+          </p>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -2010,6 +2115,7 @@ function Footer() {
       </div>
       <div className="container footer-bottom">
         © {new Date().getFullYear()} His Place Community Church
+        <div className="footer-notice">{BIBLE_NOTICE}</div>
       </div>
     </footer>
   )
@@ -2043,6 +2149,7 @@ export default function App() {
           <Route path="/kids" element={<KidsPage />} />
           <Route path="/serve" element={<ServePage />} />
           <Route path="/know-jesus" element={<KnowJesusPage />} />
+          <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/sermons" element={<SermonsPage />} />
@@ -2052,6 +2159,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      <HelperChat phone={CHURCH_PHONE} email={CONTACT_EMAIL} serviceTime={SUNDAY_SERVICE_TIME} address={CHURCH_ADDRESS} />
     </div>
   )
 }
