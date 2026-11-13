@@ -25,6 +25,7 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-ro
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
 import { knowJesus } from './knowJesusContent'
+import { BIBLE_LABEL, BIBLE_NOTICE } from './scripture'
 import { resources, resourceCategories, RESOURCES_CHECKED } from './resourcesContent'
 import ResourceCard from './ResourceCard'
 import HelperChat from './HelperChat'
@@ -1579,7 +1580,7 @@ function VerseBlock({ verse }) {
   return (
     <blockquote className="verse">
       <p>{verse.text}</p>
-      <cite>{verse.ref} ESV</cite>
+      <cite>{verse.ref} {BIBLE_LABEL}</cite>
     </blockquote>
   )
 }
@@ -1673,7 +1674,7 @@ function KnowJesusPage() {
                 <h3>{item.title}</h3>
                 <div>
                   <p>{item.text}</p>
-                  {item.verse && <VerseBlock verse={{ ref: item.ref, text: item.verse }} />}
+                  {item.verse && <VerseBlock verse={item.verse} />}
                 </div>
               </div>
             ))}
@@ -2114,6 +2115,7 @@ function Footer() {
       </div>
       <div className="container footer-bottom">
         © {new Date().getFullYear()} His Place Community Church
+        <div className="footer-notice">{BIBLE_NOTICE}</div>
       </div>
     </footer>
   )

@@ -644,3 +644,4 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .chat-input button { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--oxblood); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .chat-disclaimer { font-size: 11px; color: var(--ink-faint); text-align: center; padding: 0 12px 8px; background: #fff; }
 .site-footer { padding-bottom: 72px; }
+.footer-notice { margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.45); }

@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom'
 import { MessageCircle, X, RotateCcw, Send } from 'lucide-react'
 import { resourceById } from './resourcesContent'
 import ResourceCard from './ResourceCard'
+import { verse, BIBLE_LABEL } from './scripture'
 
 /* ------------------------------------------------------------------
    His Place guided helper.
    Every answer below is written ahead of time. Nothing is generated,
    so the helper only ever says what the church has approved.
-   Scripture quotations are from the ESV.
+   Scripture comes from src/scripture.js (NASB).
 ------------------------------------------------------------------- */
 
 const MAIN_CHOICES = [
@@ -61,30 +62,56 @@ export function buildNodes({ phone, email, serviceTime, address }) {
 
     hard: {
       text: "I'm sorry you're carrying something heavy. God sees you, and so do we. What's weighing on you most?",
-      choices: [['anxiety', 'Worry or anxiety'], ['grief', 'Grief or loss'], ['fear', 'Fear'], ['alone', 'Feeling alone'], ['guilt', 'Guilt or shame'], ['hope', 'Losing hope'], ['start', 'Main menu']],
+      choices: [['anxiety', 'Worry or anxiety'], ['grief', 'Grief or loss'], ['fear', 'Fear'], ['alone', 'Feeling alone'], ['guilt', 'Guilt or shame'], ['hope', 'Losing hope'], ['family', 'Marriage or family struggles'], ['money', 'Money stress'], ['sickness', 'Sickness'], ['doubt', 'Doubting God'], ['start', 'Main menu']],
     },
     anxiety: heartNode("Worry can feel like it takes over everything. God invites you to bring it all to Him, every bit of it.", [
-      { ref: 'Philippians 4:6-7', text: 'Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus.' },
-      { ref: '1 Peter 5:7', text: 'Casting all your anxieties on him, because he cares for you.' },
+      verse('phil4:6-7'),
+      verse('1pet5:7'),
     ], "If anxiety is making daily life hard, talking with a counselor can really help. You'll find local options under Health or mental health."),
     grief: heartNode("Losing someone or something you love is one of the hardest things there is. It's okay to grieve. God is close to you in it.", [
-      { ref: 'Psalm 34:18', text: 'The LORD is near to the brokenhearted and saves the crushed in spirit.' },
-      { ref: 'Matthew 5:4', text: 'Blessed are those who mourn, for they shall be comforted.' },
+      verse('ps34:18'),
+      verse('matt5:4'),
     ]),
     fear: heartNode("Fear is real, but it doesn't get the last word. God promises to be with you.", [
-      { ref: 'Isaiah 41:10', text: 'Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand.' },
+      verse('isa41:10'),
     ]),
     alone: heartNode("Feeling alone can hurt so much. You are not forgotten. God hasn't left you, and there's a church family here that would love to know you.", [
-      { ref: 'Deuteronomy 31:8', text: 'It is the LORD who goes before you. He will be with you; he will not leave you or forsake you. Do not fear or be dismayed.' },
+      verse('deut31:8'),
     ], `We'd love to see you. We meet ${serviceTime} at ${address}.`),
     guilt: heartNode("No matter what you've done, you are not beyond God's grace. Jesus came for people exactly like us.", [
-      { ref: '1 John 1:9', text: 'If we confess our sins, he is faithful and just to forgive us our sins and to cleanse us from all unrighteousness.' },
-      { ref: 'Romans 8:1', text: 'There is therefore now no condemnation for those who are in Christ Jesus.' },
+      verse('1john1:9'),
+      verse('rom8:1'),
     ], 'Want to know more about the forgiveness Jesus offers? The Know Jesus page walks through it.'),
     hope: heartNode("I'm so sorry things feel this dark. Please hear this: your life matters, and there is hope. If you've had any thoughts of ending your life, please call or text 988 right now. Someone is ready to listen.", [
-      { ref: 'Romans 15:13', text: 'May the God of hope fill you with all joy and peace in believing, so that by the power of the Holy Spirit you may abound in hope.' },
-      { ref: 'Matthew 11:28', text: 'Come to me, all who labor and are heavy laden, and I will give you rest.' },
+      verse('rom15:13'),
+      verse('matt11:28'),
     ]),
+
+    family: {
+      text: "Struggles at home hurt deeply, because these are the people closest to us. God cares about your marriage and your family, and there is hope for hurting relationships.",
+      verses: [verse('eph4:2-3'), verse('col3:13')],
+      extra: "If anyone at home is hurting you or you don't feel safe, please reach out now. The YWCA hotline is open any time at 513-872-9259. For counseling, look under Health or mental health.",
+      choices: [['crisis', "I don't feel safe at home"], ['prayer', 'Please pray for me'], ['person', 'Talk to a real person'], ['hard', 'Something else is weighing on me'], ['start', 'Main menu']],
+    },
+    money: {
+      text: "Money stress can keep you up at night. You don't have to carry it alone. God knows exactly what you need, and there are people nearby who can help with the practical side too.",
+      verses: [verse('phil4:19'), verse('matt6:33-34')],
+      extra: 'Need help with rent, utilities, or food right now? Tap one below, or call 2-1-1 any time.',
+      choices: [['housing', 'Rent or housing'], ['utilities', 'Utility bills'], ['food', 'Food'], ['prayer', 'Please pray for me'], ['person', 'Talk to a real person'], ['start', 'Main menu']],
+    },
+    sickness: {
+      text: "Being sick, or watching someone you love go through it, is so hard. God is with you in the waiting rooms, the long nights, and the hard news.",
+      verses: [verse('ps46:1'), verse('2cor12:9')],
+      extra: "We would love to pray for you or your loved one by name. If you need help finding care, look under Health or mental health.",
+      choices: [['prayer', 'Please pray for me'], ['health', 'Health or mental health'], ['person', 'Talk to a real person'], ['start', 'Main menu']],
+    },
+    doubt: {
+      text: "Doubts and hard questions don't scare God, and they don't scare us either. Some of the most honest prayers in the Bible came from people who were struggling to believe.",
+      verses: [verse('mark9:24'), verse('james1:5')],
+      extra: "Bring your questions. We'd love to talk them through with you, with no pressure.",
+      links: [{ to: '/know-jesus', label: 'Read the Know Jesus page' }],
+      choices: [['person', 'Talk to a real person'], ['jesus', 'Who is Jesus?'], ['start', 'Main menu']],
+    },
 
     bible: {
       text: "The Bible can feel big at first, but you don't have to figure it out alone. A great place to start is the Gospel of John. Read one chapter a day and ask, what does this show me about Jesus? Before you read, ask God to help you understand. Then think about how it applies to your life.",
@@ -94,7 +121,7 @@ export function buildNodes({ phone, email, serviceTime, address }) {
     },
     jesus: {
       text: "That's the best question anyone can ask. Here's the good news in a nutshell: God made you and loves you. Our sin separates us from Him, but Jesus died in our place and rose again. When we turn to Him and trust Him, He forgives us and gives us new life. It's a gift, not something we earn.",
-      verses: [{ ref: 'John 3:16', text: 'For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.' }],
+      verses: [verse('john3:16')],
       links: [{ to: '/know-jesus', label: 'Read the full Know Jesus page' }],
       choices: [['person', 'I want to talk to someone'], ['prayer', 'Please pray for me'], ['start', 'Main menu']],
     },
@@ -131,14 +158,18 @@ const KEYWORDS = [
   ['utilities', ['electric*', 'utility', 'utilities', 'gas bill', 'water bill', 'heat', 'heating', 'heap', 'power', 'shut off', 'shutoff', 'disconnect*', 'bill', 'bills']],
   ['clothing', ['cloth*', 'diaper*', 'baby', 'coat*', 'shoes', 'formula', 'pregnan*']],
   ['recovery', ['drug*', 'alcohol*', 'addict*', 'drinking', 'sober*', 'recovery', 'relapse*', 'opioid*', 'pills']],
-  ['health', ['doctor*', 'health', 'medical', 'counsel*', 'therap*', 'depress*', 'mental', 'dentist', 'dental', 'medicine', 'sick']],
-  ['anxiety', ['anxi*', 'worry', 'worried', 'worrying', 'stress*', 'panic*', 'overwhelm*']],
+  ['money', ['money', 'debt*', 'broke', 'afford', 'paycheck', 'financ*', 'laid off', 'lost my job', 'fired', 'unemploy*', 'job']],
   ['grief', ['grief', 'griev*', 'died', 'death', 'passed away', 'funeral', 'miscarriage', 'loss', 'lost my']],
+  ['sickness', ['sick', 'cancer', 'diagnos*', 'illness', 'surgery', 'hospital*', 'chemo*', 'tumor*']],
+  ['health', ['doctor*', 'health', 'medical', 'counsel*', 'therap*', 'depress*', 'mental', 'dentist', 'dental', 'medicine']],
+  ['family', ['marriage', 'married', 'husband', 'wife', 'divorce*', 'separated', 'spouse', 'family', 'parenting', 'teenager*', 'custody']],
+  ['anxiety', ['anxi*', 'worry', 'worried', 'worrying', 'stress*', 'panic*', 'overwhelm*']],
   ['fear', ['afraid', 'scared', 'fear*', 'terrified']],
   ['alone', ['alone', 'lonely', 'loneliness', 'no friends', 'nobody', 'isolated']],
   ['guilt', ['guilt*', 'shame*', 'forgiv*', 'sin', 'sins', 'sinned', 'ashamed', 'regret*']],
   ['hope', ['hopeless*', 'no hope', 'give up', 'giving up', 'cant go on', "can't go on", 'pointless']],
   ['hard', ['hard time', 'struggling', 'struggle', 'going through', 'rough time', 'heavy', 'broken', 'hurting']],
+  ['doubt', ['doubt*', 'unsure', "don't believe", 'dont believe', 'is god real', 'not sure', 'question*', 'skeptic*']],
   ['jesus', ['jesus', 'saved', 'salvation', 'christian', 'believe', 'god', 'heaven', 'born again']],
   ['bible', ['bible', 'scripture*', 'verse*', 'read', 'reading']],
   ['prayer', ['pray*']],
@@ -164,7 +195,7 @@ function Verse({ v }) {
   return (
     <blockquote className="chat-verse">
       <p>{v.text}</p>
-      <cite>{v.ref} ESV</cite>
+      <cite>{v.ref} {BIBLE_LABEL}</cite>
     </blockquote>
   )
 }
