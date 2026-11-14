@@ -108,12 +108,12 @@ export default function Schedule() {
         <strong className="p-month">{new Date(ym[0], ym[1], 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</strong>
         <button className="chip" onClick={() => shift(1)} aria-label="Next month">Next</button>
       </div>
-      {manageable.length > 0 && (
+      {manageable.length > 0 && sundaysOf(ym[0], ym[1]).some((d) => d >= today()) && (
         <form className="p-card p-inline-form" onSubmit={add}>
           <strong>Schedule someone:</strong>
           <select required value={draft.serve_date} onChange={(e) => setDraft({ ...draft, serve_date: e.target.value })} aria-label="Date">
             <option value="">Date</option>
-            {sundaysOf(ym[0], ym[1]).map((d) => <option key={d} value={d}>{fmtDate(d)}</option>)}
+            {sundaysOf(ym[0], ym[1]).filter((d) => d >= today()).map((d) => <option key={d} value={d}>{fmtDate(d)}</option>)}
           </select>
           <select required value={draft.team} onChange={(e) => setDraft({ ...draft, team: e.target.value })} aria-label="Team">{manageable.map(([t, l]) => <option key={t} value={t}>{l}</option>)}</select>
           <input value={draft.position} onChange={(e) => setDraft({ ...draft, position: e.target.value })} placeholder="Position (vocals, camera 1, nursery)" aria-label="Position" />
