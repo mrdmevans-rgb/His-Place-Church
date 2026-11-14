@@ -21,7 +21,7 @@ import {
   Shield,
   Star,
 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
@@ -31,6 +31,10 @@ import { BIBLE_LABEL, BIBLE_NOTICE } from './scripture'
 import { resources, resourceCategories, RESOURCES_CHECKED } from './resourcesContent'
 import ResourceCard from './ResourceCard'
 import HelperChat from './HelperChat'
+
+// Loaded only when someone opens these pages, so the public site stays fast.
+const PortalApp = lazy(() => import('./portal/PortalApp'))
+const TeamPage = lazy(() => import('./TeamPage'))
 import mensLogoSrc from './assets/mens-ministry-logo.jpg'
 import womensLogoSrc from './assets/womens-ministry-logo.jpg'
 
@@ -175,7 +179,7 @@ const footerItems = [
   ...navItems.slice(3),
   { to: '/announcements', label: 'Announcements' },
   { to: '/serve', label: 'Serve With Us' },
-  { to: '/study', label: 'How to Study the Bible' },
+  { to: '/team', label: 'Meet the Team' },
 ]
 
 const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
@@ -2322,6 +2326,10 @@ function Footer() {
           </div>
         </div>
       </div>
+      <div className="container footer-login">
+        <Link to="/portal" className="footer-login-link">Leader login</Link>
+        <Link to="/portal" className="footer-login-link">Safety team application login</Link>
+      </div>
       <div className="container footer-bottom">
         © {new Date().getFullYear()} His Place Community Church
         <div className="footer-notice">{BIBLE_NOTICE}</div>
@@ -2344,6 +2352,14 @@ export default function App() {
     window.scrollTo(0, 0)
   }, [location.pathname, location.hash])
 
+  if (location.pathname === '/portal' || location.pathname.startsWith('/portal/')) {
+    return (
+      <Suspense fallback={<div className="p-loading">Loading...</div>}>
+        <Routes><Route path="/portal/*" element={<PortalApp />} /></Routes>
+      </Suspense>
+    )
+  }
+
   return (
     <div className="app-shell">
       <a href="#main" className="skip-link">Skip to content</a>
@@ -2365,6 +2381,7 @@ export default function App() {
           <Route path="/sermons" element={<SermonsPage />} />
           <Route path="/photos" element={<PhotosPage />} />
           <Route path="/prayer" element={<PrayerPage />} />
+          <Route path="/team" element={<Suspense fallback={<div className="section container">Loading...</div>}><TeamPage /></Suspense>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
