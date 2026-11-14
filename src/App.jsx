@@ -167,7 +167,8 @@ const navItems = [
   { to: '/about', label: 'About' },
   { to: '/sermons', label: 'Sermons' },
   { to: '/kids', label: 'His Kids' },
-  { to: '/groups', label: 'Groups & Events' },
+  { to: '/groups', label: 'Groups' },
+  { to: '/study', label: 'Study the Bible' },
   { to: '/photos', label: 'Photos' },
   { to: '/prayer', label: 'Prayer' },
   { to: '/resources', label: 'Find Help' },
@@ -935,6 +936,16 @@ function HomePage() {
               Know Jesus <ChevronRight size={16} />
             </Link>
           </ShellCard>
+          <ShellCard className="cta-card know-cta" style={{ marginTop: 16 }}>
+            <div>
+              <div className="section-label">Grow in God's Word</div>
+              <h3>Want to understand the Bible better?</h3>
+              <p>A simple way to study, what the Greek and Hebrew really say, and common misconceptions to watch for.</p>
+            </div>
+            <Link to="/study" className="button button-secondary">
+              Study the Bible <ChevronRight size={16} />
+            </Link>
+          </ShellCard>
         </div>
       </section>
 
@@ -1395,6 +1406,16 @@ function GroupsPage() {
           </div>
           <SheetStatusNote status={status} emptyLabel="Check back soon for upcoming events." />
         </div>
+
+        <ShellCard className="cta-card">
+          <div>
+            <h3>Studying on your own?</h3>
+            <p>Learn a simple way to study any passage, plus how to dig into the Greek and Hebrew.</p>
+          </div>
+          <Link to="/study" className="button button-secondary">
+            How to study the Bible <ChevronRight size={16} />
+          </Link>
+        </ShellCard>
 
         <ShellCard className="cta-card">
           <div>
