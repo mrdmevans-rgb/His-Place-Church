@@ -172,3 +172,10 @@
   .p-card { border: 0; padding: 0; }
   .p-list > .p-card:not(.p-print-area) { display: none; }
 }
+.p-bio-row { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
+.p-order { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.p-order-num { font-weight: 700; color: var(--oxblood); font-size: 15px; }
+.p-order button { background: #fff; border: 1px solid var(--stone-border); border-radius: 6px; width: 34px; height: 30px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink); }
+.p-order button:hover:not(:disabled) { border-color: var(--oxblood); color: var(--oxblood); }
+.p-order button:disabled { opacity: 0.35; cursor: default; }
+.p-bio-row > :only-child { grid-column: 1 / -1; }

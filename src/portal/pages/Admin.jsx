@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ArrowUp, ArrowDown, ChevronsUp } from 'lucide-react'
 import { supabase, ROLES, roleLabel, teamLabel, friendlyError, callAdmin, isLoginId, loginIdOf, contactLabel } from '../supabase'
 import { squareJpeg } from './Account'
 import { Badge, Empty, Field, Notice, PageHead, fmtDateTime, useMe, usePeople, usePortal, useRows } from '../ui'
@@ -209,8 +210,34 @@ function BioEdit({ b, onDone }) {
   )
 }
 
+const SECTION_IDEAS = ['Pastors', 'Elders', 'Ministry Leaders', 'Worship Team', 'Production Team', "Children's Ministry", 'Safety Team', 'Outreach']
+
 function Bios() {
-  const { rows, loading, reload } = useRows('team_bios', { order: 'sort_order', ascending: true })
+  const { rows: raw, loading, reload } = useRows('team_bios', { order: 'sort_order', ascending: true })
+  const rows = [...raw].sort((a, b) => a.sort_order - b.sort_order || a.display_name.localeCompare(b.display_name))
+  const [moving, setMoving] = useState(false)
+  // Renumber everyone 10, 20, 30... in the new order, saving only what changed.
+  const reorder = async (from, to) => {
+    if (to < 0 || to >= rows.length || from === to) return
+    setMoving(true)
+    const list = [...rows]
+    const [item] = list.splice(from, 1)
+    list.splice(to, 0, item)
+    const changes = list.map((b, i) => [b, (i + 1) * 10]).filter(([b, n]) => b.sort_order !== n)
+    for (const [b, n] of changes) {
+      const { error } = await supabase.from('team_bios').update({ sort_order: n }).eq('profile_id', b.profile_id)
+      if (error) { setMsg(friendlyError(error)); break }
+    }
+    setMoving(false)
+    setMsg(`${item.display_name} moved.`)
+    reload()
+  }
+  const setSection = async (b, section) => {
+    if ((section || '') === b.section) return
+    const { error } = await supabase.from('team_bios').update({ section: section.trim().slice(0, 60) }).eq('profile_id', b.profile_id)
+    setMsg(error ? friendlyError(error) : section.trim() ? `${b.display_name} is now under ${section.trim()}.` : `${b.display_name} removed from a section.`)
+    reload()
+  }
   const [msg, setMsg] = useState('')
   const [notes, setNotes] = useState({})
   const [editing, setEditing] = useState(null)
@@ -222,12 +249,22 @@ function Bios() {
   }
   return (
     <>
-      <p className="p-muted">Bios appear on the public Meet the Team page only after you approve them. Any change a leader makes comes back here for approval. You can edit any bio to fix spelling or grammar.</p>
+      <p className="p-muted">Bios appear on the public Meet the Team page only after you approve them, in the order shown here. Use the arrows to move people, and sections to group them under headings like Pastors or Worship Team. You can edit any bio to fix spelling or grammar.</p>
+      <p><a href="/team" target="_blank" rel="noopener noreferrer">Preview the Meet the Team page</a></p>
+      <datalist id="bio-sections">{[...new Set([...SECTION_IDEAS, ...rows.map((b) => b.section).filter(Boolean)])].map((x) => <option key={x} value={x} />)}</datalist>
       <Notice tone="success">{msg}</Notice>
       {loading ? <p className="p-muted">Loading...</p> : rows.length === 0 ? <Empty>No bios yet. Leaders add theirs under My account.</Empty> : (
         <div className="p-list">
-          {rows.map((b) => (
-            <div className="p-card" key={b.profile_id}>
+          {rows.map((b, i) => (
+            <div className="p-card p-bio-row" key={b.profile_id}>
+              {editing !== b.profile_id && (
+                <div className="p-order" aria-label={`Position ${i + 1} of ${rows.length}`}>
+                  <span className="p-order-num">{i + 1}</span>
+                  <button disabled={moving || i === 0} onClick={() => reorder(i, i - 1)} aria-label={`Move ${b.display_name} up`} title="Move up"><ArrowUp size={16} /></button>
+                  <button disabled={moving || i === rows.length - 1} onClick={() => reorder(i, i + 1)} aria-label={`Move ${b.display_name} down`} title="Move down"><ArrowDown size={16} /></button>
+                  <button disabled={moving || i === 0} onClick={() => reorder(i, 0)} aria-label={`Move ${b.display_name} to the top`} title="Move to top"><ChevronsUp size={16} /></button>
+                </div>
+              )}
               {editing === b.profile_id ? (
                 <>
                   <h3 className="p-card-title">Edit {b.display_name}</h3>
@@ -239,9 +276,10 @@ function Bios() {
                   <div>
                     <div className="p-item-head"><h3>{b.display_name}</h3><Badge tone={b.status === 'approved' ? 'success' : b.status === 'pending' ? 'warn' : 'neutral'}>{b.status === 'approved' ? 'On the website' : b.status === 'pending' ? 'Waiting for approval' : 'Hidden'}</Badge></div>
                     {b.title && <div className="p-meta strong">{b.title}</div>}
+                    {b.section && <div className="p-meta">Section: <strong>{b.section}</strong></div>}
                     <p className="p-pre">{b.bio}</p>
                     <div className="p-inline-form">
-                      <label>Order on page <input type="number" style={{ width: 80 }} defaultValue={b.sort_order} onBlur={(e) => Number(e.target.value) !== b.sort_order && set(b, { sort_order: Number(e.target.value) }, 'Order saved.')} /></label>
+                      <label>Section <input list="bio-sections" key={b.section} defaultValue={b.section} placeholder="None" style={{ width: 190 }} onBlur={(e) => setSection(b, e.target.value)} onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()} aria-label={`Section for ${b.display_name}`} /></label>
                       <input placeholder="Note to the leader (optional)" value={notes[b.profile_id] ?? b.review_note} onChange={(e) => setNotes({ ...notes, [b.profile_id]: e.target.value })} aria-label="Note" />
                     </div>
                     <div className="p-row-actions">

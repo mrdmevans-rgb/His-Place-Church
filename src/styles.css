@@ -683,6 +683,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .team-card { background: var(--paper-light); border: 1px solid var(--stone-border); border-radius: var(--radius-md); padding: 20px; text-align: center; }
 .team-card img, .team-initials { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; margin: 0 auto 14px; display: block; }
 .team-initials { background: var(--oxblood); color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'Source Serif 4', Georgia, serif; font-size: 44px; }
-.team-card h2 { font-size: 1.25rem; margin: 0 0 2px; }
+
 .team-title { color: var(--oxblood); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
 .team-card p { font-size: 15px; text-align: left; white-space: pre-wrap; margin: 0; }
+.team-section + .team-section { margin-top: 40px; }
+.team-section-title { font-size: clamp(1.4rem, 2.6vw, 1.8rem); margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--stone-border); }
+.team-card h3 { font-size: 1.25rem; margin: 0 0 2px; }

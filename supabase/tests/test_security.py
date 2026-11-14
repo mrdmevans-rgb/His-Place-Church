@@ -212,6 +212,10 @@ check('admin fixes grammar, bio stays approved', lambda: (sql("update public.tea
 check('admin bio edit is logged', lambda: sql("select count(*) from public.audit_log where action='bio edited by admin'"), lambda r: r[0][0] == 1)
 check('public sees the corrected bio', lambda: sql("select bio from public.team_bios", anon=True), lambda r: r == [('I love leading worship.',)])
 
+check('admin sets section and order', lambda: sql("update public.team_bios set section='Worship Team', sort_order=10 where profile_id=%s returning section, sort_order", (WORSHIP,), as_user=ADMIN), lambda r: r[0] == ('Worship Team', 10))
+check('leader cannot move self or change section', lambda: sql("update public.team_bios set section='Pastors', sort_order=1 where profile_id=%s returning section, sort_order", (WORSHIP,), as_user=WORSHIP), lambda r: r[0] == ('Worship Team', 10))
+check('public sees the section', lambda: sql("select section from public.team_bios where profile_id=%s", (WORSHIP,)), lambda r: r[0][0] == 'Worship Team')
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))
