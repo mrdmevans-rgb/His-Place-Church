@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Megaphone, ClipboardList, Heart, FolderOpen, CalendarDays, ListOrdered, Users, Music,
   Wrench, Baby, FileWarning, ShieldCheck, UserCog, LogOut, Menu, X, KeyRound,
 } from 'lucide-react'
-import { supabase, portalConfigured, friendlyError, roleLabel } from './supabase'
+import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
 import './portal.css'
 import Dashboard from './pages/Dashboard'
@@ -128,13 +128,18 @@ function Login() {
     setBusy(true)
     setMsg({ tone: '', text: '' })
     let error
+    const account = toAccountEmail(email)
+    if (mode !== 'password' && !email.includes('@')) {
+      setBusy(false)
+      return setMsg({ tone: 'info', text: 'Login IDs can\'t receive email. Use "Use a password," or ask a church admin to text you a new sign-in link.' })
+    }
     if (mode === 'link') {
-      ({ error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: redirect } }))
+      ({ error } = await supabase.auth.signInWithOtp({ email: account, options: { shouldCreateUser: false, emailRedirectTo: redirect } }))
       if (!error) setMsg({ tone: 'success', text: 'Check your email for a sign-in link. It may take a minute to arrive.' })
     } else if (mode === 'password') {
-      ({ error } = await supabase.auth.signInWithPassword({ email, password }))
+      ({ error } = await supabase.auth.signInWithPassword({ email: account, password }))
     } else {
-      ({ error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirect }))
+      ({ error } = await supabase.auth.resetPasswordForEmail(account, { redirectTo: redirect }))
       if (!error) setMsg({ tone: 'success', text: 'If that email has an account, we sent a link to set a new password.' })
     }
     if (error) {
@@ -156,8 +161,9 @@ function Login() {
       </div>
       <form className="p-form" onSubmit={submit}>
         <div className="p-field">
-          <label htmlFor="login-email">Email</label>
-          <input id="login-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <label htmlFor="login-email">{mode === 'password' ? 'Email or login ID' : 'Email'}</label>
+          <input id="login-email" type="text" inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck="false" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          {mode === 'password' && <small className="p-muted">No email? Use the login ID your admin gave you, like john.smith</small>}
         </div>
         {mode === 'password' && (
           <div className="p-field">
