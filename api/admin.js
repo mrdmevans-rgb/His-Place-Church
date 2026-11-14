@@ -9,6 +9,11 @@ import { createClient } from '@supabase/supabase-js'
 
 const ROLES = ['admin', 'pastor', 'leader', 'applicant']
 const TEAMS = ['worship', 'sound', 'media', 'children', 'safety', 'outreach']
+// People without an email get a login ID like john.smith, stored behind the
+// scenes as john.smith@login.hpcchurch.church. That address never receives mail.
+const LOGIN_DOMAIN = 'login.hpcchurch.church'
+const slug = (name) => name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  .replace(/[^a-z\s'-]/g, '').replace(/['-]/g, '').trim().split(/\s+/).filter(Boolean).slice(0, 3).join('.') || 'member'
 
 function json(res, status, body) {
   res.statusCode = status
@@ -39,10 +44,31 @@ export default async function handler(req, res) {
   const { data: who, error: whoErr } = await admin.auth.getUser(token)
   if (whoErr || !who?.user) return json(res, 401, { error: 'Your sign-in expired. Please sign in again.' })
   const { data: me } = await admin.from('profiles').select('role, active').eq('id', who.user.id).single()
-  if (!me || me.role !== 'admin' || !me.active) return json(res, 403, { error: 'Only admins can do that.' })
+  if (!me || !me.active) return json(res, 403, { error: 'Your account is not active.' })
+  const isAdmin = me.role === 'admin'
 
   const body = await readBody(req)
   const action = body.action
+
+  if (action === 'set-email') {
+    // Anyone can add or change their own email. Admins can do it for anyone.
+    const id = String(body.id || who.user.id)
+    if (id !== who.user.id && !isAdmin) return json(res, 403, { error: 'Only admins can change someone else\'s email.' })
+    const newEmail = String(body.email || '').trim().toLowerCase()
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(newEmail) || newEmail.endsWith(`@${LOGIN_DOMAIN}`)) return json(res, 400, { error: 'Please enter a valid email address.' })
+    const { data: before } = await admin.from('profiles').select('email').eq('id', id).single()
+    const { error } = await admin.auth.admin.updateUserById(id, { email: newEmail, email_confirm: true })
+    if (error) {
+      if (/already|registered|exists/i.test(error.message)) return json(res, 409, { error: 'That email is already used by another account.' })
+      return json(res, 500, { error: error.message })
+    }
+    const { error: pErr } = await admin.from('profiles').update({ email: newEmail }).eq('id', id)
+    if (pErr) return json(res, 500, { error: pErr.message })
+    await admin.from('audit_log').insert({ actor: who.user.id, action: 'email changed', entity: 'profile', entity_id: id, details: { from: before?.email, to: newEmail } })
+    return json(res, 200, { ok: true })
+  }
+
+  if (!isAdmin) return json(res, 403, { error: 'Only admins can do that.' })
   const email = String(body.email || '').trim().toLowerCase()
   const redirectTo = `${site}/portal`
 
@@ -54,11 +80,27 @@ export default async function handler(req, res) {
       const teams = Array.isArray(body.teams) ? body.teams.filter((t) => TEAMS.includes(t)) : []
       const fullName = String(body.full_name || '').trim().slice(0, 120)
       const phone = String(body.phone || '').trim().slice(0, 40)
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json(res, 400, { error: 'Please enter a valid email address.' })
+      if (!fullName) return json(res, 400, { error: "Please enter the person's name." })
+      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json(res, 400, { error: 'Please enter a valid email address, or leave it blank.' })
 
       let userId
       let link = null
-      if (body.sendEmail) {
+      let loginId = null
+      let accountEmail = email
+      if (!email) {
+        // No email: make a login ID and a link to text them.
+        const base = slug(fullName)
+        for (let n = 1; n <= 50 && !userId; n++) {
+          loginId = n === 1 ? base : `${base}${n}`
+          accountEmail = `${loginId}@${LOGIN_DOMAIN}`
+          const { data, error } = await admin.auth.admin.generateLink({ type: 'invite', email: accountEmail, options: { redirectTo } })
+          if (error && /already been registered|already exists/i.test(error.message)) continue
+          if (error) throw error
+          userId = data.user.id
+          link = data.properties.action_link
+        }
+        if (!userId) return json(res, 409, { error: 'Could not make a login ID for that name. Try adding a middle initial.' })
+      } else if (body.sendEmail) {
         const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo })
         if (error) throw error
         userId = data.user.id
@@ -68,10 +110,10 @@ export default async function handler(req, res) {
         userId = data.user.id
         link = data.properties.action_link
       }
-      const { error: pErr } = await admin.from('profiles').upsert({ id: userId, email, full_name: fullName, phone, role, teams, active: true })
+      const { error: pErr } = await admin.from('profiles').upsert({ id: userId, email: accountEmail, full_name: fullName, phone, role, teams, active: true })
       if (pErr) throw pErr
-      await admin.from('audit_log').insert({ actor: who.user.id, action: 'person invited', entity: 'profile', entity_id: userId, details: { email, role, teams } })
-      return json(res, 200, { ok: true, link })
+      await admin.from('audit_log').insert({ actor: who.user.id, action: 'person invited', entity: 'profile', entity_id: userId, details: { email: email || `login ID ${loginId}`, role, teams } })
+      return json(res, 200, { ok: true, link, loginId })
     }
 
     if (action === 'link') {

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { supabase, roleLabel, teamLabel, friendlyError } from '../supabase'
+import { supabase, roleLabel, teamLabel, friendlyError, callAdmin, isLoginId, loginIdOf, contactLabel } from '../supabase'
 import { Badge, Form, Notice, PageHead, useMe, usePortal } from '../ui'
 
 // Crop to a centered square and shrink to 800px so every team photo matches.
-async function squareJpeg(file, size = 800) {
+export async function squareJpeg(file, size = 800) {
   const img = await new Promise((resolve, reject) => {
     const i = new Image()
     i.onload = () => resolve(i)
@@ -98,7 +98,41 @@ function BioEditor() {
   )
 }
 
+function EmailCard() {
+  const me = useMe()
+  const { reloadProfile } = usePortal()
+  const noEmail = isLoginId(me.profile.email)
+  const [email, setEmail] = useState(noEmail ? '' : me.profile.email)
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState({ tone: '', text: '' })
+  const save = async (e) => {
+    e.preventDefault()
+    if (email.trim().toLowerCase() === me.profile.email) return
+    setBusy(true)
+    try {
+      await callAdmin({ action: 'set-email', email })
+      setMsg({ tone: 'success', text: `Saved. From now on, sign in with ${email.trim().toLowerCase()}. Your password stays the same.` })
+      reloadProfile()
+    } catch (err) { setMsg({ tone: 'error', text: err.message }) }
+    setBusy(false)
+  }
+  return (
+    <form className="p-card p-form" onSubmit={save}>
+      <h2 className="p-card-title">{noEmail ? 'Add your email' : 'Email'}</h2>
+      {noEmail
+        ? <p className="p-muted">You sign in with your login ID <strong>{loginIdOf(me.profile.email)}</strong>. Add an email anytime, and you'll sign in with your email instead. Your password stays the same.</p>
+        : <p className="p-muted">You sign in with this email. Your password stays the same if you change it.</p>}
+      <div className="p-inline-form">
+        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" aria-label="Email" autoComplete="email" />
+        <button className="button button-secondary" disabled={busy}>{busy ? 'Saving...' : noEmail ? 'Add email' : 'Change email'}</button>
+      </div>
+      <Notice tone={msg.tone || 'info'}>{msg.text}</Notice>
+    </form>
+  )
+}
+
 function Password() {
+  const me = useMe()
   const [pw, setPw] = useState('')
   const [msg, setMsg] = useState({ tone: '', text: '' })
   const save = async (e) => {
@@ -106,12 +140,12 @@ function Password() {
     if (pw.length < 10) return setMsg({ tone: 'error', text: 'Please use at least 10 characters.' })
     const { error } = await supabase.auth.updateUser({ password: pw })
     setPw('')
-    setMsg(error ? { tone: 'error', text: friendlyError(error) } : { tone: 'success', text: 'Password saved. You can now sign in with your email and password, or keep using email links.' })
+    setMsg(error ? { tone: 'error', text: friendlyError(error) } : { tone: 'success', text: isLoginId(me.profile.email) ? `Password saved. Sign in with your login ID ${loginIdOf(me.profile.email)} and this password.` : 'Password saved. You can now sign in with your email and password, or keep using email links.' })
   }
   return (
     <form className="p-card p-form" onSubmit={save}>
       <h2 className="p-card-title">Password</h2>
-      <p className="p-muted">Optional. You can always sign in with an emailed link instead.</p>
+      <p className="p-muted">{isLoginId(me.profile.email) ? 'Set a password so you can sign in anytime with your login ID.' : 'Optional. You can always sign in with an emailed link instead.'}</p>
       <div className="p-inline-form">
         <input type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password (10+ characters)" aria-label="New password" />
         <button className="button button-secondary">Set password</button>
@@ -134,13 +168,14 @@ export default function Account() {
   }
   return (
     <>
-      <PageHead title="My account" intro={`${me.profile.email} · ${roleLabel(me.role)}${(me.profile.teams || []).length ? ` · ${me.profile.teams.map(teamLabel).join(', ')}` : ''}`} />
+      <PageHead title="My account" intro={`${contactLabel(me.profile.email)} · ${roleLabel(me.role)}${(me.profile.teams || []).length ? ` · ${me.profile.teams.map(teamLabel).join(', ')}` : ''}`} />
       <div className="p-card">
         <h2 className="p-card-title">Contact information</h2>
         <Notice tone="success">{msg}</Notice>
         <Form fields={[{ name: 'full_name', label: 'Full name', required: true, half: true }, { name: 'phone', label: 'Mobile phone', type: 'tel', half: true }]} initial={me.profile} onSubmit={save} />
-        <p className="p-muted">To change your email, role, or teams, ask a church admin.</p>
+        <p className="p-muted">To change your role or teams, ask a church admin.</p>
       </div>
+      <EmailCard />
       {me.isStaff && <BioEditor />}
       <Password />
     </>

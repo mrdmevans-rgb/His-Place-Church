@@ -208,6 +208,10 @@ check('leader cannot upload into another folder', lambda: sql("insert into stora
 check('public can view team photos', lambda: sql("select count(*) from storage.objects where bucket_id='team-photos'", anon=True), lambda r: r[0][0] == 1)
 check('public still cannot see private files', lambda: sql("select count(*) from storage.objects where bucket_id='portal-files'", anon=True), lambda r: r[0][0] == 0)
 
+check('admin fixes grammar, bio stays approved', lambda: (sql("update public.team_bios set status='approved' where profile_id=%s", (WORSHIP,), as_user=ADMIN), sql("update public.team_bios set bio='I love leading worship.' where profile_id=%s returning status", (WORSHIP,), as_user=ADMIN))[1], lambda r: r[0][0] == 'approved')
+check('admin bio edit is logged', lambda: sql("select count(*) from public.audit_log where action='bio edited by admin'"), lambda r: r[0][0] == 1)
+check('public sees the corrected bio', lambda: sql("select bio from public.team_bios", anon=True), lambda r: r == [('I love leading worship.',)])
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))

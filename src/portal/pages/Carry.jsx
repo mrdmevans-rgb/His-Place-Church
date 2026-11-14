@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase, friendlyError } from '../supabase'
+import { supabase, friendlyError, isLoginId } from '../supabase'
 import { Badge, Empty, Form, Notice, PageHead, daysUntil, fmtDate, fmtDateTime, useMe, usePeople, useRows } from '../ui'
 
 const PERMITS = [
@@ -74,7 +74,7 @@ function MyApplication({ app, reload }) {
         {app && <Notice tone="info">Saving changes sends your application back to the safety team for review.</Notice>}
         <Form
           fields={appFields}
-          initial={app ? { ...app, safety_policy_ack: false, signature_name: '' } : { full_name: me.profile.full_name, email: me.profile.email, phone: me.profile.phone }}
+          initial={app ? { ...app, safety_policy_ack: false, signature_name: '' } : { full_name: me.profile.full_name, email: isLoginId(me.profile.email) ? '' : me.profile.email, phone: me.profile.phone }}
           onSubmit={save}
           onCancel={app ? () => setEditing(false) : undefined}
           submitLabel={app ? 'Save and resubmit' : 'Submit application'}

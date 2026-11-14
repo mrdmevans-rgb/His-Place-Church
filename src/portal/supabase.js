@@ -32,6 +32,16 @@ export const ROLES = [
 ]
 export const roleLabel = (r) => (ROLES.find(([id]) => id === r) || [r, r])[1]
 
+// People without an email sign in with a login ID like john.smith.
+export const LOGIN_DOMAIN = 'login.hpcchurch.church'
+export const isLoginId = (email) => (email || '').toLowerCase().endsWith(`@${LOGIN_DOMAIN}`)
+export const loginIdOf = (email) => (isLoginId(email) ? email.split('@')[0] : '')
+export const toAccountEmail = (input) => {
+  const v = (input || '').trim().toLowerCase()
+  return v.includes('@') ? v : `${v}@${LOGIN_DOMAIN}`
+}
+export const contactLabel = (email) => (isLoginId(email) ? `Login ID: ${loginIdOf(email)}` : email)
+
 export function friendlyError(error) {
   if (!error) return ''
   const m = error.message || String(error)
@@ -39,4 +49,17 @@ export function friendlyError(error) {
   if (/duplicate key.*carry_applications/i.test(m)) return 'You already have an application. Edit it instead.'
   if (/JWT|session/i.test(m)) return 'Your sign-in expired. Please sign in again.'
   return m
+}
+
+// Calls the secure server tool (api/admin.js) as the signed-in person.
+export async function callAdmin(body) {
+  const { data: { session } } = await supabase.auth.getSession()
+  const res = await fetch('/api/admin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
+    body: JSON.stringify(body),
+  })
+  const out = await res.json().catch(() => ({ error: 'The server did not respond. Try again.' }))
+  if (!res.ok) throw new Error(out.error || 'Something went wrong.')
+  return out
 }
