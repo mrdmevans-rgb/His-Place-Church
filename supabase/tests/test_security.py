@@ -216,6 +216,108 @@ check('admin sets section and order', lambda: sql("update public.team_bios set s
 check('leader cannot move self or change section', lambda: sql("update public.team_bios set section='Pastors', sort_order=1 where profile_id=%s returning section, sort_order", (WORSHIP,), as_user=WORSHIP), lambda r: r[0] == ('Worship Team', 10))
 check('public sees the section', lambda: sql("select section from public.team_bios where profile_id=%s", (WORSHIP,)), lambda r: r[0][0] == 'Worship Team')
 
+# ================= member portal =================
+MEM = make_user('member@x.org', 'member')
+MEM2 = make_user('member2@x.org', 'member')
+sql("update public.profiles set phone='513-555-0001' where id=%s", (MEM,))
+
+# joining
+check('visitor can request membership', lambda: sql("insert into public.membership_requests (full_name, email, status) values ('New Person', 'new@p.org', 'approved')", anon=True), 'ok')
+check('request is forced to pending', lambda: sql("select status from public.membership_requests"), lambda r: r == [('pending',)])
+check('visitor cannot read requests', lambda: sql("select count(*) from public.membership_requests", anon=True), lambda r: r[0][0] == 0)
+check('member cannot read requests', lambda: sql("select count(*) from public.membership_requests", as_user=MEM), lambda r: r[0][0] == 0)
+check('request needs email or phone', lambda: sql("insert into public.membership_requests (full_name) values ('No Contact')", anon=True), 'denied')
+check('admin sees and approves requests', lambda: sql("update public.membership_requests set status='approved' returning decided_by", as_user=ADMIN), lambda r: r[0][0] == ADMIN)
+check('member cannot make self a leader', lambda: sql("update public.profiles set role='leader' where id=%s", (MEM,), as_user=MEM), 'denied')
+check('member can accept code of conduct', lambda: sql("update public.profiles set conduct_accepted_at=now() where id=%s", (MEM,), as_user=MEM), lambda r: r == 1)
+
+# library
+t1 = sql("insert into public.teachers (name, ministry) values ('David Guzik', 'Enduring Word') returning id", as_user=PASTOR)[0][0]
+s1 = sql("insert into public.study_series (title, teacher_id, book, status) values ('Romans', %s, 'Romans', 'draft') returning id", (t1,), as_user=PASTOR)[0][0]
+l1 = sql("insert into public.study_lessons (series_id, title, video_url) values (%s, 'Romans 1', 'https://youtube.com/watch?v=x') returning id", (s1,), as_user=PASTOR)[0][0]
+check('member cannot add to library', lambda: sql("insert into public.teachers (name) values ('x')", as_user=MEM), 'denied')
+check('leader (not pastor) cannot change library', lambda: sql("update public.study_series set title='y' where id=%s", (s1,), as_user=WORSHIP), 'denied')
+check('draft series hidden from members', lambda: sql("select count(*) from public.study_series", as_user=MEM), lambda r: r[0][0] == 0)
+check('draft lessons hidden from members', lambda: sql("select count(*) from public.study_lessons", as_user=MEM), lambda r: r[0][0] == 0)
+sql("update public.study_series set status='published' where id=%s", (s1,), as_user=PASTOR)
+check('published series visible to members', lambda: sql("select count(*) from public.study_lessons", as_user=MEM), lambda r: r[0][0] == 1)
+check('applicant cannot see library', lambda: sql("select count(*) from public.study_series", as_user=APPL), lambda r: r[0][0] == 0)
+check('visitor cannot see library', lambda: sql("select count(*) from public.study_series", anon=True), lambda r: r[0][0] == 0)
+check('member marks lesson done', lambda: sql("insert into public.lesson_progress (lesson_id, user_id) values (%s, %s)", (l1, MEM), as_user=MEM), 'ok')
+check('member cannot mark progress for others', lambda: sql("insert into public.lesson_progress (lesson_id, user_id) values (%s, %s)", (l1, MEM2), as_user=MEM), 'denied')
+check('progress is private', lambda: sql("select count(*) from public.lesson_progress", as_user=MEM2), lambda r: r[0][0] == 0)
+c1 = sql("insert into public.lesson_comments (lesson_id, body) values (%s, 'Great lesson') returning id", (l1,), as_user=MEM)[0][0]
+check('members discuss lessons', lambda: sql("select count(*) from public.lesson_comments", as_user=MEM2), lambda r: r[0][0] == 1)
+check('member cannot hide a comment', lambda: sql("update public.lesson_comments set hidden=true where id=%s", (c1,), as_user=MEM2), 'denied')
+check('author cannot hide own comment flag either', lambda: sql("update public.lesson_comments set hidden=true where id=%s", (c1,), as_user=MEM), 'denied')
+check('pastor hides a comment', lambda: sql("update public.lesson_comments set hidden=true where id=%s", (c1,), as_user=PASTOR), lambda r: r == 1)
+check('hidden comment gone for other members', lambda: sql("select count(*) from public.lesson_comments", as_user=MEM2), lambda r: r[0][0] == 0)
+check('author still sees own hidden comment', lambda: sql("select count(*) from public.lesson_comments", as_user=MEM), lambda r: r[0][0] == 1)
+check('member can report a post', lambda: sql("insert into public.content_reports (item_table, item_id, reason) values ('lesson_comments', %s, 'unkind')", (c1,), as_user=MEM2), 'ok')
+check('members cannot read others reports', lambda: sql("select count(*) from public.content_reports", as_user=MEM), lambda r: r[0][0] == 0)
+
+# ask the pastor
+q1 = sql("insert into public.pastor_questions (question, answer, share_as_faq) values ('What is grace?', 'self answer', true) returning id, answer, share_as_faq", as_user=MEM)
+check('member question cannot preset an answer', lambda: q1, lambda r: r[0][1] == '' and r[0][2] is False)
+q1 = q1[0][0]
+check('other members cannot see the question', lambda: sql("select count(*) from public.pastor_questions", as_user=MEM2), lambda r: r[0][0] == 0)
+check('leader (not pastor) cannot see questions', lambda: sql("select count(*) from public.pastor_questions", as_user=WORSHIP), lambda r: r[0][0] == 0)
+check('member cannot answer own question', lambda: sql("update public.pastor_questions set answer='x' where id=%s", (q1,), as_user=MEM), 'denied')
+check('pastor answers and shares anonymously', lambda: sql("update public.pastor_questions set answer='Unearned favor', share_as_faq=true, faq_question='What is grace?', faq_answer='Unearned favor' where id=%s returning answered_by", (q1,), as_user=PASTOR), lambda r: r[0][0] == PASTOR)
+check('FAQ shows to members without who asked', lambda: sql("select * from public.pastor_faq()", as_user=MEM2), lambda r: len(r) == 1 and r[0][1] == 'What is grace?' and len(r[0]) == 4)
+check('FAQ hidden from visitors', lambda: sql("select count(*) from public.pastor_faq()", anon=True), lambda r: r[0][0] == 0)
+check('member cannot edit answered question', lambda: sql("update public.pastor_questions set question='changed' where id=%s", (q1,), as_user=MEM), 'denied')
+
+# prayer wall
+mp = sql("insert into public.member_prayers (title) values ('Job interview') returning id", as_user=MEM)[0][0]
+mp2 = sql("insert into public.member_prayers (title, pastors_only) values ('Private', true) returning id", as_user=MEM)[0][0]
+check('members see shared prayers', lambda: sql("select count(*) from public.member_prayers where id=%s", (mp,), as_user=MEM2), lambda r: r[0][0] == 1)
+check('pastors-only prayer hidden from members', lambda: sql("select count(*) from public.member_prayers where id=%s", (mp2,), as_user=MEM2), lambda r: r[0][0] == 0)
+check('pastor sees pastors-only prayer', lambda: sql("select count(*) from public.member_prayers where id=%s", (mp2,), as_user=PASTOR), lambda r: r[0][0] == 1)
+check('member cannot pray-mark a hidden prayer', lambda: sql("insert into public.member_praying (prayer_id, user_id) values (%s, %s)", (mp2, MEM2), as_user=MEM2), 'denied')
+check('member marks praying', lambda: sql("insert into public.member_praying (prayer_id, user_id) values (%s, %s)", (mp, MEM2), as_user=MEM2), 'ok')
+check('applicant cannot see member prayers', lambda: sql("select count(*) from public.member_prayers", as_user=APPL), lambda r: r[0][0] == 0)
+check('member prayers separate from leader prayers', lambda: sql("select count(*) from public.prayers", as_user=MEM), lambda r: r[0][0] == 0)
+
+# directory
+check('member names list works for members', lambda: sql("select count(*) from public.member_names()", as_user=MEM), lambda r: r[0][0] >= 2)
+check('member cannot read other profiles directly', lambda: sql("select count(*) from public.profiles", as_user=MEM), lambda r: r[0][0] == 1)
+sql("insert into public.member_directory (profile_id, listed, show_phone, show_email, birthday_month, birthday_day, share_celebrations) values (%s, true, false, false, 4, 12, true)", (MEM,), as_user=MEM)
+check('directory hides phone and email unless chosen', lambda: sql("select phone, email from public.directory_list() where id=%s", (MEM,), as_user=MEM2), lambda r: r == [('', '')])
+sql("update public.member_directory set show_phone=true where profile_id=%s", (MEM,), as_user=MEM)
+check('directory shows phone once chosen', lambda: sql("select phone from public.directory_list() where id=%s", (MEM,), as_user=MEM2), lambda r: r == [('513-555-0001',)])
+check('unlisted members not in directory', lambda: sql("select count(*) from public.directory_list() where id=%s", (MEM2,), as_user=MEM), lambda r: r[0][0] == 0)
+check('directory hidden from visitors and applicants', lambda: sql("select (select count(*) from public.directory_list())", as_user=APPL), lambda r: r[0][0] == 0)
+check('birthday shared without year', lambda: sql("select kind, month, day from public.celebrations()", as_user=MEM2), lambda r: r == [('birthday', 4, 12)])
+check('member cannot edit another directory entry', lambda: sql("update public.member_directory set listed=false where profile_id=%s", (MEM,), as_user=MEM2), 'denied')
+check('member uploads directory photo to own folder', lambda: sql("insert into storage.objects (bucket_id, name) values ('team-photos', %s)", (f'members/{MEM}/me.jpg',), as_user=MEM), 'ok')
+check('member cannot upload to team bio photos', lambda: sql("insert into storage.objects (bucket_id, name) values ('team-photos', %s)", (f'{MEM}/x.jpg',), as_user=MEM), 'denied')
+
+# care calendar
+check('member cannot start a care calendar', lambda: sql("insert into public.care_pages (title) values ('x')", as_user=MEM), 'denied')
+cp = sql("insert into public.care_pages (title) values ('Meals for the Smiths') returning id", as_user=KIDS)[0][0]
+cs = sql("insert into public.care_slots (care_id, slot_date) values (%s, '2026-12-01') returning id", (cp,), as_user=KIDS)[0][0]
+check('member claims an open meal slot', lambda: sql("update public.care_slots set taken_by=%s where id=%s", (MEM, cs), as_user=MEM), lambda r: r == 1)
+check('another member cannot take a claimed slot', lambda: sql("update public.care_slots set taken_by=%s where id=%s", (MEM2, cs), as_user=MEM2), 'denied')
+check('member cannot change the date', lambda: sql("update public.care_slots set slot_date='2026-12-02' where id=%s", (cs,), as_user=MEM), 'denied')
+check('member gives up own slot', lambda: sql("update public.care_slots set taken_by=null where id=%s", (cs,), as_user=MEM), lambda r: r == 1)
+check('member cannot claim a slot for someone else', lambda: sql("update public.care_slots set taken_by=%s where id=%s", (MEM2, cs), as_user=MEM), 'denied')
+
+# help board, gatherings, reading plan
+hp = sql("insert into public.help_posts (kind, title) values ('need', 'Ride Sunday') returning id", as_user=MEM)[0][0]
+check('members reply on help board', lambda: sql("insert into public.help_replies (post_id, body) values (%s, 'I can drive')", (hp,), as_user=MEM2), 'ok')
+check('member cannot edit another post', lambda: sql("update public.help_posts set title='x' where id=%s", (hp,), as_user=MEM2), 'denied')
+g1 = sql("insert into public.gatherings (title, starts_at) values ('Park day', now() + interval '3 days') returning id", as_user=MEM)[0][0]
+check('member RSVPs', lambda: sql("insert into public.gathering_rsvps (gathering_id, user_id, guests) values (%s, %s, 2)", (g1, MEM2), as_user=MEM2), 'ok')
+check('member cannot RSVP for someone else', lambda: sql("insert into public.gathering_rsvps (gathering_id, user_id) values (%s, %s)", (g1, MEM), as_user=MEM2), 'denied')
+check('member cannot set the reading plan', lambda: sql("insert into public.reading_weeks (week_of, passage) values ('2026-11-16', 'John 1')", as_user=MEM), 'denied')
+rw = sql("insert into public.reading_weeks (week_of, passage) values ('2026-11-16', 'John 1') returning id", as_user=WORSHIP)[0][0]
+check('member comments on the reading', lambda: sql("insert into public.reading_comments (week_id, body) values (%s, 'Verse 14!')", (rw,), as_user=MEM), 'ok')
+check('applicant sees no community posts', lambda: sql("select (select count(*) from public.help_posts)+(select count(*) from public.gatherings)+(select count(*) from public.reading_comments)+(select count(*) from public.care_pages)", as_user=APPL), lambda r: r[0][0] == 0)
+check('visitor sees no community posts', lambda: sql("select (select count(*) from public.help_posts)+(select count(*) from public.gatherings)+(select count(*) from public.reading_weeks)", anon=True), lambda r: r[0][0] == 0)
+sql("update public.profiles set active=false where id=%s", (MEM2,))
+check('removed member loses access', lambda: sql("select (select count(*) from public.member_prayers)+(select count(*) from public.study_series)+(select count(*) from public.directory_list())", as_user=MEM2), lambda r: r[0][0] == 0)
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))

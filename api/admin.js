@@ -7,7 +7,7 @@
 //   SITE_URL                     https://www.hpcchurch.church
 import { createClient } from '@supabase/supabase-js'
 
-const ROLES = ['admin', 'pastor', 'leader', 'applicant']
+const ROLES = ['admin', 'pastor', 'leader', 'member', 'applicant']
 const TEAMS = ['worship', 'sound', 'media', 'children', 'safety', 'outreach']
 // People without an email get a login ID like john.smith, stored behind the
 // scenes as john.smith@login.hpcchurch.church. That address never receives mail.

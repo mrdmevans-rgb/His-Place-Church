@@ -3,6 +3,7 @@ import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from
 import {
   LayoutDashboard, Megaphone, ClipboardList, Heart, FolderOpen, CalendarDays, ListOrdered, Users, Music,
   Wrench, Baby, FileWarning, ShieldCheck, UserCog, LogOut, Menu, X, KeyRound,
+  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag,
 } from 'lucide-react'
 import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
@@ -17,9 +18,25 @@ import Services from './pages/Services'
 import Schedule from './pages/Schedule'
 import Account from './pages/Account'
 import { Announcements, Calendar, Songs, Equipment, KidsClearances, Incidents } from './pages/Simple'
+import MemberHome, { ConductGate, Moderation } from './member/MemberHome'
+import Library, { SeriesPage, LessonPage } from './member/Library'
+import LibraryManage from './member/LibraryManage'
+import AskPastor from './member/AskPastor'
+import { MemberPrayer, Directory, Care, HelpBoard, Gatherings, Reading } from './member/Community'
 
 const NAV = [
-  { to: '/portal', label: 'Dashboard', icon: LayoutDashboard, show: (m) => m.isStaff, end: true },
+  { group: 'Members', show: (m) => m.isMember },
+  { to: '/portal/home', label: 'Member home', icon: Home, show: (m) => m.isMember },
+  { to: '/portal/study', label: 'Bible study library', icon: BookOpen, show: (m) => m.isMember },
+  { to: '/portal/read', label: 'Read together', icon: BookMarked, show: (m) => m.isMember },
+  { to: '/portal/pray', label: 'Prayer wall', icon: HeartHandshake, show: (m) => m.isMember },
+  { to: '/portal/ask', label: 'Ask the Pastor', icon: MessageCircleQuestion, show: (m) => m.isMember },
+  { to: '/portal/gatherings', label: 'Gatherings', icon: CalendarHeart, show: (m) => m.isMember },
+  { to: '/portal/care', label: 'Care calendar', icon: Soup, show: (m) => m.isMember },
+  { to: '/portal/help', label: 'Help board', icon: HandHelping, show: (m) => m.isMember },
+  { to: '/portal/directory', label: 'Directory', icon: Contact, show: (m) => m.isMember },
+  { group: 'Leaders', show: (m) => m.isStaff },
+  { to: '/portal', label: 'Leader dashboard', icon: LayoutDashboard, show: (m) => m.isStaff, end: true },
   { to: '/portal/announcements', label: 'Announcements', icon: Megaphone, show: (m) => m.isStaff },
   { to: '/portal/requests', label: 'Requests', icon: ClipboardList, show: (m) => m.isStaff },
   { to: '/portal/prayer', label: 'Leader prayer', icon: Heart, show: (m) => m.isStaff },
@@ -31,8 +48,11 @@ const NAV = [
   { to: '/portal/equipment', label: 'Equipment issues', icon: Wrench, show: (m) => m.isStaff },
   { to: '/portal/kids', label: "Kids clearances", icon: Baby, show: (m) => m.isPastoral || m.onTeam('children') },
   { to: '/portal/incidents', label: 'Incident reports', icon: FileWarning, show: (m) => m.isStaff },
-  { to: '/portal/safety', label: 'Safety team', icon: ShieldCheck, show: (m) => !!m.role },
+  { to: '/portal/library-manage', label: 'Manage library', icon: LibraryIcon, show: (m) => m.isPastoral },
+  { to: '/portal/reports', label: 'Reported posts', icon: Flag, show: (m) => m.isPastoral },
   { to: '/portal/admin', label: 'Admin', icon: UserCog, show: (m) => m.isAdmin },
+  { group: 'Account', show: (m) => !!m.role },
+  { to: '/portal/safety', label: 'Safety team', icon: ShieldCheck, show: (m) => !!m.role },
   { to: '/portal/account', label: 'My account', icon: KeyRound, show: (m) => !!m.role },
 ]
 
@@ -71,7 +91,13 @@ export default function PortalApp() {
     if (error) { setLoadError(friendlyError(error)); return }
     setProfile(data)
     const { data: all } = await supabase.from('profiles').select('id, full_name, email, phone, role, teams, active')
-    setPeople(Object.fromEntries((all || []).map((p) => [p.id, p])))
+    const map = Object.fromEntries((all || []).map((p) => [p.id, p]))
+    if (data.active && ['admin', 'pastor', 'leader', 'member'].includes(data.role)) {
+      // Members can't read other profiles, but can see fellow members' names.
+      const { data: names } = await supabase.rpc('member_names')
+      for (const n of names || []) if (!map[n.id]) map[n.id] = { id: n.id, full_name: n.full_name, active: true, role: 'member' }
+    }
+    setPeople(map)
   }, [session])
   useEffect(() => { loadProfile() }, [loadProfile])
 
@@ -219,7 +245,7 @@ function Layout() {
   const navigate = useNavigate()
   useEffect(() => { setOpen(false); window.scrollTo(0, 0) }, [location.pathname])
   const items = NAV.filter((n) => n.show(me))
-  const home = me.isStaff ? '/portal' : '/portal/safety'
+  const home = me.isStaff ? '/portal' : me.isMember ? '/portal/home' : '/portal/safety'
 
   return (
     <div className="p-shell">
@@ -229,7 +255,9 @@ function Layout() {
           <button className="p-side-close" onClick={() => setOpen(false)} aria-label="Close menu"><X size={20} /></button>
         </div>
         <nav>
-          {items.map(({ to, label, icon: Icon, end }) => (
+          {items.map(({ to, label, icon: Icon, end, group }) => group ? (
+            <div key={group} className="p-nav-group">{group}</div>
+          ) : (
             <NavLink key={to} to={to} end={end} className={({ isActive }) => `p-nav${isActive ? ' active' : ''}`}>
               <Icon size={17} aria-hidden="true" /> {label}
             </NavLink>
@@ -248,8 +276,30 @@ function Layout() {
           <span className="p-top-title">Leader Portal</span>
         </header>
         <main className="p-content" id="main">
+          <ConductGate>
           <Routes>
-            <Route index element={me.isStaff ? <Dashboard /> : <Navigate to="/portal/safety" replace />} />
+            <Route index element={me.isStaff ? <Dashboard /> : <Navigate to={home} replace />} />
+            {me.isMember && (
+              <>
+                <Route path="home" element={<MemberHome />} />
+                <Route path="study" element={<Library />} />
+                <Route path="study/:seriesId" element={<SeriesPage />} />
+                <Route path="study/:seriesId/:lessonId" element={<LessonPage />} />
+                <Route path="read" element={<Reading />} />
+                <Route path="pray" element={<MemberPrayer />} />
+                <Route path="ask" element={<AskPastor />} />
+                <Route path="gatherings" element={<Gatherings />} />
+                <Route path="care" element={<Care />} />
+                <Route path="help" element={<HelpBoard />} />
+                <Route path="directory" element={<Directory />} />
+              </>
+            )}
+            {me.isPastoral && (
+              <>
+                <Route path="library-manage" element={<LibraryManage />} />
+                <Route path="reports" element={<Moderation />} />
+              </>
+            )}
             {me.isStaff && (
               <>
                 <Route path="announcements" element={<Announcements />} />
@@ -270,6 +320,7 @@ function Layout() {
             <Route path="account" element={<Account />} />
             <Route path="*" element={<Navigate to={home} replace />} />
           </Routes>
+          </ConductGate>
         </main>
       </div>
     </div>
