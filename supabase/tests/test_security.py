@@ -318,6 +318,17 @@ check('visitor sees no community posts', lambda: sql("select (select count(*) fr
 sql("update public.profiles set active=false where id=%s", (MEM2,))
 check('removed member loses access', lambda: sql("select (select count(*) from public.member_prayers)+(select count(*) from public.study_series)+(select count(*) from public.directory_list())", as_user=MEM2), lambda r: r[0][0] == 0)
 
+# Email updates: each member controls only their own choices.
+sql("update public.profiles set active=true where id=%s", (MEM2,))
+check('member saves email choices', lambda: sql("insert into public.email_prefs (weekly_reading, discussions) values (true, true)", as_user=MEM), 'ok')
+check('member sees own email choices', lambda: sql("select weekly_reading, pastor_answers from public.email_prefs", as_user=MEM), lambda r: r == [(True, True)])
+check("member cannot see another member's email choices", lambda: sql("select count(*) from public.email_prefs", as_user=MEM2), lambda r: r[0][0] == 0)
+check("member cannot change another member's email choices", lambda: sql("update public.email_prefs set weekly_reading=false where profile_id=%s returning 1", (MEM,), as_user=MEM2), lambda r: r == [])
+check('member cannot create choices for someone else', lambda: sql("insert into public.email_prefs (profile_id) values (%s)", (MEM,), as_user=MEM2), 'denied')
+check('applicant cannot sign up for member emails', lambda: sql("insert into public.email_prefs (weekly_reading) values (true)", as_user=APPL), 'denied')
+check('email send log is server only', lambda: sql("select count(*) from public.email_state", as_user=MEM), lambda r: r[0][0] == 0)
+check('visitor sees no email choices', lambda: sql("select count(*) from public.email_prefs", anon=True), lambda r: r[0][0] == 0)
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))
