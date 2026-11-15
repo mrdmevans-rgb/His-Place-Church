@@ -263,3 +263,4 @@
   .m-tiles { grid-template-columns: repeat(2, 1fr); }
   .m-slots li > span:first-child { min-width: 0; }
 }
+.m-find { display: block; font-size: 13px; color: var(--sage); font-weight: 600; margin-top: 2px; }

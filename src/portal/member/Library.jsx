@@ -142,7 +142,11 @@ function Questions({ title, list }) {
   return (
     <div className="m-qs">
       <h3>{title}</h3>
-      <ol>{list.map((x) => <li key={x}>{x}</li>)}</ol>
+      <ol>{list.map((x) => {
+        // Questions can end with "(Find it: ...)" telling members where to dig.
+        const m = x.match(/^(.*?)\s*\(Find it: (.*)\)\s*$/)
+        return <li key={x}>{m ? <>{m[1]}<span className="m-find">Find it: {m[2]}</span></> : x}</li>
+      })}</ol>
     </div>
   )
 }

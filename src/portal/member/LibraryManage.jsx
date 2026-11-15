@@ -6,7 +6,7 @@ import { Badge, Empty, Form, Notice, PageHead, useRows } from '../ui'
 import { STYLES, styleLabel, youtubeEmbed } from './Library'
 import { fromLines, resourcesToText, textToResources, toLines } from './shared'
 
-const guideHelp = 'One question per line.'
+const guideHelp = 'One question per line. To point members to the answer, end a question with (Find it: verse 6, or the video).'
 const resHelp = 'One per line: Label | https://link'
 
 function Teachers() {
