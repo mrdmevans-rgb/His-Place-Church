@@ -30,6 +30,8 @@ export default function JoinPage() {
     setState({ sending: true, done: false, error: '' })
     const { error } = await supabase.from('membership_requests').insert({ full_name: name, email, phone, message: form.message.trim() })
     if (error) return setState({ sending: false, done: false, error: 'Something went wrong sending your request. Please try again, or let us know on Sunday.' })
+    // Let the admins know someone is waiting. If email isn't set up, this does nothing.
+    fetch('/api/notify', { method: 'POST' }).catch(() => {})
     setState({ sending: false, done: true, error: '' })
   }
 
