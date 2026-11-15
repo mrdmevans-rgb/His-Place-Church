@@ -52,7 +52,9 @@ export const fmtDate = (d) => {
   return x.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 export const fmtDateTime = (d) => (d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '')
-export const today = () => new Date().toISOString().slice(0, 10)
+// Local date (not UTC), so evenings in Ohio don't count as tomorrow.
+export const localISO = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+export const today = () => localISO()
 export const daysUntil = (d) => (d ? Math.ceil((new Date(d + 'T12:00:00') - new Date()) / 86400000) : null)
 export const toLocalInput = (d) => {
   if (!d) return ''

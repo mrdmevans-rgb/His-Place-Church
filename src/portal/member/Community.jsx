@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Cake, Heart, Users as UsersIcon } from 'lucide-react'
 import { supabase, friendlyError } from '../supabase'
-import { Badge, Empty, Form, Notice, PageHead, fmtDate, fmtDateTime, today, useMe, usePeople, useRows } from '../ui'
-import { HideButton, PassageLinks, ReportButton, Thread } from './shared'
+import { Badge, Empty, Form, Notice, PageHead, fmtDate, fmtDateTime, localISO, today, useMe, usePeople, useRows } from '../ui'
+import { HideButton, PassageLinks, ReportButton, Thread, gatewayUrl } from './shared'
 import { squareJpeg } from '../pages/Account'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -393,23 +393,71 @@ export function Gatherings() {
 }
 
 /* ======================= Weekly reading ======================= */
-const mondayOf = (d = new Date()) => { const x = new Date(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x.toISOString().slice(0, 10) }
+const mondayOf = (d = new Date()) => { const x = new Date(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return localISO(x) }
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+const dayLines = (days) => (Array.isArray(days) ? days.map((d) => `${d.day}: ${d.passage}`).join('\n') : '')
+const linesToDays = (text) => (text || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l, i) => {
+  const m = l.match(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*:\s*(.+)$/i)
+  return m ? { day: m[1][0].toUpperCase() + m[1].slice(1).toLowerCase(), passage: m[2].trim() } : { day: WEEKDAYS[i] || `Day ${i + 1}`, passage: l }
+})
+
+function DayList({ w, isCurrent }) {
+  if (!w.days?.length) return null
+  const dow = new Date().getDay() // 0 Sunday ... 6 Saturday
+  const todayName = isCurrent && dow >= 1 && dow <= 5 ? WEEKDAYS[dow - 1] : null
+  return (
+    <>
+      <ol className="m-days">
+        {w.days.map((d) => (
+          <li key={d.day + d.passage} className={d.day === todayName ? 'today' : ''}>
+            <span className="m-day">{d.day === todayName ? 'Today' : d.day}</span>
+            <a href={gatewayUrl(d.passage)} target="_blank" rel="noopener noreferrer">{d.passage}</a>
+          </li>
+        ))}
+      </ol>
+      {isCurrent && (dow === 0 || dow === 6) && <p className="p-small">It's the weekend. Catch up on anything you missed, and share what stood out below.</p>}
+    </>
+  )
+}
 
 export function Reading() {
   const me = useMe()
   const { name } = usePeople()
   const { rows, reload } = useRows('reading_weeks', { order: 'week_of' })
   const { rows: done, reload: rd } = useRows('reading_done', { order: null })
-  const [adding, setAdding] = useState(false)
-  const current = rows.find((w) => w.week_of <= today()) || null
-  const upcoming = rows.filter((w) => w.week_of > today()).reverse()
+  const [editing, setEditing] = useState(null)
+  const [msg, setMsg] = useState('')
+  const now = today()
+  // rows are newest first
+  const current = rows.find((w) => w.week_of <= now) || null
+  const upcoming = rows.filter((w) => w.week_of > now).reverse()
+  const next = !current ? upcoming[0] : null
   const past = rows.filter((w) => current && w.week_of < current.week_of)
-  const create = async (v) => {
-    const { error } = await supabase.from('reading_weeks').insert({ week_of: v.week_of, passage: v.passage, note: v.note, question: v.question })
+  const fields = [
+    { name: 'week_of', label: 'Week starting (Monday)', type: 'date', required: true, default: mondayOf(), half: true },
+    { name: 'passage', label: 'Passage for the week', required: true, half: true, placeholder: 'John 1-5', max: 120 },
+    { name: 'days', label: 'Daily readings', type: 'textarea', rows: 5, help: 'One per line, like Monday: John 1' },
+    { name: 'note', label: 'A short introduction', type: 'textarea', rows: 3 },
+    { name: 'question', label: 'A question to think about', max: 500 },
+  ]
+  const save = async (v) => {
+    const payload = { week_of: v.week_of, passage: v.passage, note: v.note || '', question: v.question || '', days: linesToDays(v.days) }
+    const { error } = editing === 'new' ? await supabase.from('reading_weeks').insert(payload) : await supabase.from('reading_weeks').update(payload).eq('id', editing.id)
     if (error) return /duplicate/.test(error.message) ? 'That week already has a reading.' : error
-    setAdding(false); reload(); return null
+    setEditing(null); setMsg('Saved.'); reload(); return null
   }
-  const Week = ({ w, big }) => {
+  const remove = async (w) => {
+    if (!window.confirm(`Delete the reading for the week of ${fmtDate(w.week_of)}?`)) return
+    const { error } = await supabase.from('reading_weeks').delete().eq('id', w.id)
+    setMsg(error ? friendlyError(error) : 'Deleted.'); reload()
+  }
+  const StaffActions = ({ w }) => (me.isStaff ? (
+    <span className="p-run-actions">
+      <button className="p-link" onClick={() => { setEditing(w); setMsg(''); window.scrollTo(0, 0) }}>Edit</button>
+      <button className="p-link danger" onClick={() => remove(w)}>Delete</button>
+    </span>
+  ) : null)
+  const Week = ({ w, big, label }) => {
     const readers = done.filter((x) => x.week_id === w.id)
     const iDid = readers.some((x) => x.user_id === me.profile.id)
     const toggle = async () => {
@@ -419,31 +467,42 @@ export function Reading() {
     }
     return (
       <div className="p-card">
-        <div className="p-item-head"><h3>{big ? 'This week: ' : `Week of ${fmtDate(w.week_of)}: `}{w.passage}</h3><Badge tone="info">{readers.length} read it</Badge></div>
+        <div className="p-item-head"><h3>{label || `Week of ${fmtDate(w.week_of)}: `}{w.passage}</h3>{!label?.startsWith('Starting') && <Badge tone="info">{readers.length} read it</Badge>}</div>
         {w.note && <p className="p-pre">{w.note}</p>}
+        <DayList w={w} isCurrent={big} />
         {w.question && <Notice tone="info"><strong>Think about: </strong>{w.question}</Notice>}
-        <div className="m-lesson-bar">
-          <button className={`button ${iDid ? 'button-secondary' : 'button-primary'}`} onClick={toggle}>{iDid ? "I've read it" : 'Mark as read'}</button>
-          <PassageLinks passage={w.passage} />
-        </div>
+        {!label?.startsWith('Starting') && (
+          <div className="m-lesson-bar">
+            <button className={`button ${iDid ? 'button-secondary' : 'button-primary'}`} onClick={toggle}>{iDid ? "I've read it this week" : 'Mark the week as read'}</button>
+            <PassageLinks passage={w.passage} />
+          </div>
+        )}
         {readers.length > 0 && <div className="p-meta">Read by {readers.map((r) => name(r.user_id)).filter(Boolean).join(', ')}</div>}
         {big && <><h4 className="p-sub">What stood out to you?</h4><Thread table="reading_comments" fk="week_id" parentId={w.id} placeholder="Share what stood out to you" /></>}
+        <StaffActions w={w} />
       </div>
     )
   }
   return (
     <>
-      <PageHead title="Read together" intro="One passage a week, read by the whole church. Read it, mark it done, and share what God showed you.">
-        {me.isStaff && !adding && <button className="button button-secondary" onClick={() => setAdding(true)}>Plan a week</button>}
+      <PageHead title="Read together" intro="One reading each weekday, the same passage for the whole church. Read it, mark the week done, and share what God showed you.">
+        {me.isStaff && !editing && <button className="button button-secondary" onClick={() => { setEditing('new'); setMsg('') }}>Plan a week</button>}
       </PageHead>
-      {adding && <div className="p-card"><Form fields={[
-        { name: 'week_of', label: 'Week starting (Monday)', type: 'date', required: true, default: mondayOf(), half: true },
-        { name: 'passage', label: 'Passage', required: true, half: true, placeholder: 'John 1' },
-        { name: 'note', label: 'A short introduction (optional)', type: 'textarea', rows: 2 },
-        { name: 'question', label: 'A question to think about (optional)' },
-      ]} onSubmit={create} onCancel={() => setAdding(false)} submitLabel="Save" /></div>}
-      {current ? <Week w={current} big /> : <Empty>No reading planned yet.{me.isStaff ? ' Use "Plan a week" to start.' : ''}</Empty>}
-      {me.isStaff && upcoming.length > 0 && <p className="p-muted">Coming up: {upcoming.map((w) => `${fmtDate(w.week_of)} ${w.passage}`).join(' · ')}</p>}
+      <Notice tone="success">{msg}</Notice>
+      {editing && <div className="p-card"><Form key={editing === 'new' ? 'new' : editing.id} fields={fields} initial={editing === 'new' ? {} : { ...editing, days: dayLines(editing.days) }} onSubmit={save} onCancel={() => setEditing(null)} submitLabel="Save" /></div>}
+      {current ? <Week w={current} big label="This week: " />
+        : next ? <Week w={next} label={`Starting ${fmtDate(next.week_of)}: `} />
+        : <Empty>No reading planned yet.{me.isStaff ? ' Use "Plan a week" to start.' : ''}</Empty>}
+      {upcoming.filter((w) => w !== next).length > 0 && (
+        <details className="m-older">
+          <summary>The year ahead ({upcoming.filter((w) => w !== next).length} weeks)</summary>
+          <ul className="m-plan">
+            {upcoming.filter((w) => w !== next).map((w) => (
+              <li key={w.id}><span className="m-day">{fmtDate(w.week_of)}</span><span>{w.passage}</span><StaffActions w={w} /></li>
+            ))}
+          </ul>
+        </details>
+      )}
       {past.length > 0 && <details className="m-older"><summary>Past weeks</summary><div className="p-list">{past.map((w) => <Week key={w.id} w={w} />)}</div></details>}
     </>
   )
