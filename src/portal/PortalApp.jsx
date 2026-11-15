@@ -62,7 +62,7 @@ function useNoIndex() {
     m.name = 'robots'
     m.content = 'noindex, nofollow'
     document.head.appendChild(m)
-    document.title = 'Leader Portal | His Place Community Church'
+    document.title = 'Portal | His Place Community Church'
     return () => m.remove()
   }, [])
 }
@@ -104,7 +104,7 @@ export default function PortalApp() {
   if (!portalConfigured) {
     return (
       <PortalShellPlain>
-        <h1>Leader Portal</h1>
+        <h1>His Place Portal</h1>
         <p>The portal is being set up and will be available soon.</p>
         <Link to="/">Back to the website</Link>
       </PortalShellPlain>
@@ -179,8 +179,8 @@ function Login() {
 
   return (
     <PortalShellPlain>
-      <h1>Leader and safety team sign in</h1>
-      <p className="p-muted">For church leaders and approved safety team applicants. Accounts are by invitation.</p>
+      <h1>Member and leader sign in</h1>
+      <p className="p-muted">For His Place members, leaders, and safety team applicants. Not a member yet? <Link to="/join">Request member access</Link>.</p>
       <div className="p-tabs" role="tablist">
         <button role="tab" aria-selected={mode === 'link'} className={mode === 'link' ? 'active' : ''} onClick={() => setMode('link')}>Email me a link</button>
         <button role="tab" aria-selected={mode === 'password'} className={mode === 'password' ? 'active' : ''} onClick={() => setMode('password')}>Use a password</button>
@@ -245,13 +245,14 @@ function Layout() {
   const navigate = useNavigate()
   useEffect(() => { setOpen(false); window.scrollTo(0, 0) }, [location.pathname])
   const items = NAV.filter((n) => n.show(me))
+  const portalName = me.isStaff ? 'Leader Portal' : me.isMember ? 'Member Portal' : 'Portal'
   const home = me.isStaff ? '/portal' : me.isMember ? '/portal/home' : '/portal/safety'
 
   return (
     <div className="p-shell">
       <aside className={`p-side${open ? ' open' : ''}`} aria-label="Portal menu">
         <div className="p-side-head">
-          <Link to={home} className="p-brand">His Place<span>Leader Portal</span></Link>
+          <Link to={home} className="p-brand">His Place<span>{portalName}</span></Link>
           <button className="p-side-close" onClick={() => setOpen(false)} aria-label="Close menu"><X size={20} /></button>
         </div>
         <nav>
@@ -273,7 +274,7 @@ function Layout() {
       <div className="p-main">
         <header className="p-top">
           <button className="p-menu-btn" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={20} /></button>
-          <span className="p-top-title">Leader Portal</span>
+          <span className="p-top-title">{portalName}</span>
         </header>
         <main className="p-content" id="main">
           <ConductGate>

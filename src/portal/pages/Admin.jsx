@@ -10,7 +10,7 @@ export function ShareLink({ link, person, onClose }) {
   const [copied, setCopied] = useState(false)
   const first = (person.full_name || '').split(' ')[0]
   const loginId = person.loginId || loginIdOf(person.email)
-  const text = `Hi${first ? ` ${first}` : ''}! Here is your sign-in link for the His Place Leader Portal: ${link}`
+  const text = `Hi${first ? ` ${first}` : ''}! Here is your sign-in link for the His Place Community Church portal: ${link}`
     + (loginId ? ` Your login ID is ${loginId}. After you sign in, go to My account to set a password.` : '')
   const copy = async () => {
     try { await navigator.clipboard.writeText(link); setCopied(true) } catch { window.prompt('Copy this link:', link) }
@@ -23,7 +23,7 @@ export function ShareLink({ link, person, onClose }) {
       <div className="p-share-actions">
         <a className="button button-primary" href={smsHref(person.phone, text)}>Text this link</a>
         <button className="button button-secondary" onClick={copy}>{copied ? 'Copied!' : 'Copy link'}</button>
-        {!loginId && <a className="button button-secondary" href={`mailto:${person.email}?subject=${encodeURIComponent('Your His Place Leader Portal sign-in link')}&body=${encodeURIComponent(text)}`}>Email it</a>}
+        {!loginId && <a className="button button-secondary" href={`mailto:${person.email}?subject=${encodeURIComponent('Your His Place portal sign-in link')}&body=${encodeURIComponent(text)}`}>Email it</a>}
         <button className="p-link" onClick={onClose}>Done</button>
       </div>
       {!person.phone && <p className="p-muted">No phone number on file, so you'll pick the person in your messages app.</p>}
