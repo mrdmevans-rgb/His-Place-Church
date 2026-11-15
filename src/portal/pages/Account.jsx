@@ -155,6 +155,68 @@ function Password() {
   )
 }
 
+
+// Members choose which automatic emails they get. Stored in email_prefs (only they can see it).
+export const EMAIL_CHOICES = [
+  ['pastor_answers', 'When the pastor answers my question', 'Sent right away. Only you see your question and the answer.'],
+  ['weekly_reading', "This week's Read together plan", 'Monday morning: the week’s five readings and the question to think about.'],
+  ['discussions', 'New Bible study and reading discussions', 'In the morning email: which lessons and readings have new comments.'],
+  ['help_board', 'New needs and offers on the Help board', 'In the morning email: titles of new posts.'],
+  ['prayer_wall', 'New prayer requests', 'In the morning email: titles only. Requests sent to the pastors only are never emailed.'],
+  ['gatherings', 'New gatherings', 'In the morning email: what, when, and a link to RSVP.'],
+  ['care', 'New care calendars', 'In the morning email: when a family could use meals or help.'],
+]
+
+function EmailUpdates() {
+  const me = useMe()
+  const [prefs, setPrefs] = useState(null)
+  const [saved, setSaved] = useState(false)
+  const [msg, setMsg] = useState({ tone: '', text: '' })
+  const noEmail = isLoginId(me.profile.email)
+  useEffect(() => {
+    supabase.from('email_prefs').select('*').eq('profile_id', me.profile.id).maybeSingle().then(({ data }) => {
+      setSaved(!!data)
+      setPrefs(data || { pastor_answers: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false })
+    })
+    if (window.location.hash === '#email-updates') setTimeout(() => document.getElementById('email-updates')?.scrollIntoView({ behavior: 'smooth' }), 300)
+  }, [me.profile.id])
+  if (!me.isMember || !prefs) return null
+  const toggle = (k) => setPrefs({ ...prefs, [k]: !prefs[k] })
+  const save = async (e) => {
+    e.preventDefault()
+    const row = Object.fromEntries(EMAIL_CHOICES.map(([k]) => [k, !!prefs[k]]))
+    const { error } = saved
+      ? await supabase.from('email_prefs').update(row).eq('profile_id', me.profile.id)
+      : await supabase.from('email_prefs').insert(row)
+    if (error) return setMsg({ tone: 'error', text: friendlyError(error) })
+    setSaved(true)
+    setMsg({ tone: 'success', text: 'Saved. You can change these anytime.' })
+  }
+  const all = (on) => setPrefs({ ...prefs, ...Object.fromEntries(EMAIL_CHOICES.map(([k]) => [k, on])) })
+  return (
+    <form className="p-card p-form" id="email-updates" onSubmit={save}>
+      <h2 className="p-card-title">Email updates</h2>
+      {noEmail
+        ? <Notice tone="warn">Add an email address above to get email updates.</Notice>
+        : <p className="p-muted">Choose what you'd like emailed to {me.profile.email}. Everything except pastor answers comes in one short morning email, and only on days there's something new.</p>}
+      <div className="m-email-choices">
+        {EMAIL_CHOICES.map(([k, label, help]) => (
+          <label className="p-check" key={k}>
+            <input type="checkbox" checked={!!prefs[k]} onChange={() => toggle(k)} disabled={noEmail} />
+            <span>{label}<small>{help}</small></span>
+          </label>
+        ))}
+      </div>
+      <Notice tone={msg.tone || 'info'}>{msg.text}</Notice>
+      <div className="p-form-actions">
+        <button className="button button-primary" disabled={noEmail}>Save email choices</button>
+        <button type="button" className="p-link" onClick={() => all(true)} disabled={noEmail}>Select all</button>
+        <button type="button" className="p-link" onClick={() => all(false)} disabled={noEmail}>Turn all off</button>
+      </div>
+    </form>
+  )
+}
+
 export default function Account() {
   const me = useMe()
   const { reloadProfile } = usePortal()
@@ -176,6 +238,7 @@ export default function Account() {
         <p className="p-muted">To change your role or teams, ask a church admin.</p>
       </div>
       <EmailCard />
+      <EmailUpdates />
       {me.isStaff && <BioEditor />}
       <Password />
     </>

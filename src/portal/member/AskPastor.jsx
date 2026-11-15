@@ -32,6 +32,9 @@ function Answer({ q, onDone }) {
       answer, share_as_faq: share, faq_question: share ? fq : '', faq_answer: share ? (fa || answer) : '',
     }).eq('id', q.id)
     if (error) return setErr(friendlyError(error))
+    // Email the person who asked (if they chose that). Each answer is emailed once.
+    const { data: { session } } = await supabase.auth.getSession()
+    fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` }, body: JSON.stringify({ kind: 'answer', id: q.id }) }).catch(() => {})
     onDone()
   }
   return (
@@ -45,6 +48,7 @@ function Answer({ q, onDone }) {
         </>
       )}
       <Notice tone="error">{err}</Notice>
+      <p className="p-small">If they chose email updates, they'll get an email with your answer the first time you send it.</p>
       <div className="p-form-actions"><button className="button button-primary" onClick={save}>Send answer</button></div>
     </div>
   )
