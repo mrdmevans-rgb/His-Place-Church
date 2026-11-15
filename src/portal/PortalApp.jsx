@@ -259,7 +259,7 @@ function Layout() {
           {items.map(({ to, label, icon: Icon, end, group }) => group ? (
             <div key={group} className="p-nav-group">{group}</div>
           ) : (
-            <NavLink key={to} to={to} end={end} className={({ isActive }) => `p-nav${isActive ? ' active' : ''}`}>
+            <NavLink key={to} to={to} end={end} onClick={() => setOpen(false)} className={({ isActive }) => `p-nav${isActive ? ' active' : ''}`}>
               <Icon size={17} aria-hidden="true" /> {label}
             </NavLink>
           ))}
