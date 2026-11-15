@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowUp, ArrowDown, ChevronsUp } from 'lucide-react'
-import { supabase, ROLES, roleLabel, teamLabel, friendlyError, callAdmin, isLoginId, loginIdOf, contactLabel } from '../supabase'
+import { supabase, ROLES, roleLabel, teamLabel, friendlyError, callAdmin, isLoginId, loginIdOf, contactLabel, pendingJoinCount } from '../supabase'
 import { squareJpeg } from './Account'
 import { Badge, Empty, Field, Notice, PageHead, fmtDateTime, useMe, usePeople, usePortal, useRows } from '../ui'
 
@@ -369,11 +369,13 @@ function Activity() {
 
 export default function Admin() {
   const [tab, setTab] = useState(new URLSearchParams(window.location.search).get('tab') || 'people')
+  const [joinWaiting, setJoinWaiting] = useState(0)
+  useEffect(() => { pendingJoinCount().then(setJoinWaiting) }, [tab])
   return (
     <>
       <PageHead title="Admin" intro="Invite people, set roles and teams, approve website bios, and review activity." />
       <div className="p-toolbar">
-        {[['people', 'People'], ['join', 'Requests to join'], ['bios', 'Website bios'], ['activity', 'Activity log']].map(([v, l]) => <button key={v} className={`chip${tab === v ? ' active' : ''}`} onClick={() => setTab(v)}>{l}</button>)}
+        {[['people', 'People'], ['join', joinWaiting > 0 ? `Requests to join (${joinWaiting})` : 'Requests to join'], ['bios', 'Website bios'], ['activity', 'Activity log']].map(([v, l]) => <button key={v} className={`chip${tab === v ? ' active' : ''}`} onClick={() => setTab(v)}>{l}</button>)}
       </div>
       {tab === 'people' && <People />}
       {tab === 'join' && <JoinRequests />}

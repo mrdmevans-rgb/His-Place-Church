@@ -5,7 +5,7 @@ import {
   Wrench, Baby, FileWarning, ShieldCheck, UserCog, LogOut, Menu, X, KeyRound,
   Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag,
 } from 'lucide-react'
-import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail } from './supabase'
+import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail, pendingJoinCount } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
 import './portal.css'
 import Dashboard from './pages/Dashboard'
@@ -244,6 +244,9 @@ function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   useEffect(() => { setOpen(false); window.scrollTo(0, 0) }, [location.pathname])
+  // Count people waiting to join so admins see it right away.
+  const [joinWaiting, setJoinWaiting] = useState(0)
+  useEffect(() => { if (me.isAdmin) pendingJoinCount().then(setJoinWaiting) }, [me.isAdmin, location.pathname, location.search])
   const items = NAV.filter((n) => n.show(me))
   const portalName = me.isStaff ? 'Leader Portal' : me.isMember ? 'Member Portal' : 'Portal'
   const home = me.isStaff ? '/portal' : me.isMember ? '/portal/home' : '/portal/safety'
@@ -261,6 +264,7 @@ function Layout() {
           ) : (
             <NavLink key={to} to={to} end={end} onClick={() => setOpen(false)} className={({ isActive }) => `p-nav${isActive ? ' active' : ''}`}>
               <Icon size={17} aria-hidden="true" /> {label}
+              {to === '/portal/admin' && joinWaiting > 0 && <span className="p-nav-count" aria-label={`${joinWaiting} waiting to join`}>{joinWaiting}</span>}
             </NavLink>
           ))}
         </nav>
@@ -273,7 +277,7 @@ function Layout() {
       {open && <div className="p-scrim" onClick={() => setOpen(false)} />}
       <div className="p-main">
         <header className="p-top">
-          <button className="p-menu-btn" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={20} /></button>
+          <button className="p-menu-btn" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={20} />{joinWaiting > 0 && <span className="p-menu-dot" aria-hidden="true" />}</button>
           <span className="p-top-title">{portalName}</span>
         </header>
         <main className="p-content" id="main">

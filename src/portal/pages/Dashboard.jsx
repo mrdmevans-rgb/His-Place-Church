@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { supabase, teamLabel } from '../supabase'
+import { supabase, teamLabel, pendingJoinCount } from '../supabase'
 import { Badge, PageHead, daysUntil, fmtDate, fmtDateTime, today, useMe, usePeople } from '../ui'
 
 function useDashboard(me) {
@@ -37,10 +37,13 @@ export default function Dashboard() {
   const me = useMe()
   const { name } = usePeople()
   const d = useDashboard(me)
+  const [joinWaiting, setJoinWaiting] = useState(0)
+  useEffect(() => { if (me.isAdmin) pendingJoinCount().then(setJoinWaiting) }, [me.isAdmin])
   const first = (me.profile.full_name || '').split(' ')[0]
   if (!d) return <p className="p-muted">Loading...</p>
 
   const todos = [
+    me.isAdmin && joinWaiting > 0 && { to: '/portal/admin?tab=join', text: `${joinWaiting} ${joinWaiting > 1 ? 'people are' : 'person is'} waiting to join the member portal`, tone: 'warn' },
     me.isAdmin && d.docsPending > 0 && { to: '/portal/documents', text: `${d.docsPending} document${d.docsPending > 1 ? 's' : ''} waiting for your approval`, tone: 'warn' },
     me.isAdmin && d.biosPending > 0 && { to: '/portal/admin', text: `${d.biosPending} website bio${d.biosPending > 1 ? 's' : ''} waiting for approval`, tone: 'warn' },
     me.isPastoral && d.newReq > 0 && { to: '/portal/requests', text: `${d.newReq} new request${d.newReq > 1 ? 's' : ''} to review`, tone: 'warn' },

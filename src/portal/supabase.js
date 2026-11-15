@@ -64,3 +64,9 @@ export async function callAdmin(body) {
   if (!res.ok) throw new Error(out.error || 'Something went wrong.')
   return out
 }
+
+// How many people are waiting for member access (admins only; others get 0).
+export const pendingJoinCount = async () => {
+  const { count } = await supabase.from('membership_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')
+  return count || 0
+}
