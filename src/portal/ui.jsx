@@ -14,13 +14,14 @@ export function useMe() {
     isAdmin: role === 'admin',
     isPastoral: role === 'admin' || role === 'pastor',
     isStaff: role === 'admin' || role === 'pastor' || role === 'leader',
+    isMember: ['admin', 'pastor', 'leader', 'member'].includes(role),
     onTeam: (t) => ['admin', 'pastor', 'leader'].includes(role) && (profile?.teams || []).includes(t),
   }
 }
 
 export function usePeople() {
   const { people } = usePortal()
-  const name = (id) => (id && people[id] ? people[id].full_name || people[id].email : '')
+  const name = (id) => (id && people[id] ? people[id].full_name || people[id].email || 'A member' : '')
   return { people, name }
 }
 

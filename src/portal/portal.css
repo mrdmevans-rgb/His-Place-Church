@@ -179,3 +179,92 @@
 .p-order button:hover:not(:disabled) { border-color: var(--oxblood); color: var(--oxblood); }
 .p-order button:disabled { opacity: 0.35; cursor: default; }
 .p-bio-row > :only-child { grid-column: 1 / -1; }
+
+/* ---------- Member portal ---------- */
+.p-nav-group { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); padding: 14px 10px 4px; }
+.p-nav-group:first-child { padding-top: 4px; }
+
+.m-conduct { max-width: 680px; margin: 20px auto; padding: 28px; }
+.m-conduct h1 { font-size: 26px; margin: 0 0 10px; }
+.m-conduct ol { padding-left: 22px; line-height: 1.6; margin: 16px 0; }
+.m-conduct li { margin-bottom: 8px; }
+.m-conduct .button { margin-top: 12px; }
+
+.m-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.m-tile { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: var(--radius-md); background: var(--paper-light); border: 1px solid var(--stone-border); color: var(--ink); font-weight: 600; font-size: 14px; }
+.m-tile svg { color: var(--oxblood); }
+.m-tile:hover { border-color: var(--oxblood); text-decoration: none; }
+
+.m-series-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.m-series-card { display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: var(--radius-md); background: var(--paper-light); border: 1px solid var(--stone-border); color: var(--ink); }
+.m-series-card:hover { border-color: var(--oxblood); text-decoration: none; box-shadow: 0 4px 14px rgba(43,36,32,0.08); }
+.m-series-card h3 { margin: 0; font-size: 18px; }
+.m-series-card p { margin: 4px 0 0; color: var(--ink-soft); font-size: 14px; }
+.m-series-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.m-book { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); }
+.m-progress { height: 6px; border-radius: 3px; background: var(--paper-dark); overflow: hidden; margin-top: auto; }
+.m-progress span { display: block; height: 100%; background: var(--sage); }
+
+.m-back { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; margin-bottom: 8px; }
+.m-lead { font-size: 17px; color: var(--ink-soft); max-width: 70ch; }
+
+.m-lessons { list-style: none; padding: 0; margin: 0; }
+.m-lessons li { border-top: 1px solid var(--stone-border); }
+.m-lessons li:first-child { border-top: 0; }
+.m-lessons a { display: flex; gap: 10px; align-items: flex-start; padding: 10px 4px; color: var(--ink); }
+.m-lessons a:hover { background: var(--paper); text-decoration: none; }
+.m-lessons small, .m-lessons.manage small { display: block; color: var(--ink-faint); font-size: 13px; }
+.m-lessons.manage li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; flex-wrap: wrap; }
+.m-done { color: var(--sage); flex-shrink: 0; margin-top: 2px; }
+.m-todo { color: var(--ink-faint); flex-shrink: 0; margin-top: 2px; }
+.m-lesson-editor { margin-top: 14px; background: #fff; }
+
+.m-video { margin-bottom: 8px; }
+.m-watch { text-align: center; padding: 28px; }
+.m-lesson-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 12px 0 16px; }
+.m-passage-links { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; }
+.m-guide h3 { font-size: 16px; margin: 18px 0 6px; color: var(--oxblood); }
+.m-qs ol { padding-left: 22px; margin: 0; line-height: 1.6; }
+.m-qs li { margin-bottom: 6px; }
+.m-resources { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.m-resources a { display: inline-flex; align-items: center; gap: 4px; }
+.m-pager { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 10px 0 24px; }
+.m-pager a { display: inline-flex; align-items: center; gap: 4px; }
+
+.m-hidden { opacity: 0.6; border-style: dashed; }
+.m-actions { display: flex; gap: 12px; margin-top: 4px; font-size: 13px; }
+.m-quoted { background: var(--paper); border-left: 3px solid var(--gold); padding: 10px 12px; border-radius: 4px; }
+
+.m-q { border-top: 1px solid var(--stone-border); padding: 12px 0; }
+.m-q:first-of-type { border-top: 0; }
+.m-answer { background: var(--paper); border-left: 3px solid var(--sage); padding: 10px 12px; border-radius: 4px; }
+.m-faq { border-top: 1px solid var(--stone-border); padding: 10px 0; }
+.m-faq summary { cursor: pointer; font-weight: 600; }
+.m-faq p { margin: 8px 0 0; }
+
+.m-dir-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.m-dir-card { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: var(--radius-md); background: var(--paper-light); border: 1px solid var(--stone-border); }
+.m-dir-card img, .m-dir-initials { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.m-dir-initials { display: grid; place-items: center; background: var(--paper-dark); color: var(--oxblood); font-weight: 700; }
+.m-dir-card h3 { margin: 0; font-size: 16px; }
+.m-dir-card a { display: block; font-size: 14px; overflow-wrap: anywhere; }
+
+.m-slots { list-style: none; padding: 0; margin: 12px 0 0; }
+.m-slots li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 0; border-top: 1px solid var(--stone-border); }
+.m-slots li > span:first-child { min-width: 180px; }
+.m-slots li > span:nth-child(2) { flex: 1; }
+.m-slots li.taken em { color: var(--ink-faint); }
+.m-slots em { color: var(--sage); font-style: normal; font-weight: 600; }
+.m-older { margin-top: 18px; }
+.m-older summary { cursor: pointer; font-weight: 600; margin-bottom: 10px; }
+
+@media (max-width: 600px) {
+  .m-conduct { padding: 18px; }
+  .m-tiles { grid-template-columns: repeat(2, 1fr); }
+  .m-slots li > span:first-child { min-width: 0; }
+}
+.m-find { display: block; font-size: 13px; color: var(--sage); font-weight: 600; margin-top: 2px; }
+.m-qs-intro { font-size: 14px; color: var(--ink-soft); margin: 0 0 8px; }
+.m-howto summary { cursor: pointer; font-weight: 600; color: var(--oxblood); }
+.m-howto ol { padding-left: 22px; margin: 12px 0 0; line-height: 1.6; }
+.m-howto li { margin-bottom: 6px; }

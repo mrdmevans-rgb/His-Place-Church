@@ -28,6 +28,7 @@ export const ROLES = [
   ['admin', 'Admin'],
   ['pastor', 'Pastor'],
   ['leader', 'Leader'],
+  ['member', 'Member'],
   ['applicant', 'Carry applicant only'],
 ]
 export const roleLabel = (r) => (ROLES.find(([id]) => id === r) || [r, r])[1]

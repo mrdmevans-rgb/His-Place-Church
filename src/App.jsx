@@ -35,6 +35,7 @@ import HelperChat from './HelperChat'
 // Loaded only when someone opens these pages, so the public site stays fast.
 const PortalApp = lazy(() => import('./portal/PortalApp'))
 const TeamPage = lazy(() => import('./TeamPage'))
+const JoinPage = lazy(() => import('./JoinPage'))
 import mensLogoSrc from './assets/mens-ministry-logo.jpg'
 import womensLogoSrc from './assets/womens-ministry-logo.jpg'
 
@@ -2348,6 +2349,8 @@ function Footer() {
         </div>
       </div>
       <div className="container footer-login">
+        <Link to="/portal" className="footer-login-link">Member login</Link>
+        <Link to="/join" className="footer-login-link">Request member access</Link>
         <Link to="/portal" className="footer-login-link">Leader login</Link>
         <Link to="/portal" className="footer-login-link">Safety team application login</Link>
       </div>
@@ -2403,6 +2406,7 @@ export default function App() {
           <Route path="/photos" element={<PhotosPage />} />
           <Route path="/prayer" element={<PrayerPage />} />
           <Route path="/team" element={<Suspense fallback={<div className="section container">Loading...</div>}><TeamPage /></Suspense>} />
+          <Route path="/join" element={<Suspense fallback={<div className="section container">Loading...</div>}><JoinPage /></Suspense>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

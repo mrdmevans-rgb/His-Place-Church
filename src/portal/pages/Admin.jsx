@@ -10,7 +10,7 @@ export function ShareLink({ link, person, onClose }) {
   const [copied, setCopied] = useState(false)
   const first = (person.full_name || '').split(' ')[0]
   const loginId = person.loginId || loginIdOf(person.email)
-  const text = `Hi${first ? ` ${first}` : ''}! Here is your sign-in link for the His Place Leader Portal: ${link}`
+  const text = `Hi${first ? ` ${first}` : ''}! Here is your sign-in link for the His Place Community Church portal: ${link}`
     + (loginId ? ` Your login ID is ${loginId}. After you sign in, go to My account to set a password.` : '')
   const copy = async () => {
     try { await navigator.clipboard.writeText(link); setCopied(true) } catch { window.prompt('Copy this link:', link) }
@@ -23,7 +23,7 @@ export function ShareLink({ link, person, onClose }) {
       <div className="p-share-actions">
         <a className="button button-primary" href={smsHref(person.phone, text)}>Text this link</a>
         <button className="button button-secondary" onClick={copy}>{copied ? 'Copied!' : 'Copy link'}</button>
-        {!loginId && <a className="button button-secondary" href={`mailto:${person.email}?subject=${encodeURIComponent('Your His Place Leader Portal sign-in link')}&body=${encodeURIComponent(text)}`}>Email it</a>}
+        {!loginId && <a className="button button-secondary" href={`mailto:${person.email}?subject=${encodeURIComponent('Your His Place portal sign-in link')}&body=${encodeURIComponent(text)}`}>Email it</a>}
         <button className="p-link" onClick={onClose}>Done</button>
       </div>
       {!person.phone && <p className="p-muted">No phone number on file, so you'll pick the person in your messages app.</p>}
@@ -298,6 +298,53 @@ function Bios() {
   )
 }
 
+function JoinRequests() {
+  const { reloadProfile } = usePortal()
+  const [view, setView] = useState('pending')
+  const { rows, reload } = useRows('membership_requests', { filter: (q) => q.eq('status', view), deps: [view] })
+  const [share, setShare] = useState(null)
+  const [msg, setMsg] = useState('')
+  const [busy, setBusy] = useState(null)
+  const approve = async (r) => {
+    setBusy(r.id); setMsg('')
+    try {
+      const out = await callAdmin({ action: 'invite', full_name: r.full_name, email: r.email, phone: r.phone, role: 'member', teams: [], sendEmail: false })
+      await supabase.from('membership_requests').update({ status: 'approved' }).eq('id', r.id)
+      setShare({ link: out.link, person: { full_name: r.full_name, email: r.email, phone: r.phone, loginId: out.loginId } })
+      reloadProfile(); reload()
+    } catch (e) { setMsg(e.message) }
+    setBusy(null)
+  }
+  const decline = async (r) => {
+    if (!window.confirm(`Decline ${r.full_name}'s request?`)) return
+    await supabase.from('membership_requests').update({ status: 'declined' }).eq('id', r.id)
+    reload()
+  }
+  return (
+    <>
+      <p className="p-muted">People who asked for member access on the website. Approving creates their member account and gives you a sign-in link to text them.</p>
+      <div className="p-toolbar">{[['pending', 'Waiting'], ['approved', 'Approved'], ['declined', 'Declined']].map(([v, l]) => <button key={v} className={`chip${view === v ? ' active' : ''}`} onClick={() => setView(v)}>{l}</button>)}</div>
+      <Notice tone="error">{msg}</Notice>
+      {share && <ShareLink link={share.link} person={share.person} onClose={() => setShare(null)} />}
+      {rows.length === 0 ? <Empty>{view === 'pending' ? 'No requests waiting.' : 'None.'}</Empty> : (
+        <div className="p-list">{rows.map((r) => (
+          <div className="p-card" key={r.id}>
+            <div className="p-item-head"><h3>{r.full_name}</h3><span className="p-meta">{fmtDateTime(r.created_at)}</span></div>
+            <div className="p-meta">{[r.email, r.phone].filter(Boolean).join(' · ')}</div>
+            {r.message && <p className="p-pre">{r.message}</p>}
+            {view === 'pending' && (
+              <div className="p-row-actions">
+                <button className="button button-primary" disabled={busy === r.id} onClick={() => approve(r)}>{busy === r.id ? 'Approving...' : 'Approve and invite'}</button>
+                <button className="button button-secondary" onClick={() => decline(r)}>Decline</button>
+              </div>
+            )}
+          </div>
+        ))}</div>
+      )}
+    </>
+  )
+}
+
 function Activity() {
   const { name } = usePeople()
   const { rows, loading } = useRows('audit_log', { order: 'at', filter: (q) => q.limit(200) })
@@ -321,14 +368,15 @@ function Activity() {
 }
 
 export default function Admin() {
-  const [tab, setTab] = useState('people')
+  const [tab, setTab] = useState(new URLSearchParams(window.location.search).get('tab') || 'people')
   return (
     <>
       <PageHead title="Admin" intro="Invite people, set roles and teams, approve website bios, and review activity." />
       <div className="p-toolbar">
-        {[['people', 'People'], ['bios', 'Website bios'], ['activity', 'Activity log']].map(([v, l]) => <button key={v} className={`chip${tab === v ? ' active' : ''}`} onClick={() => setTab(v)}>{l}</button>)}
+        {[['people', 'People'], ['join', 'Requests to join'], ['bios', 'Website bios'], ['activity', 'Activity log']].map(([v, l]) => <button key={v} className={`chip${tab === v ? ' active' : ''}`} onClick={() => setTab(v)}>{l}</button>)}
       </div>
       {tab === 'people' && <People />}
+      {tab === 'join' && <JoinRequests />}
       {tab === 'bios' && <Bios />}
       {tab === 'activity' && <Activity />}
     </>
