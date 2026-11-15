@@ -4,7 +4,7 @@ import { BookOpen, Heart, MessageCircleQuestion, CalendarHeart, HandHelping, Use
 import { supabase, friendlyError } from '../supabase'
 import { Badge, Empty, Notice, PageHead, fmtDate, fmtDateTime, today, useMe, usePeople, usePortal } from '../ui'
 import { Celebrations } from './Community'
-import { PassageLinks } from './shared'
+import { PassageLinks, gatewayUrl } from './shared'
 
 export const CONDUCT = [
   'Speak the truth in love (Ephesians 4:15). Be kind, even when you disagree.',
@@ -57,13 +57,14 @@ export default function MemberHome() {
     const rows = (q) => q.then((r) => r.data || [])
     Promise.all([
       rows(supabase.from('reading_weeks').select('*').lte('week_of', today()).order('week_of', { ascending: false }).limit(1)),
+      rows(supabase.from('reading_weeks').select('*').gt('week_of', today()).order('week_of', { ascending: true }).limit(1)),
       rows(supabase.from('gatherings').select('*').gte('starts_at', new Date().toISOString()).order('starts_at').limit(3)),
       rows(supabase.from('member_prayers').select('id, title, author, created_at').eq('answered', false).eq('pastors_only', false).order('created_at', { ascending: false }).limit(4)),
       rows(supabase.from('care_pages').select('id, title').eq('status', 'open')),
       rows(supabase.from('help_posts').select('id, title, kind').eq('status', 'open').order('created_at', { ascending: false }).limit(3)),
       rows(supabase.from('lesson_progress').select('lesson_id, completed_at, study_lessons(series_id, position, study_series(title))').order('completed_at', { ascending: false }).limit(1)),
       rows(supabase.from('pastor_questions').select('id').eq('author', me.profile.id).not('answered_at', 'is', null)),
-    ]).then(([reading, gatherings, prayers, care, help, progress, answered]) => setD({ reading: reading[0], gatherings, prayers, care, help, progress: progress[0], answered }))
+    ]).then(([reading, nextReading, gatherings, prayers, care, help, progress, answered]) => setD({ reading: reading[0], nextReading: nextReading[0], gatherings, prayers, care, help, progress: progress[0], answered }))
   }, [me.profile.id])
   const first = (me.profile.full_name || '').split(' ')[0]
   if (!d) return <p className="p-muted">Loading...</p>
@@ -76,7 +77,15 @@ export default function MemberHome() {
       <div className="p-dash-grid">
         <div className="p-card">
           <h2 className="p-card-title">This week's reading</h2>
-          {d.reading ? <><p><strong>{d.reading.passage}</strong></p><PassageLinks passage={d.reading.passage} /><p><Link to="/portal/read">Read together and share</Link></p></> : <p className="p-muted">Coming soon.</p>}
+          {d.reading ? (() => {
+            const dow = new Date().getDay()
+            const todays = dow >= 1 && dow <= 5 ? d.reading.days?.[dow - 1] : null
+            return <>
+              <p><strong>{d.reading.passage}</strong></p>
+              {todays ? <p>Today: <a href={gatewayUrl(todays.passage)} target="_blank" rel="noopener noreferrer">{todays.passage}</a></p> : <PassageLinks passage={d.reading.passage} />}
+              <p><Link to="/portal/read">Read together and share</Link></p>
+            </>
+          })() : d.nextReading ? <><p>Starts {fmtDate(d.nextReading.week_of)}: <strong>{d.nextReading.passage}</strong></p><p><Link to="/portal/read">See the plan</Link></p></> : <p className="p-muted">Coming soon.</p>}
         </div>
         <div className="p-card">
           <h2 className="p-card-title">Keep studying</h2>

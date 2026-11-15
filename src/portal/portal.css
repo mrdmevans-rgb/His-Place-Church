@@ -268,3 +268,11 @@
 .m-howto summary { cursor: pointer; font-weight: 600; color: var(--oxblood); }
 .m-howto ol { padding-left: 22px; margin: 12px 0 0; line-height: 1.6; }
 .m-howto li { margin-bottom: 6px; }
+.m-days { list-style: none; padding: 0; margin: 10px 0 14px; display: grid; gap: 4px; }
+.m-days li, .m-plan li { display: flex; gap: 12px; align-items: baseline; padding: 6px 10px; border-radius: 8px; flex-wrap: wrap; }
+.m-days li.today { background: var(--paper); border-left: 3px solid var(--oxblood); font-weight: 600; }
+.m-day { min-width: 92px; font-size: 13px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+.m-days li.today .m-day { color: var(--oxblood); }
+.m-plan { list-style: none; padding: 0; margin: 0; }
+.m-plan li { border-top: 1px solid var(--stone-border); border-radius: 0; }
+.m-plan li .p-run-actions { margin-left: auto; }
