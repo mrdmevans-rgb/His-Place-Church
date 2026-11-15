@@ -50,15 +50,16 @@ function LessonEditor({ series, onClose }) {
     { name: 'summary', label: 'Lesson summary', type: 'textarea', rows: 3 },
     { name: 'observe', label: 'Observe questions', type: 'textarea', rows: 3, help: guideHelp },
     { name: 'understand', label: 'Understand questions', type: 'textarea', rows: 3, help: guideHelp },
+    { name: 'search', label: 'Search the Scriptures questions', type: 'textarea', rows: 3, help: 'Cross references to compare, especially where Bible teachers differ. ' + guideHelp },
     { name: 'apply', label: 'Apply questions', type: 'textarea', rows: 3, help: guideHelp },
     { name: 'resources', label: 'Go deeper links', type: 'textarea', rows: 3, help: resHelp },
   ]
-  const toForm = (l) => ({ ...l, observe: toLines(l.observe), understand: toLines(l.understand), apply: toLines(l.apply), resources: resourcesToText(l.resources) })
+  const toForm = (l) => ({ ...l, observe: toLines(l.observe), understand: toLines(l.understand), search: toLines(l.search), apply: toLines(l.apply), resources: resourcesToText(l.resources) })
   const save = async (v) => {
     const payload = {
       series_id: series.id, position: v.position || (rows.length + 1), title: v.title, scripture: v.scripture, minutes: v.minutes || null,
       video_url: v.video_url, embed_ok: !!v.embed_ok, summary: v.summary,
-      observe: fromLines(v.observe), understand: fromLines(v.understand), apply: fromLines(v.apply), resources: textToResources(v.resources),
+      observe: fromLines(v.observe), understand: fromLines(v.understand), search: fromLines(v.search), apply: fromLines(v.apply), resources: textToResources(v.resources),
     }
     const { error } = editing === 'new' ? await supabase.from('study_lessons').insert(payload) : await supabase.from('study_lessons').update(payload).eq('id', editing.id)
     if (error) return error

@@ -264,3 +264,7 @@
   .m-slots li > span:first-child { min-width: 0; }
 }
 .m-find { display: block; font-size: 13px; color: var(--sage); font-weight: 600; margin-top: 2px; }
+.m-qs-intro { font-size: 14px; color: var(--ink-soft); margin: 0 0 8px; }
+.m-howto summary { cursor: pointer; font-weight: 600; color: var(--oxblood); }
+.m-howto ol { padding-left: 22px; margin: 12px 0 0; line-height: 1.6; }
+.m-howto li { margin-bottom: 6px; }

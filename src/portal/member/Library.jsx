@@ -51,6 +51,18 @@ export default function Library() {
       <PageHead title="Bible study library" intro="Video teaching from trusted, Bible-centered pastors, with a study guide for every lesson. Videos play from each ministry's own channel.">
         {me.isPastoral && <Link className="button button-secondary" to="/portal/library-manage">Manage the library</Link>}
       </PageHead>
+      <details className="p-card m-howto">
+        <summary>How to study a passage</summary>
+        <ol>
+          <li><strong>Pray first.</strong> Ask the Holy Spirit to open your eyes to His Word (Psalm 119:18).</li>
+          <li><strong>Read it in context.</strong> Read the whole chapter, not just one verse. Who wrote it, to whom, and why? What was happening at the time?</li>
+          <li><strong>Observe.</strong> Write down what it actually says before deciding what it means. Notice repeated words, commands, and promises.</li>
+          <li><strong>Let Scripture explain Scripture.</strong> Look up cross references. A clear passage helps explain a harder one, and the Bible never contradicts itself.</li>
+          <li><strong>Dig into the words.</strong> Use Study on Blue Letter Bible, then the Interlinear tool, to see the original Hebrew or Greek word and how it's used elsewhere.</li>
+          <li><strong>Then check the teachers.</strong> Watch the lesson and read the commentary, but test what you hear by the Bible, like the Bereans did (Acts 17:11).</li>
+          <li><strong>Apply it.</strong> Ask what it meant to them then, what never changes about God, and what it means for you this week.</li>
+        </ol>
+      </details>
       <div className="p-toolbar">
         <input className="p-search" type="search" placeholder="Search studies" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search studies" />
         <select className="p-select-small" value={book} onChange={(e) => setBook(e.target.value)} aria-label="Book of the Bible"><option value="">All books</option>{books.map((b) => <option key={b}>{b}</option>)}</select>
@@ -137,11 +149,12 @@ function Resources({ list }) {
   )
 }
 
-function Questions({ title, list }) {
+function Questions({ title, intro, list }) {
   if (!list?.length) return null
   return (
     <div className="m-qs">
       <h3>{title}</h3>
+      {intro && <p className="m-qs-intro">{intro}</p>}
       <ol>{list.map((x) => {
         // Questions can end with "(Find it: ...)" telling members where to dig.
         const m = x.match(/^(.*?)\s*\(Find it: (.*)\)\s*$/)
@@ -197,9 +210,10 @@ export function LessonPage() {
         {l.summary && <p className="p-pre">{l.summary}</p>}
         <Questions title="Observe: what does the passage say?" list={l.observe} />
         <Questions title="Understand: what did it mean then?" list={l.understand} />
-        <Questions title="Apply: what does it mean for me?" list={l.apply} />
+        <Questions title="Search the Scriptures" intro="Like the Bereans in Acts 17:11, check it against the whole Bible. Read each passage in its context and let Scripture explain Scripture. Bring what you find to the discussion or to Ask the Pastor." list={l.search} />
+        <Questions title="Apply: what does it mean for me today?" list={l.apply} />
         {l.resources?.length > 0 && <><h3>Go deeper</h3><Resources list={l.resources} /></>}
-        {!l.summary && !l.observe?.length && !l.understand?.length && !l.apply?.length && <p className="p-muted">The study guide for this lesson is coming soon.</p>}
+        {!l.summary && !l.observe?.length && !l.understand?.length && !l.search?.length && !l.apply?.length && <p className="p-muted">The study guide for this lesson is coming soon.</p>}
       </div>
       <div className="p-card">
         <h2 className="p-card-title">Discussion</h2>
