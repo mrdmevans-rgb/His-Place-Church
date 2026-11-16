@@ -374,6 +374,36 @@ check('the backups bucket is private', lambda: sql("select public from storage.b
 check('admin cannot upload into the backups bucket', lambda: sql("insert into storage.objects (bucket_id, name) values ('backups', 'x.json')", as_user=ADMIN), 'denied')
 check('admin cannot see files in the backups bucket', lambda: sql("select count(*) from storage.objects where bucket_id='backups'", as_user=ADMIN), lambda r: r[0][0] == 0)
 
+
+# Member features (0012)
+MEM_B = make_user('member-b@x.org', 'member')
+sql("insert into public.services (service_date, sermon_title, scripture, speaker, notes, created_by) values ((now() at time zone 'America/New_York')::date + 3, 'Living hope', '1 Peter 1:3-9', 'Pastor Dave', 'Slides due Thursday, mic 2 is broken', %s)", (WORSHIP,), as_user=WORSHIP)
+sql("insert into public.services (service_date, sermon_title, scripture, created_by) values ((now() at time zone 'America/New_York')::date - 4, 'Last week', 'John 1', %s)", (WORSHIP,), as_user=WORSHIP)
+check('members see the upcoming sermon', lambda: sql("select sermon_title, scripture, speaker from public.this_sunday()", as_user=MEM), lambda r: r == [('Living hope', '1 Peter 1:3-9', 'Pastor Dave')])
+check('This Sunday never includes leader notes', lambda: sql("select * from public.this_sunday()", as_user=MEM), lambda r: 'mic 2' not in str(r) and len(r[0]) == 4)
+check('members still cannot read the run sheets', lambda: sql("select count(*) from public.services", as_user=MEM), lambda r: r[0][0] == 0)
+check('visitors cannot see This Sunday', lambda: sql("select * from public.this_sunday()", anon=True), 'denied')
+check('applicants get nothing from This Sunday', lambda: sql("select count(*) from public.this_sunday()", as_user=APPL), lambda r: r[0][0] == 0)
+sql("insert into public.sermon_notes (service_date, body) values (current_date + 3, 'Hope is alive because Jesus is')", as_user=MEM)
+check('a member can save sermon notes', lambda: sql("select body from public.sermon_notes", as_user=MEM), lambda r: r == [('Hope is alive because Jesus is',)])
+check('another member cannot read them', lambda: sql("select count(*) from public.sermon_notes", as_user=MEM_B), lambda r: r[0][0] == 0)
+check('even a pastor cannot read them', lambda: sql("select count(*) from public.sermon_notes", as_user=PASTOR), lambda r: r[0][0] == 0)
+check('even an admin cannot read them', lambda: sql("select count(*) from public.sermon_notes", as_user=ADMIN), lambda r: r[0][0] == 0)
+check('nobody can write notes for someone else', lambda: sql("insert into public.sermon_notes (user_id, service_date, body) values (%s, current_date, 'x')", (MEM,), as_user=MEM_B), 'denied')
+check('applicants cannot keep notes', lambda: sql("insert into public.sermon_notes (service_date, body) values (current_date, 'x')", as_user=APPL), 'denied')
+check('care reminders and prayer updates default to on', lambda: sql("select care_reminders, prayer_updates from public.email_prefs where profile_id=%s", (MEM,), as_user=MEM), lambda r: r == [(True, True)])
+check('members cannot see which reminders went out', lambda: sql("select count(*) from public.care_reminders_sent", as_user=MEM), lambda r: r[0][0] == 0)
+check('members cannot fake a sent reminder', lambda: sql("insert into public.care_reminders_sent (slot_id) values (gen_random_uuid())", as_user=MEM), 'denied')
+sql("update public.profiles set text_size='large' where id=%s", (MEM,), as_user=MEM)
+check('a member can choose bigger text', lambda: sql("select text_size from public.profiles where id=%s", (MEM,), as_user=MEM), lambda r: r == [('large',)])
+check('only the listed text sizes are allowed', lambda: sql("update public.profiles set text_size='huge' where id=%s", (MEM,), as_user=MEM), 'denied')
+check('nobody can change someone else\'s text size', lambda: sql("update public.profiles set text_size='larger' where id=%s", (MEM,), as_user=MEM_B), 'denied')
+wk = sql("insert into public.reading_weeks (week_of, passage, days) values (current_date + 400, 'James 1-5', '[{\"day\":\"Monday\",\"passage\":\"James 1\"}]') returning id", as_user=WORSHIP)[0][0]
+sql("insert into public.reading_day_done (week_id, day) values (%s, 'Monday')", (wk,), as_user=MEM)
+check('a member can check off a day', lambda: sql("select day from public.reading_day_done", as_user=MEM), lambda r: r == [('Monday',)])
+check('daily check marks are private', lambda: sql("select count(*) from public.reading_day_done", as_user=MEM_B), lambda r: r[0][0] == 0)
+check('nobody can check off a day for someone else', lambda: sql("insert into public.reading_day_done (week_id, user_id, day) values (%s, %s, 'Tuesday')", (wk, MEM), as_user=MEM_B), 'denied')
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))

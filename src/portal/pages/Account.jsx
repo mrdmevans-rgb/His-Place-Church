@@ -161,6 +161,8 @@ function Password() {
 // Members choose which automatic emails they get. Stored in email_prefs (only they can see it).
 export const EMAIL_CHOICES = [
   ['pastor_answers', 'When the pastor answers my question', 'Sent right away. Only you see your question and the answer.'],
+  ['care_reminders', 'A reminder when I signed up to help a family', 'The morning before your day on the Care calendar: what you signed up for and where to drop it off.'],
+  ['prayer_updates', 'When people pray for my requests', 'A short morning note when someone starts praying for your request or leaves an encouragement.'],
   ['weekly_reading', "This week's Read together plan", 'Monday morning: the week’s five readings and the question to think about.'],
   ['discussions', 'New Bible study and reading discussions', 'In the morning email: which lessons and readings have new comments.'],
   ['help_board', 'New needs and offers on the Help board', 'In the morning email: titles of new posts.'],
@@ -184,7 +186,7 @@ function EmailUpdates() {
   useEffect(() => {
     supabase.from('email_prefs').select('*').eq('profile_id', me.profile.id).maybeSingle().then(({ data }) => {
       setSaved(!!data)
-      setPrefs(data || { pastor_answers: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true })
+      setPrefs(data || { pastor_answers: true, care_reminders: true, prayer_updates: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true })
     })
     if (window.location.hash === '#email-updates') setTimeout(() => document.getElementById('email-updates')?.scrollIntoView({ behavior: 'smooth' }), 300)
   }, [me.profile.id])
@@ -206,7 +208,7 @@ function EmailUpdates() {
       <h2 className="p-card-title">Email updates</h2>
       {noEmail
         ? <Notice tone="warn">Add an email address above to get email updates.</Notice>
-        : <p className="p-muted">Choose what you'd like emailed to {me.profile.email}. Everything except pastor answers comes in one short morning email, and only on days there's something new.</p>}
+        : <p className="p-muted">Choose what you'd like emailed to {me.profile.email}. Pastor answers come right away. Everything else comes in the morning, and only on days there's something new.</p>}
       <div className="m-email-choices">
         {EMAIL_CHOICES.map(([k, label, help]) => (
           <label className="p-check" key={k}>
@@ -235,6 +237,30 @@ function EmailUpdates() {
         <button type="button" className="p-link" onClick={() => all(false)} disabled={noEmail}>Turn all off</button>
       </div>
     </form>
+  )
+}
+
+// Bigger text for easier reading, saved for each person.
+const TEXT_SIZES = [['normal', 'Normal'], ['large', 'Large'], ['larger', 'Larger']]
+function TextSize() {
+  const me = useMe()
+  const { reloadProfile } = usePortal()
+  const [err, setErr] = useState('')
+  const pick = async (size) => {
+    setErr('')
+    const { error } = await supabase.from('profiles').update({ text_size: size }).eq('id', me.profile.id)
+    if (error) setErr(friendlyError(error)); else reloadProfile()
+  }
+  const current = me.profile.text_size || 'normal'
+  return (
+    <div className="p-card" id="text-size">
+      <h2 className="p-card-title">Text size</h2>
+      <p className="p-muted">Make the words in the portal bigger and easier to read. It follows you to any phone or computer you sign in on.</p>
+      <div className="p-toolbar" role="radiogroup" aria-label="Text size">
+        {TEXT_SIZES.map(([v, l]) => <button key={v} type="button" role="radio" aria-checked={current === v} className={`chip${current === v ? ' active' : ''} m-size-${v}`} onClick={() => pick(v)}>{l}</button>)}
+      </div>
+      {err && <span className="p-error-inline">{err}</span>}
+    </div>
   )
 }
 
@@ -298,6 +324,7 @@ export default function Account() {
         <p className="p-muted">To change your role or teams, ask a church admin.</p>
       </div>
       <EmailCard />
+      <TextSize />
       <EmailUpdates />
       <AppCard />
       {me.isStaff && <BioEditor />}

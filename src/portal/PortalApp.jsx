@@ -3,7 +3,7 @@ import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from
 import {
   LayoutDashboard, Megaphone, ClipboardList, Heart, FolderOpen, CalendarDays, ListOrdered, Users, Music,
   Wrench, Baby, FileWarning, ShieldCheck, UserCog, LogOut, Menu, X, KeyRound,
-  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag,
+  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen,
 } from 'lucide-react'
 import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail, pendingJoinCount } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
@@ -24,12 +24,14 @@ import Library, { SeriesPage, LessonPage } from './member/Library'
 import LibraryManage from './member/LibraryManage'
 import AskPastor from './member/AskPastor'
 import { MemberPrayer, Directory, Care, HelpBoard, Gatherings, Reading } from './member/Community'
+import { SermonNotes } from './member/Sermon'
 
 const NAV = [
   { group: 'Members', show: (m) => m.isMember },
   { to: '/portal/home', label: 'Member home', icon: Home, show: (m) => m.isMember },
   { to: '/portal/study', label: 'Bible study library', icon: BookOpen, show: (m) => m.isMember },
   { to: '/portal/read', label: 'Read together', icon: BookMarked, show: (m) => m.isMember },
+  { to: '/portal/notes', label: 'Sermon notes', icon: NotebookPen, show: (m) => m.isMember },
   { to: '/portal/pray', label: 'Prayer wall', icon: HeartHandshake, show: (m) => m.isMember },
   { to: '/portal/ask', label: 'Ask the Pastor', icon: MessageCircleQuestion, show: (m) => m.isMember },
   { to: '/portal/gatherings', label: 'Gatherings', icon: CalendarHeart, show: (m) => m.isMember },
@@ -282,7 +284,7 @@ function Layout() {
           <button className="p-menu-btn" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={20} />{joinWaiting > 0 && <span className="p-menu-dot" aria-hidden="true" />}</button>
           <span className="p-top-title">{portalName}</span>
         </header>
-        <main className="p-content" id="main">
+        <main className={`p-content${me.profile.text_size && me.profile.text_size !== 'normal' ? ` p-text-${me.profile.text_size}` : ''}`} id="main">
           <ConductGate>
           <Routes>
             <Route index element={me.isStaff ? <Dashboard /> : <Navigate to={home} replace />} />
@@ -293,6 +295,7 @@ function Layout() {
                 <Route path="study/:seriesId" element={<SeriesPage />} />
                 <Route path="study/:seriesId/:lessonId" element={<LessonPage />} />
                 <Route path="read" element={<Reading />} />
+                <Route path="notes" element={<SermonNotes />} />
                 <Route path="pray" element={<MemberPrayer />} />
                 <Route path="ask" element={<AskPastor />} />
                 <Route path="gatherings" element={<Gatherings />} />
