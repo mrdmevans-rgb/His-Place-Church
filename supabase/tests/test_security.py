@@ -265,7 +265,7 @@ check('leader (not pastor) cannot see questions', lambda: sql("select count(*) f
 check('member cannot answer own question', lambda: sql("update public.pastor_questions set answer='x' where id=%s", (q1,), as_user=MEM), 'denied')
 check('pastor answers and shares anonymously', lambda: sql("update public.pastor_questions set answer='Unearned favor', share_as_faq=true, faq_question='What is grace?', faq_answer='Unearned favor' where id=%s returning answered_by", (q1,), as_user=PASTOR), lambda r: r[0][0] == PASTOR)
 check('FAQ shows to members without who asked', lambda: sql("select * from public.pastor_faq()", as_user=MEM2), lambda r: len(r) == 1 and r[0][1] == 'What is grace?' and len(r[0]) == 4)
-check('FAQ hidden from visitors', lambda: sql("select count(*) from public.pastor_faq()", anon=True), lambda r: r[0][0] == 0)
+check('FAQ hidden from visitors', lambda: sql("select * from public.pastor_faq()", anon=True), 'denied')
 check('member cannot edit answered question', lambda: sql("update public.pastor_questions set question='changed' where id=%s", (q1,), as_user=MEM), 'denied')
 
 # prayer wall
@@ -328,6 +328,18 @@ check('member cannot create choices for someone else', lambda: sql("insert into 
 check('applicant cannot sign up for member emails', lambda: sql("insert into public.email_prefs (weekly_reading) values (true)", as_user=APPL), 'denied')
 check('email send log is server only', lambda: sql("select count(*) from public.email_state", as_user=MEM), lambda r: r[0][0] == 0)
 check('visitor sees no email choices', lambda: sql("select count(*) from public.email_prefs", anon=True), lambda r: r[0][0] == 0)
+
+# Locked functions (0009): visitors can't call member lookups or background functions directly.
+check('visitor cannot call the directory lookup', lambda: sql("select * from public.directory_list()", anon=True), 'denied')
+check('visitor cannot call the FAQ lookup', lambda: sql("select * from public.pastor_faq()", anon=True), 'denied')
+check('member cannot call the activity log directly', lambda: sql("select public.log_action('fake', 'x', '1', '{}'::jsonb)", as_user=MEM), 'denied')
+check('member cannot call a background function directly', lambda: sql("select public.handle_new_user()", as_user=MEM), 'denied')
+check('members can still use the directory lookup', lambda: sql("select count(*) from public.directory_list()", as_user=MEM), 'ok')
+NEWU = make_user('new-after-lock@x.org', 'member')
+check('new accounts still get a profile after the lock', lambda: sql("select count(*) from public.profiles where id=%s", (NEWU,)), lambda r: r[0][0] == 1)
+before = sql("select count(*) from public.audit_log")[0][0]
+sql("update public.profiles set role='leader' where id=%s", (NEWU,))
+check('the activity log still records changes', lambda: sql("select count(*) from public.audit_log"), lambda r: r[0][0] > before)
 
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:

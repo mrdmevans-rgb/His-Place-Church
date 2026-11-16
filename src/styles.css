@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600&display=swap');
 
 :root {
   --paper: #EDE6D9;
@@ -6,7 +5,7 @@
   --paper-dark: #E1D8C6;
   --ink: #2B2420;
   --ink-soft: #5B5147;
-  --ink-faint: #8C8171;
+  --ink-faint: #6E6458; /* darkened so small gray text is easy to read */
   --gold: #B8862F;
   --oxblood: #7A2E2E;
   --oxblood-dark: #5E2222;
@@ -78,7 +77,7 @@ main { flex: 1; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-logo { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
 .brand-top { font-family: 'Source Serif 4', serif; font-weight: 600; font-size: 15px; letter-spacing: 0.03em; color: var(--ink); }
-.brand-bottom { font-size: 11px; letter-spacing: 0.08em; color: var(--ink-faint); text-transform: uppercase; }
+.brand-bottom { font-size: 11px; letter-spacing: 0.08em; color: #6B6158; text-transform: uppercase; }
 
 .nav-desktop { display: flex; align-items: center; gap: 13px; }
 .nav-link {
@@ -192,7 +191,7 @@ main { flex: 1; }
   border-right: 1px solid var(--stone-border);
 }
 .fact-item:last-child { border-right: none; }
-.fact-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 4px; }
+.fact-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-bottom: 4px; }
 .fact-value { font-family: 'Source Serif 4', serif; font-size: 17px; color: var(--ink); }
 
 /* ---------- Sections ---------- */
@@ -366,7 +365,7 @@ main { flex: 1; }
 .footer-logo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 .footer-title { color: #fff; font-family: 'Source Serif 4', serif; font-size: 15px; }
 .footer-subtitle { font-size: 12px; color: rgba(255,255,255,0.5); }
-.footer-copy { font-size: 13px; max-width: 320px; }
+.footer-copy { font-size: 13px; max-width: 320px; color: rgba(255,255,255,0.72); }
 .footer-heading { color: #fff; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
 .footer-links { display: flex; flex-direction: column; gap: 8px; }
 .footer-link { font-size: 13px; color: rgba(255,255,255,0.72); }
@@ -644,7 +643,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .chat-input button { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--oxblood); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
 .chat-disclaimer { font-size: 11px; color: var(--ink-faint); text-align: center; padding: 0 12px 8px; background: #fff; }
 .site-footer { padding-bottom: 72px; }
-.footer-notice { margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.45); }
+.footer-notice { margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.62); }
 
 /* ---------- Added: How to Study the Bible ---------- */
 .study-intro-verses { max-width: 760px; }
@@ -702,3 +701,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .join-hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .join-error { color: var(--oxblood); font-weight: 600; }
 @media (max-width: 800px) { .join-grid, .join-perks { grid-template-columns: 1fr; } }
+
+/* Photos carry their real width and height so the page saves room for them.
+   :where() keeps this from overriding any rule that sets a fixed height. */
+:where(img[width][height]) { height: auto; }
+
+/* Team page placeholders while loading */
+.team-skeleton .team-initials { background: var(--paper-dark); }
+.skeleton-line { height: 14px; border-radius: 7px; background: var(--paper-dark); margin: 10px auto; width: 60%; }
+.skeleton-line.short { width: 40%; }
+.team-card { min-height: 260px; }
+/* While loading, hold enough room that the content below stays out of view, so nothing jumps. */
+.team-loading { min-height: 130vh; align-content: start; }
+@media (min-width: 900px) { .team-loading { min-height: 640px; } }

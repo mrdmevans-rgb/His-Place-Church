@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BookOpen, HeartHandshake, MessageCircleQuestion, Users } from 'lucide-react'
 import { supabase, portalConfigured } from './portal/supabase'
+import { useDocumentHead } from './head'
 
 // Public page where someone asks for member portal access.
 // An admin reviews each request in the portal before an account is made.
@@ -15,7 +16,7 @@ const PERKS = [
 export default function JoinPage() {
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', message: '', website: '' })
   const [state, setState] = useState({ sending: false, done: false, error: '' })
-  useEffect(() => { document.title = 'Request Member Access | His Place Community Church' }, [])
+  useDocumentHead({ title: 'Request Member Access', description: 'Ask to join the His Place member portal: Bible studies, a shared reading plan, the prayer wall, and ways to care for each other all week long.' })
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
 
   const submit = async (e) => {
