@@ -5,7 +5,7 @@
   --paper-dark: #E1D8C6;
   --ink: #2B2420;
   --ink-soft: #5B5147;
-  --ink-faint: #8C8171;
+  --ink-faint: #6E6458; /* darkened so small gray text is easy to read */
   --gold: #B8862F;
   --oxblood: #7A2E2E;
   --oxblood-dark: #5E2222;
@@ -711,3 +711,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--oxblood); outli
 .skeleton-line { height: 14px; border-radius: 7px; background: var(--paper-dark); margin: 10px auto; width: 60%; }
 .skeleton-line.short { width: 40%; }
 .team-card { min-height: 260px; }
+/* While loading, hold enough room that the content below stays out of view, so nothing jumps. */
+.team-loading { min-height: 130vh; align-content: start; }
+@media (min-width: 900px) { .team-loading { min-height: 640px; } }

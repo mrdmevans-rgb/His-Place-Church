@@ -38,7 +38,7 @@ export default function TeamPage() {
         </div>
         {team === null ? (
           // Placeholder cards hold the space so the page doesn't jump when the team loads.
-          <div className="team-grid" aria-busy="true" aria-label="Loading the team">{[0, 1, 2].map((i) => <div className="team-card team-skeleton" key={i}><div className="team-initials" /><div className="skeleton-line" /><div className="skeleton-line short" /></div>)}</div>
+          <div className="team-grid team-loading" aria-busy="true" aria-label="Loading the team">{[0, 1, 2].map((i) => <div className="team-card team-skeleton" key={i}><div className="team-initials" /><div className="skeleton-line" /><div className="skeleton-line short" /></div>)}</div>
         ) : team.length === 0 ? (
           <div className="card"><h3>Coming soon</h3><p>We're putting together introductions to our team. In the meantime, <Link to="/about">meet Pastor Dave</Link> or <Link to="/visit">plan a visit</Link> and say hello in person.</p></div>
         ) : (

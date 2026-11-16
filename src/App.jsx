@@ -25,7 +25,7 @@ import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { SITE_URL, useDocumentHead } from './head'
 import logoSrc from './assets/logo.jpg'
-import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
+import hisKidsLogoSrc from './assets/his-kids-logo.jpg?w=360&format=webp'
 import { knowJesus } from './knowJesusContent'
 import { study } from './studyContent'
 import { BIBLE_LABEL, BIBLE_NOTICE } from './scripture'
@@ -770,15 +770,15 @@ function HomePage() {
           </div>
           <div className="essay-grid">
             <div className="essay-item wide">
-              <Photo name="sunday-full-room" />
+              <Photo name="sunday-full-room" sizes="(max-width: 600px) 100vw, 720px" />
               <div className="essay-caption">Sunday worship</div>
             </div>
             <div className="essay-item">
-              <Photo name="worship-hands-raised" />
+              <Photo name="worship-hands-raised" sizes="(max-width: 600px) 50vw, 360px" />
               <div className="essay-caption">Worship & music</div>
             </div>
             <div className="essay-item">
-              <Photo name="praying-over-one-another" />
+              <Photo name="praying-over-one-another" sizes="(max-width: 600px) 50vw, 360px" />
               <div className="essay-caption">Praying for one another</div>
             </div>
           </div>
@@ -833,9 +833,9 @@ function HomePage() {
             </p>
           </div>
           <div className="photo-strip">
-            <Photo name="back-to-school-prayer-circle" />
-            <Photo name="back-to-school-notebooks" />
-            <Photo name="back-to-school-haircuts" />
+            <Photo name="back-to-school-prayer-circle" sizes="(max-width: 600px) 50vw, 360px" />
+            <Photo name="back-to-school-notebooks" sizes="(max-width: 600px) 50vw, 360px" />
+            <Photo name="back-to-school-haircuts" sizes="(max-width: 600px) 50vw, 360px" />
           </div>
           <div className="hero-actions" style={{ marginTop: 0 }}>
             <Link to="/serve" className="button button-primary">
@@ -1464,12 +1464,12 @@ function KidsPage() {
           </div>
 
           <div className="kids-gallery">
-            <Photo name="toddlers-dancing" />
-            <Photo name="kids-fruit-of-the-spirit-craft" />
-            <Photo name="nursery-smiles" />
-            <Photo name="kids-table-grins" />
-            <Photo name="nursery-building-blocks" />
-            <Photo name="nursery-play-time" />
+            <Photo name="toddlers-dancing" sizes="(max-width: 600px) 50vw, 360px" />
+            <Photo name="kids-fruit-of-the-spirit-craft" sizes="(max-width: 600px) 50vw, 360px" />
+            <Photo name="nursery-smiles" sizes="(max-width: 600px) 50vw, 360px" />
+            <Photo name="kids-table-grins" sizes="(max-width: 600px) 50vw, 360px" />
+            <Photo name="nursery-building-blocks" sizes="(max-width: 600px) 50vw, 360px" />
+            <Photo name="nursery-play-time" sizes="(max-width: 600px) 50vw, 360px" />
           </div>
 
           <div className="stack-md">
@@ -1541,8 +1541,8 @@ function ServePage() {
             </p>
           </div>
           <div className="photo-strip two">
-            <Photo name="back-to-school-supplies" />
-            <Photo name="worship-with-the-band" />
+            <Photo name="back-to-school-supplies" sizes="(max-width: 600px) 50vw, 360px" />
+            <Photo name="worship-with-the-band" sizes="(max-width: 600px) 50vw, 360px" />
           </div>
         </div>
 
