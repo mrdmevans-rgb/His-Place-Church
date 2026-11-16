@@ -297,7 +297,7 @@
 .m-notes { margin-top: 14px; }
 .m-notes label { display: block; font-weight: 600; margin-bottom: 6px; }
 .m-notes label small { font-weight: 400; color: var(--ink-faint); margin-left: 6px; }
-.m-notes textarea { width: 100%; font: inherit; font-size: 16px; line-height: 1.55; padding: 10px 12px; border: 1px solid var(--stone-border); border-radius: 8px; background: #fff; resize: vertical; }
+.m-notes textarea { box-sizing: border-box; display: block; max-width: 100%; width: 100%; font: inherit; font-size: 16px; line-height: 1.55; padding: 10px 12px; border: 1px solid var(--stone-border); border-radius: 8px; background: #fff; resize: vertical; }
 .m-notes-status { min-height: 1.2em; margin-top: 4px; }
 .m-note summary { cursor: pointer; }
 /* Add to my calendar */
