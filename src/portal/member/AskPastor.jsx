@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase, friendlyError } from '../supabase'
+import { supabase, friendlyError, notify } from '../supabase'
 import { Badge, Empty, Notice, PageHead, fmtDate, useMe, usePeople, useRows } from '../ui'
 
 function Faq() {
@@ -33,8 +33,7 @@ function Answer({ q, onDone }) {
     }).eq('id', q.id)
     if (error) return setErr(friendlyError(error))
     // Email the person who asked (if they chose that). Each answer is emailed once.
-    const { data: { session } } = await supabase.auth.getSession()
-    fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` }, body: JSON.stringify({ kind: 'answer', id: q.id }) }).catch(() => {})
+    notify('answer', q.id)
     onDone()
   }
   return (
@@ -90,8 +89,9 @@ export default function AskPastor() {
   const ask = async (e) => {
     e.preventDefault()
     if (!question.trim()) return
-    const { error } = await supabase.from('pastor_questions').insert({ question: question.trim() })
+    const { data: added, error } = await supabase.from('pastor_questions').insert({ question: question.trim() }).select('id').single()
     if (error) return setMsg({ tone: 'error', text: friendlyError(error) })
+    notify('question', added.id) // email the pastors
     setQuestion('')
     setMsg({ tone: 'success', text: "Your question was sent. The pastor's answer will show up right here." })
     reload()

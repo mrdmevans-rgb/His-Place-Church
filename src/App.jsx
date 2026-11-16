@@ -346,7 +346,8 @@ const icsText = (s) => String(s || '').replace(/([,;\\])/g, '\\$1').replace(/\n/
 // Reads dates like "11/22/2026 6:00 PM", "11/22/26 6pm", or "11/22/2026".
 function parseEventStart(value) {
   if (!value) return null
-  const m = String(value).match(/(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})(?:[^\d]+(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?)?/i)
+  // Four-digit years are checked first so 2026 isn't read as 20.
+  const m = String(value).match(/(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})(?:[^\d]+(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?)?/i)
   if (!m) return null
   const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3])
   let hour = m[4] ? Number(m[4]) % 12 : 0
@@ -417,7 +418,7 @@ function addSundayToCalendar() {
 }
 
 function AddToCalendar({ event }) {
-  const parsed = parseEventStart(event.start || event.time)
+  const parsed = event.startsAt ? { date: new Date(event.startsAt), allDay: false } : parseEventStart(event.start || event.time)
   if (!parsed) return null
   const { date, allDay } = parsed
   const end = allDay ? new Date(date.getTime() + 24 * 3600e3) : new Date(date.getTime() + 90 * 60e3)
@@ -519,6 +520,62 @@ const mapEventRow = (row, index) => ({
   // Time column) and the event gets "add to calendar" buttons.
   start: row.Start || row.start || row.Date || row.date || '',
 })
+
+
+/* ---------- Public news posted from the Leader Portal ----------
+   Leaders check "Also show on the public website" on an announcement or event in the portal.
+   The site reads only the public fields through two small lookups, with one lightweight request,
+   and shows them ahead of anything in the Google Sheet. With no portal posts, nothing changes. */
+const PUBLIC_API = import.meta.env.VITE_SUPABASE_URL
+const PUBLIC_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+function usePortalPublic(fn, mapRow) {
+  const [rows, setRows] = useState([])
+  useEffect(() => {
+    if (!PUBLIC_API || !PUBLIC_KEY) return undefined
+    let cancelled = false
+    fetch(`${PUBLIC_API}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers: { apikey: PUBLIC_KEY, Authorization: `Bearer ${PUBLIC_KEY}`, 'Content-Type': 'application/json' },
+      body: '{}',
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => { if (!cancelled && Array.isArray(data)) setRows(data.map(mapRow)) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [fn])
+  return rows
+}
+
+const eastern = (iso, opts) => new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', ...opts }).format(new Date(iso))
+const mapPortalAnnouncement = (r) => ({
+  id: r.id,
+  title: r.title,
+  date: new Date(`${r.posted}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+  text: r.body,
+})
+const mapPortalEvent = (r) => ({
+  id: r.id,
+  title: r.title,
+  time: eastern(r.starts_at, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+  location: r.location,
+  description: r.details,
+  // Same "11/21/2026, 6:00 PM" style as the sheet, so Add to calendar works.
+  start: eastern(r.starts_at, { month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }),
+  // The exact moment, so Add to calendar is right for visitors in any time zone.
+  startsAt: r.starts_at,
+})
+
+function withPortal(sheet, portal) {
+  if (!portal.length) return sheet
+  return { data: [...portal, ...(sheet.status === 'loaded' ? sheet.data : [])], status: 'loaded' }
+}
+function useAnnouncements() {
+  return withPortal(useSheetData(ANNOUNCEMENTS_URL, fallbackAnnouncements, mapAnnouncementRow), usePortalPublic('public_announcements', mapPortalAnnouncement))
+}
+function useEvents() {
+  return withPortal(useSheetData(EVENTS_SHEET_URL, fallbackEvents, mapEventRow), usePortalPublic('public_events', mapPortalEvent))
+}
 
 function SheetStatusNote({ status, emptyLabel }) {
   if (status === 'loading') return <p className="events-helper-text">Loading...</p>
@@ -706,11 +763,7 @@ function HomePage() {
       'His Place Community Church is a Bible based, Jesus following church serving Amelia, Beechmont, Cherry Grove, Bethel, and the State Route 125 area. Join us Sundays at 11:00 AM.',
   })
 
-  const { data: announcements, status: announcementsStatus } = useSheetData(
-    ANNOUNCEMENTS_URL,
-    fallbackAnnouncements,
-    mapAnnouncementRow
-  )
+  const { data: announcements, status: announcementsStatus } = useAnnouncements()
   const { data: sermons, status: sermonsStatus } = useSheetData(SERMONS_URL, fallbackSermons, mapSermonRow, {
     newestFirst: true,
   })
@@ -1260,7 +1313,7 @@ function GroupsPage() {
     description: "Men's breakfast and Bible study, women's book and Bible study, Life Groups, the Prayer Team, and upcoming events at His Place Community Church.",
   })
 
-  const { data: events, status } = useSheetData(EVENTS_SHEET_URL, fallbackEvents, mapEventRow)
+  const { data: events, status } = useEvents()
   const mensNext = nextMensBreakfast()
   const mensNextLabel = mensNext.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
   const mensEvent = {
@@ -2052,7 +2105,7 @@ function StudyPage() {
 
 function AnnouncementsPage() {
   useDocumentHead({ title: 'Announcements', description: 'Stay up to date with the latest announcements from His Place Community Church.' })
-  const { data: announcements, status } = useSheetData(ANNOUNCEMENTS_URL, fallbackAnnouncements, mapAnnouncementRow)
+  const { data: announcements, status } = useAnnouncements()
 
   return (
     <section className="section page-section">

@@ -1,6 +1,8 @@
 // Instant emails.
 //   POST {}                                  -> tell admins about new requests to join (called by the join page)
 //   POST { kind: 'answer', id }  + sign-in   -> tell a member the pastor answered their question (called by the pastor)
+//   POST { kind: 'question' | 'prayer' | 'report', id } + sign-in
+//                                            -> tell pastors about a new question, private prayer request, or reported post
 // Each item is emailed once. Until RESEND_API_KEY is set in Vercel, this quietly does nothing.
 import { button, db as getDb, esc, json, layout, readBody, realEmail, sendEmails, site, unsubscribeLinks } from './_email.js'
 
@@ -78,11 +80,98 @@ async function pastorAnswer(db, req, res, id) {
   }
 }
 
+// ---------- Pastor alerts ----------
+const AREA = { lesson_comments: 'Bible study discussion', member_prayers: 'Prayer wall', member_prayer_comments: 'Prayer wall encouragement', help_posts: 'Help board', help_replies: 'Help board reply', gatherings: 'Gatherings', reading_comments: 'Read together discussion' }
+
+async function signedIn(db, req) {
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+  if (!token) return null
+  const { data } = await db.auth.getUser(token)
+  if (!data?.user) return null
+  const { data: me } = await db.from('profiles').select('id, active').eq('id', data.user.id).single()
+  return me?.active ? me : null
+}
+
+// Pastors and admins who want this kind of alert (on unless they turned it off).
+async function pastorsWanting(db, pref) {
+  const { data: people } = await db.from('profiles').select('id, full_name, email').eq('active', true).in('role', ['admin', 'pastor'])
+  const list = (people || []).filter((p) => realEmail(p.email))
+  if (!list.length) return []
+  const { data: prefs } = await db.from('email_prefs').select('*').in('profile_id', list.map((p) => p.id))
+  const byId = Object.fromEntries((prefs || []).map((p) => [p.profile_id, p]))
+  const out = []
+  for (const p of list) {
+    let pr = byId[p.id]
+    if (pr && pr[pref] === false) continue
+    if (!pr) pr = (await db.from('email_prefs').insert({ profile_id: p.id }).select('token').single()).data
+    out.push({ ...p, token: pr?.token })
+  }
+  return out
+}
+
+async function pastorAlert(db, req, res, kind, id) {
+  const me = await signedIn(db, req)
+  if (!me) return json(res, 401, { error: 'Please sign in.' })
+  const now = new Date().toISOString()
+  let claimed, subject, title, bodyHtml, bodyText, link, pref, table
+  const nameOf = async (uid) => (await db.from('profiles').select('full_name').eq('id', uid).maybeSingle()).data?.full_name || 'A member'
+  if (kind === 'question') {
+    table = 'pastor_questions'; pref = 'new_questions'
+    claimed = (await db.from(table).update({ notified_at: now }).eq('id', id).is('notified_at', null).select('id, author, question').maybeSingle()).data
+    if (!claimed) return json(res, 200, { sent: false, reason: 'Already sent.' })
+    const who = await nameOf(claimed.author)
+    subject = `New question for the pastor from ${who}`
+    title = 'A new question for the pastor'
+    link = `${site()}/portal/ask`
+    bodyHtml = `<p><strong>${esc(who)}</strong> asked:</p><div style="border-left:3px solid #B8862F;background:#EDE6D9;padding:10px 14px;border-radius:4px;white-space:pre-wrap">${esc(claimed.question)}</div>${button(link, 'Answer in the pastor inbox')}<p style="color:#8C8171;font-size:13px">Only pastors can see this question.</p>`
+    bodyText = `${who} asked:\n\n${claimed.question}\n\nAnswer it here: ${link}`
+  } else if (kind === 'prayer') {
+    table = 'member_prayers'; pref = 'private_prayers'
+    claimed = (await db.from(table).update({ notified_at: now }).eq('id', id).eq('pastors_only', true).is('notified_at', null).select('id, author, title, body').maybeSingle()).data
+    if (!claimed) return json(res, 200, { sent: false, reason: 'Already sent, or not a private request.' })
+    const who = await nameOf(claimed.author)
+    subject = `Private prayer request from ${who}`
+    title = 'A private prayer request'
+    link = `${site()}/portal/pray`
+    bodyHtml = `<p><strong>${esc(who)}</strong> sent a prayer request to the pastors only:</p><div style="border-left:3px solid #B8862F;background:#EDE6D9;padding:10px 14px;border-radius:4px"><strong>${esc(claimed.title)}</strong>${claimed.body ? `<div style="white-space:pre-wrap;margin-top:6px">${esc(claimed.body)}</div>` : ''}</div>${button(link, 'Open the prayer wall')}<p style="color:#8C8171;font-size:13px">Only pastors can see this request. Please keep it confidential.</p>`
+    bodyText = `${who} sent a prayer request to the pastors only:\n\n${claimed.title}\n${claimed.body || ''}\n\nOpen the prayer wall: ${link}`
+  } else {
+    table = 'content_reports'; pref = 'reported_posts'
+    // Members can't read reports back after filing them, so gather every report not yet emailed.
+    const since = new Date(Date.now() - 86400000).toISOString()
+    const rows = (await db.from(table).update({ notified_at: now }).is('notified_at', null).eq('resolved', false).gte('created_at', since).select('id, item_table, reason')).data || []
+    if (!rows.length) return json(res, 200, { sent: false, reason: 'Already sent.' })
+    claimed = { id: rows.map((r) => r.id) }
+    subject = rows.length === 1 ? 'A post was reported in the member portal' : `${rows.length} posts were reported in the member portal`
+    title = rows.length === 1 ? 'A post was reported' : `${rows.length} posts were reported`
+    link = `${site()}/portal/reports`
+    const lines = rows.map((r) => `<li>${esc(AREA[r.item_table] || 'Member portal')}${r.reason ? `: <em>${esc(r.reason)}</em>` : ''}</li>`).join('')
+    bodyHtml = `<p>Someone reported ${rows.length === 1 ? 'a post' : 'posts'} for a pastor to look at:</p><ul>${lines}</ul>${button(link, 'Review reported posts')}`
+    bodyText = `Reported for a pastor to look at:\n${rows.map((r) => `- ${AREA[r.item_table] || 'Member portal'}${r.reason ? `: ${r.reason}` : ''}`).join('\n')}\n\nReview: ${link}`
+  }
+  const release = () => db.from(table).update({ notified_at: null }).in('id', [].concat(claimed.id))
+  const pastors = await pastorsWanting(db, pref)
+  if (!pastors.length) return json(res, 200, { sent: false, reason: 'No pastors want this email.' })
+  const messages = pastors.map((p) => {
+    const links = unsubscribeLinks(p.token)
+    return { to: [p.email], subject, headers: links.headers, html: layout(title, bodyHtml, links.footer), text: `${bodyText}\n\nUnsubscribe: ${links.unsub}` }
+  })
+  try {
+    const out = await sendEmails(messages)
+    if (out.skipped) { await release(); return json(res, 200, { sent: false, reason: out.skipped }) }
+    return json(res, 200, { sent: true, count: out.sent })
+  } catch (e) {
+    await release()
+    return json(res, 502, { sent: false, error: e.message })
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'POST only' })
   let db
   try { db = getDb() } catch (e) { return json(res, 500, { error: e.message }) }
   const body = await readBody(req)
   if (body.kind === 'answer') return pastorAnswer(db, req, res, String(body.id || ''))
+  if (['question', 'prayer', 'report'].includes(body.kind)) return pastorAlert(db, req, res, body.kind, String(body.id || ''))
   return joinRequests(db, res)
 }

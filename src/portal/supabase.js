@@ -70,3 +70,12 @@ export const pendingJoinCount = async () => {
   const { count } = await supabase.from('membership_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')
   return count || 0
 }
+
+// Ask the server to send an instant email (pastor alerts, answer emails).
+// Fire and forget: if email isn't set up, the server quietly does nothing.
+export async function notify(kind, id) {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    await fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` }, body: JSON.stringify({ kind, id }) })
+  } catch { /* never block the person over an email */ }
+}

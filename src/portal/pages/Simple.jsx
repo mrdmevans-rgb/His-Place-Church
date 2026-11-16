@@ -21,8 +21,10 @@ export function Announcements() {
         { name: 'body', label: 'Message', type: 'textarea' },
         { name: 'team', label: 'For', type: 'select', options: teamOptions, placeholder: 'All leaders', half: true },
         ...(me.isPastoral ? [{ name: 'pinned', label: 'Pin to the top', type: 'checkbox' }] : []),
+        { name: 'show_public', label: 'Also show on the public website', type: 'checkbox', help: 'Shows on the Announcements page and the home page. Only the title and message are shown.' },
+        { name: 'public_until', label: 'Stop showing on the website after (optional)', type: 'date', half: true },
       ]}
-      prepare={(v) => ({ title: v.title, body: v.body, team: v.team || null, ...(me.isPastoral ? { pinned: !!v.pinned } : {}) })}
+      prepare={(v) => ({ title: v.title, body: v.body, team: v.team || null, show_public: !!v.show_public, public_until: v.public_until || null, ...(me.isPastoral ? { pinned: !!v.pinned } : {}) })}
       canEdit={(r) => r.author === me.profile.id || me.isPastoral}
       canDelete={(r) => r.author === me.profile.id || me.isPastoral}
       emptyText="No announcements yet."
@@ -30,6 +32,7 @@ export function Announcements() {
         <>
           <div className="p-item-head">
             <h3>{r.pinned && <span className="p-pin">Pinned </span>}{r.title}</h3>
+            {r.show_public && <Badge tone="success">On the website{r.public_until ? ` until ${fmtDate(r.public_until)}` : ''}</Badge>}
             {withTeam(r.team)}
           </div>
           {r.body && <p className="p-pre">{r.body}</p>}
@@ -62,17 +65,20 @@ export function Calendar() {
         { name: 'ends_at', label: 'Ends', type: 'datetime', half: true },
         { name: 'location', label: 'Location', half: true },
         { name: 'team', label: 'Team', type: 'select', options: teamOptions, placeholder: 'All leaders', half: true },
-        { name: 'notes', label: 'Notes', type: 'textarea', rows: 3 },
+        { name: 'notes', label: 'Notes for leaders', type: 'textarea', rows: 3 },
+        { name: 'show_public', label: 'Also show on the public website', type: 'checkbox', help: 'Shows on the Groups and Events page with an Add to calendar button.' },
+        { name: 'public_details', label: 'Description for the public website', type: 'textarea', rows: 2, max: 2000, help: 'What visitors see. Your notes for leaders stay private.' },
       ]}
-      prepare={(v) => ({ title: v.title, starts_at: v.starts_at, ends_at: v.ends_at || null, location: v.location, team: v.team || null, notes: v.notes })}
+      prepare={(v) => ({ title: v.title, starts_at: v.starts_at, ends_at: v.ends_at || null, location: v.location, team: v.team || null, notes: v.notes, show_public: !!v.show_public, public_details: v.public_details || '' })}
       canEdit={(r) => r.created_by === me.profile.id || me.isPastoral}
       canDelete={(r) => r.created_by === me.profile.id || me.isPastoral}
       emptyText={past ? 'No past events.' : 'Nothing on the calendar yet.'}
       renderItem={(r) => (
         <>
-          <div className="p-item-head"><h3>{r.title}</h3>{withTeam(r.team)}</div>
+          <div className="p-item-head"><h3>{r.title}</h3>{r.show_public && <Badge tone="success">On the website</Badge>}{withTeam(r.team)}</div>
           <div className="p-meta strong">{fmtDateTime(r.starts_at)}{r.ends_at ? ` to ${fmtDateTime(r.ends_at)}` : ''}{r.location ? ` · ${r.location}` : ''}</div>
           {r.notes && <p className="p-pre">{r.notes}</p>}
+          {r.show_public && r.public_details && <p className="p-pre p-public-copy"><strong>On the website: </strong>{r.public_details}</p>}
           <div className="p-meta">Added by {name(r.created_by)}</div>
         </>
       )}

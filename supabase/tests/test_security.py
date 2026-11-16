@@ -341,6 +341,21 @@ before = sql("select count(*) from public.audit_log")[0][0]
 sql("update public.profiles set role='leader' where id=%s", (NEWU,))
 check('the activity log still records changes', lambda: sql("select count(*) from public.audit_log"), lambda r: r[0][0] > before)
 
+# Public news (0010): visitors see only public items, and only the safe fields.
+an_pub = sql("insert into public.announcements (title, body, team, show_public) values ('Fall festival', 'Join us!', 'worship', true) returning id", as_user=WORSHIP)[0][0]
+sql("insert into public.announcements (title, body, show_public) values ('Leaders only: keys', 'Pick up keys', false)", as_user=WORSHIP)
+sql("insert into public.announcements (title, show_public, public_until) values ('Old news', true, current_date - 5)", as_user=WORSHIP)
+check('visitor sees only current public announcements', lambda: sql("select title from public.public_announcements()", anon=True), lambda r: [x[0] for x in r] == ['Fall festival'])
+check('public announcements never include team or author', lambda: sql("select * from public.public_announcements()", anon=True), lambda r: len(r[0]) == 4)
+check('visitor still cannot read the announcements table', lambda: sql("select count(*) from public.announcements", anon=True), lambda r: r[0][0] == 0)
+sql("insert into public.events (title, starts_at, notes, public_details, show_public) values ('Trunk or treat', now() + interval '3 days', 'Bring the building keys', 'Candy and games for kids', true)", as_user=WORSHIP)
+sql("insert into public.events (title, starts_at, show_public) values ('Leaders meeting', now() + interval '2 days', false)", as_user=WORSHIP)
+sql("insert into public.events (title, starts_at, show_public) values ('Past picnic', now() - interval '3 days', true)", as_user=WORSHIP)
+check('visitor sees only upcoming public events', lambda: sql("select title, details from public.public_events()", anon=True), lambda r: r == [('Trunk or treat', 'Candy and games for kids')])
+check('internal event notes never go public', lambda: sql("select * from public.public_events()", anon=True), lambda r: 'Bring the building keys' not in str(r))
+check('member cannot make an announcement public', lambda: sql("insert into public.announcements (title, show_public) values ('x', true)", as_user=MEM), 'denied')
+check('pastor alert choices default to on', lambda: sql("select new_questions, private_prayers, reported_posts from public.email_prefs where profile_id=%s", (MEM,), as_user=MEM), lambda r: r == [(True, True, True)])
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Flag, EyeOff, Eye } from 'lucide-react'
-import { supabase, friendlyError } from '../supabase'
+import { supabase, friendlyError, notify } from '../supabase'
 import { fmtDateTime, useMe, usePeople, useRows } from '../ui'
 
 // Open a passage in the NASB 1995 on Bible Gateway, or study it on Blue Letter Bible.
@@ -23,7 +23,7 @@ export function ReportButton({ table, id }) {
     const reason = window.prompt('Let a pastor know what concerns you about this post (optional):', '')
     if (reason === null) return
     const { error } = await supabase.from('content_reports').insert({ item_table: table, item_id: id, reason })
-    if (!error) setDone(true)
+    if (!error) { setDone(true); notify('report') } // email the pastors
   }
   return done
     ? <span className="p-small">Reported. A pastor will look at it.</span>
