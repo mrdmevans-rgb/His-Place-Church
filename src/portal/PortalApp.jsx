@@ -25,7 +25,7 @@ import LibraryManage from './member/LibraryManage'
 import AskPastor from './member/AskPastor'
 import { MemberPrayer, Directory, Care, HelpBoard, Gatherings, Reading } from './member/Community'
 import { SermonNotes } from './member/Sermon'
-import { MyDiscipleship, DiscipleshipLeaders } from './member/Discipleship'
+import { MyDiscipleship, DiscipleshipLeaders, CoursePreview } from './member/Discipleship'
 
 const NAV = [
   { group: 'Members', show: (m) => m.isMember },
@@ -322,6 +322,8 @@ function Layout() {
                 <Route path="announcements" element={<Announcements />} />
                 <Route path="discipleship-leaders" element={<DiscipleshipLeaders />} />
                 <Route path="discipleship-leaders/:memberId" element={<DiscipleshipLeaders />} />
+                <Route path="discipleship-preview" element={<CoursePreview />} />
+                <Route path="discipleship-preview/:n" element={<CoursePreview />} />
                 <Route path="requests" element={<Requests />} />
                 <Route path="prayer" element={<Prayer />} />
                 <Route path="documents" element={<Documents />} />
