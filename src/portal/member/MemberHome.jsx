@@ -5,7 +5,6 @@ import { supabase, friendlyError, isLoginId } from '../supabase'
 import { Badge, Empty, Notice, PageHead, fmtDate, fmtDateTime, today, useMe, usePeople, usePortal } from '../ui'
 import { Celebrations } from './Community'
 import { PassageLinks, gatewayUrl } from './shared'
-import { SermonCard } from './Sermon'
 import DailyQuestion from './Trivia'
 
 export const CONDUCT = [
@@ -67,22 +66,17 @@ export default function MemberHome() {
       rows(supabase.from('lesson_progress').select('lesson_id, completed_at, study_lessons(series_id, position, study_series(title))').order('completed_at', { ascending: false }).limit(1)),
       rows(supabase.from('pastor_questions').select('id').eq('author', me.profile.id).not('answered_at', 'is', null)),
       rows(supabase.from('email_prefs').select('profile_id').eq('profile_id', me.profile.id)),
-      rows(supabase.rpc('this_sunday')),
-    ]).then(([reading, nextReading, gatherings, prayers, care, help, progress, answered, emailPrefs, sunday]) => setD({ sermon: sunday[0] || null, emailChosen: emailPrefs.length > 0, reading: reading[0], nextReading: nextReading[0], gatherings, prayers, care, help, progress: progress[0], answered }))
+    ]).then(([reading, nextReading, gatherings, prayers, care, help, progress, answered, emailPrefs]) => setD({ emailChosen: emailPrefs.length > 0, reading: reading[0], nextReading: nextReading[0], gatherings, prayers, care, help, progress: progress[0], answered }))
   }, [me.profile.id])
   const first = (me.profile.full_name || '').split(' ')[0]
   if (!d) return <p className="p-muted">Loading...</p>
   const s = d.progress?.study_lessons
-  // On the day of the service, notes go right at the top so they're easy to find in church.
-  const serviceDay = d.sermon ? d.sermon.service_date === today() : new Date().getDay() === 0
   return (
     <>
       <PageHead title={`Welcome${first ? `, ${first}` : ''}`} intro="Your His Place family, all week long." />
-      {serviceDay && <SermonCard sermon={d.sermon} />}
       <div className="m-tiles">{TILES.map(([to, label, Icon]) => <Link key={to} to={to} className="m-tile"><Icon size={22} aria-hidden="true" /><span>{label}</span></Link>)}</div>
       {!d.emailChosen && !isLoginId(me.profile.email) && <div className="p-card m-email-nudge"><strong>Get email updates?</strong> Choose emails for the weekly reading, new discussions, prayer needs, and more. <Link to="/portal/account#email-updates">Choose your emails</Link></div>}
       {d.answered.length > 0 && <Notice tone="success">The pastor has answered your question. <Link to="/portal/ask">Read the answer</Link></Notice>}
-      {!serviceDay && <SermonCard sermon={d.sermon} />}
       <DailyQuestion />
       <div className="p-dash-grid">
         <div className="p-card">
