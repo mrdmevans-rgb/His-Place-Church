@@ -429,6 +429,35 @@ check('everyone sees how many got it right today', lambda: r2, lambda r: r['toda
 check("members cannot see each other's answers", lambda: sql("select count(*) from public.trivia_answers", as_user=MEM_B), lambda r: r[0][0] == 1)
 check('members cannot erase an answer to try again', lambda: sql("delete from public.trivia_answers where user_id=%s", (MEM,), as_user=MEM), 'denied')
 
+
+# Discipleship paths (0014)
+check('members cannot assign themselves a discipleship path', lambda: sql("insert into public.disciple_assignments (member_id) values (%s)", (MEM,), as_user=MEM), 'denied')
+check('members cannot start work before being assigned', lambda: sql("insert into public.disciple_work (course, session, answers) values ('rooted', 1, '{}')", as_user=MEM), 'denied')
+check('a leader can assign the path and be the mentor', lambda: sql("insert into public.disciple_assignments (member_id, mentor_id) values (%s, %s)", (MEM, WORSHIP), as_user=WORSHIP), 'ok')
+check('applicants cannot be assigned', lambda: sql("insert into public.disciple_assignments (member_id) values (%s)", (APPL,), as_user=WORSHIP), 'denied')
+check('the member sees their assignment', lambda: sql("select course, active from public.disciple_assignments", as_user=MEM), lambda r: r == [('rooted', True)])
+check("other members don't see it", lambda: sql("select count(*) from public.disciple_assignments", as_user=MEM_B), lambda r: r[0][0] == 0)
+sql("insert into public.disciple_work (course, session, answers) values ('rooted', 1, '{\"d1q1\": \"Jesus died for my sins\"}')", as_user=MEM)
+check('the member can save answers', lambda: sql("select answers->>'d1q1' from public.disciple_work", as_user=MEM), lambda r: r == [('Jesus died for my sins',)])
+check('the mentor can read them', lambda: sql("select count(*) from public.disciple_work where member_id=%s", (MEM,), as_user=WORSHIP), lambda r: r[0][0] == 1)
+check('a pastor can read them', lambda: sql("select count(*) from public.disciple_work where member_id=%s", (MEM,), as_user=PASTOR), lambda r: r[0][0] == 1)
+check('another leader who is not the mentor cannot', lambda: sql("select count(*) from public.disciple_work where member_id=%s", (MEM,), as_user=KIDS), lambda r: r[0][0] == 0)
+check('another member cannot', lambda: sql("select count(*) from public.disciple_work where member_id=%s", (MEM,), as_user=MEM_B), lambda r: r[0][0] == 0)
+check('nobody can write answers for someone else', lambda: sql("insert into public.disciple_work (member_id, course, session) values (%s, 'rooted', 2)", (MEM,), as_user=WORSHIP), 'denied')
+check('the mentor cannot change the answers', lambda: sql("update public.disciple_work set answers='{}' where member_id=%s", (MEM,), as_user=WORSHIP), 'denied')
+sql("update public.disciple_work set done_at=now() where session=1", as_user=MEM)
+check('leaders see progress without answers', lambda: sql("select sessions_done from public.disciple_progress() where member_id=%s", (MEM,), as_user=KIDS), lambda r: r == [(1,)])
+check('members cannot see the progress list', lambda: sql("select count(*) from public.disciple_progress()", as_user=MEM), lambda r: r[0][0] == 0)
+sql("update public.disciple_assignments set active=false where member_id=%s", (MEM,), as_user=WORSHIP)
+check('when paused, the member cannot keep editing', lambda: sql("update public.disciple_work set answers='{\"x\":\"y\"}' where session=1", as_user=MEM), 'denied')
+check('but their answers are kept', lambda: sql("select count(*) from public.disciple_work", as_user=MEM), lambda r: r[0][0] == 1)
+check('only pastors and admins can delete an assignment', lambda: sql("delete from public.disciple_assignments where member_id=%s", (MEM,), as_user=WORSHIP), 'denied')
+check('assignments are recorded in the activity log', lambda: sql("select count(*) from public.audit_log where action in ('discipleship assigned', 'discipleship paused')"), lambda r: r[0][0] >= 2)
+
+n_before = sql("select count(*) from public.audit_log where action like 'discipleship%%'")[0][0]
+sql("update public.disciple_assignments set assigned_by=null where member_id=%s", (MEM,))
+check('clearing who assigned it is not logged as a change', lambda: sql("select count(*) from public.audit_log where action like 'discipleship%%'"), lambda r: r[0][0] == n_before)
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))

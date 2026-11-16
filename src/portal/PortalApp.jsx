@@ -3,7 +3,7 @@ import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from
 import {
   LayoutDashboard, Megaphone, ClipboardList, Heart, FolderOpen, CalendarDays, ListOrdered, Users, Music,
   Wrench, Baby, FileWarning, ShieldCheck, UserCog, LogOut, Menu, X, KeyRound,
-  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen,
+  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen, Sprout,
 } from 'lucide-react'
 import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail, pendingJoinCount } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
@@ -25,6 +25,7 @@ import LibraryManage from './member/LibraryManage'
 import AskPastor from './member/AskPastor'
 import { MemberPrayer, Directory, Care, HelpBoard, Gatherings, Reading } from './member/Community'
 import { SermonNotes } from './member/Sermon'
+import { MyDiscipleship, DiscipleshipLeaders } from './member/Discipleship'
 
 const NAV = [
   { group: 'Members', show: (m) => m.isMember },
@@ -32,6 +33,7 @@ const NAV = [
   { to: '/portal/study', label: 'Bible study library', icon: BookOpen, show: (m) => m.isMember },
   { to: '/portal/read', label: 'Read together', icon: BookMarked, show: (m) => m.isMember },
   { to: '/portal/notes', label: 'Sermon notes', icon: NotebookPen, show: (m) => m.isMember },
+  { to: '/portal/discipleship', label: 'Discipleship', icon: Sprout, show: (m) => m.isMember && m.hasDiscipleship },
   { to: '/portal/pray', label: 'Prayer wall', icon: HeartHandshake, show: (m) => m.isMember },
   { to: '/portal/ask', label: 'Ask the Pastor', icon: MessageCircleQuestion, show: (m) => m.isMember },
   { to: '/portal/gatherings', label: 'Gatherings', icon: CalendarHeart, show: (m) => m.isMember },
@@ -51,6 +53,7 @@ const NAV = [
   { to: '/portal/equipment', label: 'Equipment issues', icon: Wrench, show: (m) => m.isStaff },
   { to: '/portal/kids', label: "Kids clearances", icon: Baby, show: (m) => m.isPastoral || m.onTeam('children') },
   { to: '/portal/incidents', label: 'Incident reports', icon: FileWarning, show: (m) => m.isStaff },
+  { to: '/portal/discipleship-leaders', label: 'Discipleship paths', icon: Sprout, show: (m) => m.isStaff },
   { to: '/portal/library-manage', label: 'Manage library', icon: LibraryIcon, show: (m) => m.isPastoral },
   { to: '/portal/reports', label: 'Reported posts', icon: Flag, show: (m) => m.isPastoral },
   { to: '/portal/admin', label: 'Admin', icon: UserCog, show: (m) => m.isAdmin },
@@ -93,7 +96,9 @@ export default function PortalApp() {
     if (!session) { setProfile(null); setPeople({}); return }
     const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
     if (error) { setLoadError(friendlyError(error)); return }
-    setProfile(data)
+    // Does this person have a discipleship path? (Shows the Discipleship menu item.)
+    const { data: paths } = await supabase.from('disciple_assignments').select('course').eq('member_id', session.user.id)
+    setProfile({ ...data, hasDiscipleship: (paths || []).length > 0 })
     const { data: all } = await supabase.from('profiles').select('id, full_name, email, phone, role, teams, active')
     const map = Object.fromEntries((all || []).map((p) => [p.id, p]))
     if (data.active && ['admin', 'pastor', 'leader', 'member'].includes(data.role)) {
@@ -296,6 +301,8 @@ function Layout() {
                 <Route path="study/:seriesId/:lessonId" element={<LessonPage />} />
                 <Route path="read" element={<Reading />} />
                 <Route path="notes" element={<SermonNotes />} />
+                <Route path="discipleship" element={<MyDiscipleship />} />
+                <Route path="discipleship/:n" element={<MyDiscipleship />} />
                 <Route path="pray" element={<MemberPrayer />} />
                 <Route path="ask" element={<AskPastor />} />
                 <Route path="gatherings" element={<Gatherings />} />
@@ -313,6 +320,8 @@ function Layout() {
             {me.isStaff && (
               <>
                 <Route path="announcements" element={<Announcements />} />
+                <Route path="discipleship-leaders" element={<DiscipleshipLeaders />} />
+                <Route path="discipleship-leaders/:memberId" element={<DiscipleshipLeaders />} />
                 <Route path="requests" element={<Requests />} />
                 <Route path="prayer" element={<Prayer />} />
                 <Route path="documents" element={<Documents />} />

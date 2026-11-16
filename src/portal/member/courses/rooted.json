@@ -1,0 +1,1698 @@
+{
+ "title": "Rooted",
+ "subtitle": "A discipleship path for His Place",
+ "translation": "Scripture quotations are from the King James Version",
+ "intro": {
+  "theme": "Colossians 2:6-7",
+  "theme_text": "As ye have therefore received Christ Jesus the Lord, so walk ye in him: Rooted and built up in him, and stablished in the faith, as ye have been taught, abounding therein with thanksgiving.",
+  "about": [
+   "Rooted is a twelve session path for His Place members who want to grow deeper in Christ. It isn't a membership requirement or a test. It's a guided way to build the habits and convictions that keep a believer strong for the long haul.",
+   "Each session has a short reading for the week, key Scriptures, teaching, questions to think through, a memory verse, and practical activities. Plan on one session a week. Work through it with the leader who invited you, or a mentor they connect you with, and meet to talk about what you're learning.",
+   "Be honest in your answers. Your mentor and our pastors can see what you write, and that's the point. Discipleship happens in relationship, not alone."
+  ],
+  "flow": [
+   "Know the gospel that saved you and who you are in Christ (sessions 1 and 2).",
+   "Build daily habits of abiding, Scripture, and prayer (sessions 3 through 5).",
+   "Walk in the Spirit and fight sin with grace and with others beside you (sessions 6 through 8).",
+   "Stand firm in trials, share Christ, serve, and make disciples (sessions 9 through 12)."
+  ]
+ },
+ "lessons": [
+  {
+   "n": 1,
+   "title": "The Gospel That Saved You",
+   "reading": "Romans 3 through 5",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "The gospel isn't just how you got in. It's the good news you live from every day."
+    },
+    {
+     "t": "read",
+     "id": "d1r1",
+     "text": "This week, read Romans 3 through 5."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "Ephesians 2:8-10",
+     "text": "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast. For we are his workmanship, created in Christ Jesus unto good works, which God hath before ordained that we should walk in them."
+    },
+    {
+     "t": "passage",
+     "ref": "Romans 5:1",
+     "text": "Therefore being justified by faith, we have peace with God through our Lord Jesus Christ:"
+    },
+    {
+     "t": "passage",
+     "ref": "2 Corinthians 5:21",
+     "text": "For he hath made him to be sin for us, who knew no sin; that we might be made the righteousness of God in him."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "The word gospel means good news, and it's news about what God has done, not advice about what we should do. Paul summarizes it plainly: Christ died for our sins according to the Scriptures, He was buried, and He rose again the third day (1 Corinthians 15:3-4). Everything in the Christian life grows out of that announcement."
+    },
+    {
+     "t": "p",
+     "text": "Scripture is honest about our condition. All have sinned and come short of the glory of God (Romans 3:23). Sin isn't just breaking rules. It's turning from the God who made us, and it leaves us guilty and unable to fix ourselves. That's why salvation has to be by grace, a gift we don't earn, received through faith, which is trusting Christ rather than ourselves."
+    },
+    {
+     "t": "p",
+     "text": "Second Corinthians 5:21 shows the great exchange. Jesus, who never sinned, took our sin on Himself at the cross, and those who trust Him receive His righteousness. Romans 5:1 calls this being justified: God declares us right with Him because of what Christ did. The result is peace with God, not a truce we have to keep earning."
+    },
+    {
+     "t": "p",
+     "text": "Grace doesn't make obedience unimportant. Ephesians 2:10 says we're God's workmanship, created in Christ Jesus unto good works. We don't work to be saved. Saved people work because grace has changed them. When you fail, the gospel doesn't change. Run back to it, not away from God."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d1v1",
+     "vid": "G_OlRWGLdnw",
+     "title": "Sacrifice and Atonement",
+     "mins": 7,
+     "prompt": "The video explains why sacrifice was at the heart of how God dealt with sin. How does it help you see what Jesus did for you on the cross?"
+    },
+    {
+     "t": "video",
+     "id": "d1v2",
+     "vid": "ej_6dVdJSIU",
+     "title": "Romans, Part 1 (chapters 1 to 4)",
+     "mins": 8,
+     "prompt": "Paul says everyone, religious or not, needs God's grace. Where did you see yourself in this video?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d1q1",
+     "q": "In your own words, what is the gospel? Try to say it in a few sentences without church words."
+    },
+    {
+     "t": "q",
+     "id": "d1q2",
+     "q": "Before you trusted Christ, what were you counting on to make you right with God, if anything?"
+    },
+    {
+     "t": "q",
+     "id": "d1q3",
+     "q": "Ephesians 2:8-9 says salvation is not of works. Why do you think we're so tempted to earn God's approval?"
+    },
+    {
+     "t": "q",
+     "id": "d1q4",
+     "q": "What does it mean to you that God declares you righteous because of Christ, not because of your record?"
+    },
+    {
+     "t": "q",
+     "id": "d1q5",
+     "q": "How should the gospel change the way you respond when you fail?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d1m1",
+     "ref": "2 Corinthians 5:21",
+     "text": "For he hath made him to be sin for us, who knew no sin; that we might be made the righteousness of God in him."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d1a1",
+     "title": "Write the gospel in four lines",
+     "how": "Write four short sentences: one about God, one about our sin, one about what Jesus did, and one about how a person responds. Keep it simple enough to share over a cup of coffee."
+    },
+    {
+     "t": "activity",
+     "id": "d1a2",
+     "title": "A grace list",
+     "how": "List at least ten things God has given you by grace that you could never have earned. Read the list out loud as a prayer of thanks."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Share your four-line gospel with your mentor and talk about any part that's hard to put into words."
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "title": "Who You Are in Christ",
+   "reading": "Ephesians 1 and 2, Romans 8",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "Your identity comes from Christ, not from your past, your failures, or other people's opinions."
+    },
+    {
+     "t": "read",
+     "id": "d2r1",
+     "text": "This week, read Ephesians 1 and 2, Romans 8."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "Galatians 2:20",
+     "text": "I am crucified with Christ: nevertheless I live; yet not I, but Christ liveth in me: and the life which I now live in the flesh I live by the faith of the Son of God, who loved me, and gave himself for me."
+    },
+    {
+     "t": "passage",
+     "ref": "Romans 8:15-17",
+     "text": "For ye have not received the spirit of bondage again to fear; but ye have received the Spirit of adoption, whereby we cry, Abba, Father. The Spirit itself beareth witness with our spirit, that we are the children of God: And if children, then heirs; heirs of God, and joint-heirs with Christ; if so be that we suffer with him, that we may be also glorified together."
+    },
+    {
+     "t": "passage",
+     "ref": "1 Peter 2:9",
+     "text": "But ye are a chosen generation, a royal priesthood, an holy nation, a peculiar people; that ye should shew forth the praises of him who hath called you out of darkness into his marvellous light:"
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "When someone trusts Christ, Scripture says they are united with Him. Paul can say, I am crucified with Christ: nevertheless I live; yet not I, but Christ liveth in me (Galatians 2:20). The old life that sin defined has died, and a new life has begun that's joined to Jesus."
+    },
+    {
+     "t": "p",
+     "text": "One of the richest pictures of this is adoption. Romans 8:15-17 says believers have received the Spirit of adoption, whereby we cry, Abba, Father. You aren't a hired hand trying to stay on God's good side. You're a son or daughter, and an heir with Christ. Many of us carry wounds from earthly fathers, so this truth may take time to sink in. It's still true."
+    },
+    {
+     "t": "p",
+     "text": "First Peter 2:9 describes God's people as a chosen generation, a royal priesthood, an holy nation, a peculiar people. The word peculiar here means a people belonging to God. Your worth is settled by whose you are."
+    },
+    {
+     "t": "p",
+     "text": "Knowing who you are in Christ doesn't make you proud. It makes you secure. Secure people can admit their faults, take correction, serve without needing credit, and love people who don't love them back. Much of our sin grows from trying to find identity somewhere other than Christ."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d2v1",
+     "vid": "Y71r-T98E2Q",
+     "title": "The Book of Ephesians",
+     "mins": 9,
+     "prompt": "Ephesians spends three chapters on who you are in Christ before it tells you how to live. Why do you think that order matters?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d2q1",
+     "q": "Which labels from your past still try to define you? Be honest."
+    },
+    {
+     "t": "q",
+     "id": "d2q2",
+     "q": "What does it mean to you personally to be adopted by God as His child?"
+    },
+    {
+     "t": "q",
+     "id": "d2q3",
+     "q": "Galatians 2:20 says Christ lives in you. How might that change the way you handle an ordinary day?"
+    },
+    {
+     "t": "q",
+     "id": "d2q4",
+     "q": "Where are you most tempted to find your identity apart from Christ: work, money, reputation, family, past success, or something else?"
+    },
+    {
+     "t": "q",
+     "id": "d2q5",
+     "q": "How does being secure in Christ free you to serve others?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d2m1",
+     "ref": "Galatians 2:20",
+     "text": "I am crucified with Christ: nevertheless I live; yet not I, but Christ liveth in me: and the life which I now live in the flesh I live by the faith of the Son of God, who loved me, and gave himself for me."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d2a1",
+     "title": "In Christ I am",
+     "how": "Read Ephesians 1:3-14 and Romans 8. Write at least eight statements that begin, In Christ I am, and list the verse next to each one."
+    },
+    {
+     "t": "activity",
+     "id": "d2a2",
+     "title": "Answer a lie with the truth",
+     "how": "Write down one lie you've believed about yourself. Then find a verse that answers it, and write that verse out by hand somewhere you'll see it every day."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Talk with your mentor about which In Christ truth is hardest for you to believe, and pray together about it."
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "title": "Abiding: Staying Connected to Jesus",
+   "reading": "John 14 and 15",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "Fruitfulness doesn't come from trying harder. It comes from staying connected to Christ."
+    },
+    {
+     "t": "read",
+     "id": "d3r1",
+     "text": "This week, read John 14 and 15."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "John 15:4-5",
+     "text": "Abide in me, and I in you. As the branch cannot bear fruit of itself, except it abide in the vine; no more can ye, except ye abide in me. I am the vine, ye are the branches: He that abideth in me, and I in him, the same bringeth forth much fruit: for without me ye can do nothing."
+    },
+    {
+     "t": "passage",
+     "ref": "Mark 1:35",
+     "text": "And in the morning, rising up a great while before day, he went out, and departed into a solitary place, and there prayed."
+    },
+    {
+     "t": "passage",
+     "ref": "Luke 10:41-42",
+     "text": "And Jesus answered and said unto her, Martha, Martha, thou art careful and troubled about many things: But one thing is needful: and Mary hath chosen that good part, which shall not be taken away from her."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "Jesus gave His disciples a simple picture the night before the cross. He is the vine, and we are the branches. A branch doesn't strain to produce grapes. It stays connected, and the life of the vine flows through it. Without me ye can do nothing, Jesus said (John 15:5)."
+    },
+    {
+     "t": "p",
+     "text": "Abiding means remaining in close, ongoing relationship with Jesus: trusting Him, listening to His word, talking with Him, and obeying Him. It's not a feeling you wait for. It's a way of living that's built through daily habits."
+    },
+    {
+     "t": "p",
+     "text": "Jesus Himself made time alone with the Father. Mark 1:35 says that rising up a great while before day, He went out into a solitary place and prayed. If the Son of God set aside time with His Father, we certainly need it too."
+    },
+    {
+     "t": "p",
+     "text": "Busyness is one of the biggest enemies of abiding. Martha was serving Jesus and got so distracted she missed Him, while Mary sat at His feet (Luke 10:41-42). Serving matters, but it was never meant to replace time with Him. A daily quiet time isn't a religious chore. It's where the branch stays connected to the vine."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d3v1",
+     "vid": "RUfh_wOsauk",
+     "title": "The Gospel of John, Part 2 (chapters 13 to 21)",
+     "mins": 9,
+     "prompt": "Jesus spent His last night teaching His friends how to stay close to Him. What part of it hit you hardest?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d3q1",
+     "q": "What does abiding in Christ look like in practical terms for you?"
+    },
+    {
+     "t": "q",
+     "id": "d3q2",
+     "q": "When in your life have you tried to live for God in your own strength? What happened?"
+    },
+    {
+     "t": "q",
+     "id": "d3q3",
+     "q": "What usually crowds out your time with God?"
+    },
+    {
+     "t": "q",
+     "id": "d3q4",
+     "q": "What's the best time and place for you to meet with God each day? Be specific."
+    },
+    {
+     "t": "q",
+     "id": "d3q5",
+     "q": "What fruit would you love to see God grow in your life over the next year?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d3m1",
+     "ref": "John 15:5",
+     "text": "I am the vine, ye are the branches: He that abideth in me, and I in him, the same bringeth forth much fruit: for without me ye can do nothing."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d3a1",
+     "title": "Seven day quiet time log",
+     "how": "Meet with God every day for seven days. Each day, write what you read and one thing God showed you or one thing you prayed about."
+    },
+    {
+     "t": "activity",
+     "id": "d3a2",
+     "title": "Set your time and place",
+     "how": "Choose a regular time and place for your daily time with God and write it down. Tell your mentor so they can ask you how it's going."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Go over your seven day log together. What helped you show up, and what got in the way?"
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "title": "Feeding on the Word",
+   "reading": "the Gospel of Mark, a few chapters a day",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "Scripture is God's voice to His people. It's how we learn who He is and how to live."
+    },
+    {
+     "t": "read",
+     "id": "d4r1",
+     "text": "This week, read the Gospel of Mark, a few chapters a day."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "2 Timothy 3:16-17",
+     "text": "All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness: That the man of God may be perfect, throughly furnished unto all good works."
+    },
+    {
+     "t": "passage",
+     "ref": "Psalm 119:105",
+     "text": "Thy word is a lamp unto my feet, and a light unto my path."
+    },
+    {
+     "t": "passage",
+     "ref": "James 1:22",
+     "text": "But be ye doers of the word, and not hearers only, deceiving your own selves."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "Paul told Timothy that all scripture is given by inspiration of God (2 Timothy 3:16). The idea is that Scripture is breathed out by God. That's why it carries His authority and is profitable for doctrine, for reproof, for correction, for instruction in righteousness."
+    },
+    {
+     "t": "p",
+     "text": "God gave His Word for a purpose: that the man of God may be perfect, throughly furnished unto all good works (2 Timothy 3:17). The word perfect here means complete or fully equipped. The Bible isn't meant to sit on a shelf. It's meant to equip you for the life God has called you to."
+    },
+    {
+     "t": "p",
+     "text": "A simple way to study any passage is to ask three questions. Observe: What does it say? Interpret: What did it mean to the people who first heard it, and what does it show us about God? Apply: What do I need to believe, change, or do because of it? Read slowly. Read the verses around a passage so you don't pull it out of context."
+    },
+    {
+     "t": "p",
+     "text": "James warns against being hearers only, deceiving your own selves (James 1:22). The goal of Bible reading isn't information. It's transformation. A few verses read carefully and obeyed will change you more than many chapters skimmed and forgotten."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d4v1",
+     "vid": "ak06MSETeo4",
+     "title": "What Is the Bible?",
+     "mins": 6,
+     "prompt": "What's one thing about how the Bible came together that you didn't know before?"
+    },
+    {
+     "t": "video",
+     "id": "d4v2",
+     "vid": "HGHqu9-DtXk",
+     "title": "The Gospel of Mark",
+     "mins": 10,
+     "prompt": "You're reading Mark this week. What from the video do you want to watch for as you read?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d4q1",
+     "q": "How would you describe your Bible reading right now, honestly?"
+    },
+    {
+     "t": "q",
+     "id": "d4q2",
+     "q": "What does it mean that Scripture is inspired by God, and why does that matter for how you read it?"
+    },
+    {
+     "t": "q",
+     "id": "d4q3",
+     "q": "What has made the Bible hard for you to read or understand in the past?"
+    },
+    {
+     "t": "q",
+     "id": "d4q4",
+     "q": "Why is it dangerous to pull a verse out of its context?"
+    },
+    {
+     "t": "q",
+     "id": "d4q5",
+     "q": "Name one thing you've read in Scripture recently that you need to actually do."
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d4m1",
+     "ref": "Psalm 119:11",
+     "text": "Thy word have I hid in mine heart, that I might not sin against thee."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d4a1",
+     "title": "Read the Gospel of Mark",
+     "how": "Read all sixteen chapters of Mark over the next two weeks. As you go, note one thing each chapter shows you about who Jesus is."
+    },
+    {
+     "t": "activity",
+     "id": "d4a2",
+     "title": "Observe, Interpret, Apply",
+     "how": "Use the three questions on Mark 4:1-20, the parable of the sower. Write what you observe, what it means, and one specific way you'll apply it."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Share what you learned about Jesus from Mark, and talk through your Observe, Interpret, Apply notes."
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "title": "Prayer: Talking With Your Father",
+   "reading": "Matthew 6 and 7, Psalm 145",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "Prayer is a child talking with a loving Father, not a performance or a wish list."
+    },
+    {
+     "t": "read",
+     "id": "d5r1",
+     "text": "This week, read Matthew 6 and 7, Psalm 145."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "Matthew 6:9-13",
+     "text": "After this manner therefore pray ye: Our Father which art in heaven, Hallowed be thy name. Thy kingdom come. Thy will be done in earth, as it is in heaven. Give us this day our daily bread. And forgive us our debts, as we forgive our debtors. And lead us not into temptation, but deliver us from evil: For thine is the kingdom, and the power, and the glory, for ever. Amen."
+    },
+    {
+     "t": "passage",
+     "ref": "Philippians 4:6-7",
+     "text": "Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God. And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus."
+    },
+    {
+     "t": "passage",
+     "ref": "Hebrews 4:16",
+     "text": "Let us therefore come boldly unto the throne of grace, that we may obtain mercy, and find grace to help in time of need."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "When the disciples asked Jesus to teach them to pray, He gave them a model that begins with Our Father (Matthew 6:9). Prayer starts with relationship. Because of Christ, we come to God as children, not strangers."
+    },
+    {
+     "t": "p",
+     "text": "The Lord's Prayer puts God first: His name, His kingdom, His will. Then it brings our needs: daily bread, forgiveness, and protection from temptation and evil. One helpful pattern that follows this shape is ACTS: Adoration, praising God for who He is; Confession, owning our sin; Thanksgiving, thanking Him for what He's done; and Supplication, asking for our needs and the needs of others."
+    },
+    {
+     "t": "p",
+     "text": "Philippians 4:6-7 tells us to be careful for nothing, meaning don't be anxious about anything, but bring everything to God by prayer and supplication with thanksgiving. The promise isn't that we'll always get what we ask. It's that the peace of God will keep our hearts and minds through Christ Jesus."
+    },
+    {
+     "t": "p",
+     "text": "Hebrews 4:16 invites us to come boldly unto the throne of grace. We can be bold because Jesus is our great High Priest who understands our weakness. Prayer isn't about fancy words. Honest, simple, persistent prayer pleases the Father."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d5v1",
+     "vid": "n_vEB11XKSE",
+     "title": "The Lord's Prayer, Verse by Verse",
+     "mins": 6,
+     "prompt": "Pick one line of the Lord's Prayer and write it out as your own prayer for this week."
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d5q1",
+     "q": "What has your prayer life looked like up to now?"
+    },
+    {
+     "t": "q",
+     "id": "d5q2",
+     "q": "Why do you think Jesus taught us to start prayer with God's name and kingdom instead of our needs?"
+    },
+    {
+     "t": "q",
+     "id": "d5q3",
+     "q": "What keeps you from praying more? Be specific."
+    },
+    {
+     "t": "q",
+     "id": "d5q4",
+     "q": "What does it mean to come boldly to the throne of grace? Where do you need that boldness?"
+    },
+    {
+     "t": "q",
+     "id": "d5q5",
+     "q": "Describe a time God answered a prayer, or a time He answered differently than you hoped. What did you learn?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d5m1",
+     "ref": "Philippians 4:6",
+     "text": "Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d5a1",
+     "title": "Pray ACTS for a week",
+     "how": "Each day for a week, pray through Adoration, Confession, Thanksgiving, and Supplication. Write down one line from each day and any answers you notice."
+    },
+    {
+     "t": "activity",
+     "id": "d5a2",
+     "title": "Pray for five",
+     "how": "Write the names of five people who don't know Jesus. Pray for them by name every day this week, and ask God for an open door with at least one of them."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Pray together using the ACTS pattern, and share the names on your list of five."
+    }
+   ]
+  },
+  {
+   "n": 6,
+   "title": "Walking in the Spirit",
+   "reading": "John 14 through 16, Galatians 5",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "The Holy Spirit lives in every believer to make us like Jesus and empower us to serve."
+    },
+    {
+     "t": "read",
+     "id": "d6r1",
+     "text": "This week, read John 14 through 16, Galatians 5."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "John 14:16-17",
+     "text": "And I will pray the Father, and he shall give you another Comforter, that he may abide with you for ever; Even the Spirit of truth; whom the world cannot receive, because it seeth him not, neither knoweth him: but ye know him; for he dwelleth with you, and shall be in you."
+    },
+    {
+     "t": "passage",
+     "ref": "Galatians 5:16",
+     "text": "This I say then, Walk in the Spirit, and ye shall not fulfil the lust of the flesh."
+    },
+    {
+     "t": "passage",
+     "ref": "Galatians 5:22-25",
+     "text": "But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith, Meekness, temperance: against such there is no law. And they that are Christ's have crucified the flesh with the affections and lusts. If we live in the Spirit, let us also walk in the Spirit."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "Jesus promised His followers another Comforter who would abide with them for ever, the Spirit of truth (John 14:16-17). The Holy Spirit is not a force or a feeling. He is God, the third Person of the Trinity, and He lives in every believer. Romans 8:9 says that if any man have not the Spirit of Christ, he is none of his."
+    },
+    {
+     "t": "p",
+     "text": "The Spirit teaches and reminds us of what Jesus said, guides us into truth, convicts us of sin, comforts us, helps us pray, and gives us power to be witnesses (John 14:26, John 16:8 and 13, Romans 8:26, Acts 1:8). He also gives each believer gifts to serve others, given for the good of the whole church (1 Corinthians 12:7)."
+    },
+    {
+     "t": "p",
+     "text": "Galatians 5:16 says, Walk in the Spirit, and ye shall not fulfil the lust of the flesh. Walking in the Spirit means depending on Him moment by moment: listening, yielding, and obeying. The flesh, our sinful nature, still pulls at us, but the Spirit is stronger."
+    },
+    {
+     "t": "p",
+     "text": "The evidence of the Spirit's work isn't mainly dramatic moments. It's fruit: love, joy, peace, longsuffering, gentleness, goodness, faith, meekness, and temperance (Galatians 5:22-23). Fruit grows slowly and steadily. Look for it over months and years, not days."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d6v1",
+     "vid": "oNNZO9i1Gjc",
+     "title": "Why the Holy Spirit Isn't Just a Force",
+     "mins": 5,
+     "prompt": "The Spirit is God's personal presence with you, not a power to use. How does that change the way you think about walking in the Spirit?"
+    },
+    {
+     "t": "video",
+     "id": "d6v2",
+     "vid": "vmx4UjRFp0M",
+     "title": "The Book of Galatians",
+     "mins": 9,
+     "prompt": "Galatians sets living by rules against living by the Spirit. Which one do you slide into more, and what does that look like for you?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d6q1",
+     "q": "Who is the Holy Spirit, based on these Scriptures? How is that different from how some people talk about Him?"
+    },
+    {
+     "t": "q",
+     "id": "d6q2",
+     "q": "Which part of the Spirit's work do you most need right now: comfort, guidance, conviction, power to witness, or something else?"
+    },
+    {
+     "t": "q",
+     "id": "d6q3",
+     "q": "What does walking in the Spirit look like on an ordinary day for you?"
+    },
+    {
+     "t": "q",
+     "id": "d6q4",
+     "q": "Look at the fruit of the Spirit. Which one do you see growing in your life? Which one feels weakest?"
+    },
+    {
+     "t": "q",
+     "id": "d6q5",
+     "q": "How might the Spirit want to use you to serve others in our church family?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d6m1",
+     "ref": "Galatians 5:16",
+     "text": "This I say then, Walk in the Spirit, and ye shall not fulfil the lust of the flesh."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d6a1",
+     "title": "Fruit check with a friend",
+     "how": "Read Galatians 5:16-26. Ask a trusted believer which fruit of the Spirit they see growing in you and which one they think needs work. Write down what they said."
+    },
+    {
+     "t": "activity",
+     "id": "d6a2",
+     "title": "Start the day surrendered",
+     "how": "For one week, begin each morning with a simple prayer asking the Holy Spirit to lead you, and write down one moment each day when you sensed His leading or His conviction."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Talk through what your friend said about the fruit in your life, and how the morning prayer went."
+    }
+   ]
+  },
+  {
+   "n": 7,
+   "title": "Fighting Sin With Grace",
+   "reading": "Romans 6 through 8",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "God's grace forgives our sin and trains us to say no to it."
+    },
+    {
+     "t": "read",
+     "id": "d7r1",
+     "text": "This week, read Romans 6 through 8."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "Romans 6:11-14",
+     "text": "Likewise reckon ye also yourselves to be dead indeed unto sin, but alive unto God through Jesus Christ our Lord. Let not sin therefore reign in your mortal body, that ye should obey it in the lusts thereof. Neither yield ye your members as instruments of unrighteousness unto sin: but yield yourselves unto God, as those that are alive from the dead, and your members as instruments of righteousness unto God. For sin shall not have dominion over you: for ye are not under the law, but under grace."
+    },
+    {
+     "t": "passage",
+     "ref": "1 Corinthians 10:13",
+     "text": "There hath no temptation taken you but such as is common to man: but God is faithful, who will not suffer you to be tempted above that ye are able; but will with the temptation also make a way to escape, that ye may be able to bear it."
+    },
+    {
+     "t": "passage",
+     "ref": "Titus 2:11-12",
+     "text": "For the grace of God that bringeth salvation hath appeared to all men, Teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly, in this present world;"
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "Romans 6 teaches that believers have died to sin's rule through union with Christ. We are told to reckon ye also yourselves to be dead indeed unto sin, but alive unto God (Romans 6:11). Reckon means count it as true. Sin is no longer your master, even when it still tempts you."
+    },
+    {
+     "t": "p",
+     "text": "Grace is not a license to sin. Titus 2:11-12 says the grace of God that brings salvation teaches us to deny ungodliness and worldly lusts and to live soberly, righteously, and godly in this present world. The same grace that forgives also trains."
+    },
+    {
+     "t": "p",
+     "text": "First Corinthians 10:13 gives a promise for every temptation. No temptation is unique to you, God is faithful, and He will with the temptation also make a way to escape. Part of fighting sin is planning ahead: knowing your weak spots, avoiding situations that feed them, and taking the way out when it shows up."
+    },
+    {
+     "t": "p",
+     "text": "When we do sin, the answer isn't to hide. If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness (1 John 1:9). Confession to God brings forgiveness. Confession to a trusted believer brings help and healing (James 5:16). Sin grows in secret and weakens in the light."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d7v1",
+     "vid": "aNOZ7ocLD74",
+     "title": "Sin Is Not Rule Breaking",
+     "mins": 6,
+     "prompt": "The video describes sin as missing the mark. Where do you keep missing it, and what does grace say to you about that?"
+    },
+    {
+     "t": "video",
+     "id": "d7v2",
+     "vid": "0SVTl4Xa5fY",
+     "title": "Romans, Part 2 (chapters 5 to 16)",
+     "mins": 9,
+     "prompt": "Romans 6 through 8 is about being set free from sin's power. What did the video show you about how that freedom works?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d7q1",
+     "q": "What does it mean to count yourself dead to sin and alive to God?"
+    },
+    {
+     "t": "q",
+     "id": "d7q2",
+     "q": "How is it possible that grace both forgives sin and trains us to say no to it?"
+    },
+    {
+     "t": "q",
+     "id": "d7q3",
+     "q": "What temptation do you face most often? When and where does it usually hit?"
+    },
+    {
+     "t": "q",
+     "id": "d7q4",
+     "q": "What escape routes has God given you that you've been ignoring?"
+    },
+    {
+     "t": "q",
+     "id": "d7q5",
+     "q": "Why is it so hard to confess sin to another believer? What might change if you did?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d7m1",
+     "ref": "1 Corinthians 10:13",
+     "text": "There hath no temptation taken you but such as is common to man: but God is faithful, who will not suffer you to be tempted above that ye are able; but will with the temptation also make a way to escape, that ye may be able to bear it."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d7a1",
+     "title": "Write an escape plan",
+     "how": "Name your most frequent temptation. Write down when it usually hits, what feeds it, and at least three specific ways out you'll take next time."
+    },
+    {
+     "t": "activity",
+     "id": "d7a2",
+     "title": "Find an accountability partner",
+     "how": "Ask one trusted, mature believer of the same gender to check in with you weekly about your walk with God and your struggle with sin. Write down who it is and when you'll talk."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Share your escape plan honestly with your mentor, and pray together for victory in that area."
+    }
+   ]
+  },
+  {
+   "n": 8,
+   "title": "The Church Family",
+   "reading": "Acts 2, 1 Corinthians 12, Hebrews 10",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "No believer is meant to follow Jesus alone. We grow together in the body of Christ."
+    },
+    {
+     "t": "read",
+     "id": "d8r1",
+     "text": "This week, read Acts 2, 1 Corinthians 12, Hebrews 10."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "Acts 2:42",
+     "text": "And they continued stedfastly in the apostles' doctrine and fellowship, and in breaking of bread, and in prayers."
+    },
+    {
+     "t": "passage",
+     "ref": "Hebrews 10:24-25",
+     "text": "And let us consider one another to provoke unto love and to good works: Not forsaking the assembling of ourselves together, as the manner of some is; but exhorting one another: and so much the more, as ye see the day approaching."
+    },
+    {
+     "t": "passage",
+     "ref": "Galatians 6:1-2",
+     "text": "Brethren, if a man be overtaken in a fault, ye which are spiritual, restore such an one in the spirit of meekness; considering thyself, lest thou also be tempted. Bear ye one another's burdens, and so fulfil the law of Christ."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "From the very beginning, believers gathered. Acts 2:42 says they continued stedfastly in the apostles' doctrine and fellowship, and in breaking of bread, and in prayers. Teaching, fellowship, sharing life, and prayer were the heartbeat of the early church."
+    },
+    {
+     "t": "p",
+     "text": "Paul describes the church as a body with many members (1 Corinthians 12:12-27). Every part matters, and every part needs the others. A believer who drifts from the body is like a hand cut off from the arm. It can't thrive alone."
+    },
+    {
+     "t": "p",
+     "text": "Hebrews 10:24-25 tells us to consider one another to provoke unto love and to good works, and not to forsake the assembling of ourselves together. That's why being an active part of a local church matters so much. Online sermons, podcasts, and Christian friends are good gifts, but they aren't a substitute for a church family, pastors, and the baptism and Lord's Supper that Christ gave His church."
+    },
+    {
+     "t": "p",
+     "text": "Galatians 6:1-2 shows what a church family looks like when someone falls. Those who are spiritual restore such an one in the spirit of meekness, and we bear one another's burdens. Real fellowship is more than sitting in the same room on Sunday. It's speaking the truth in love and carrying each other's loads."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d8v1",
+     "vid": "yiHf8klCCc4",
+     "title": "The Book of 1 Corinthians",
+     "mins": 9,
+     "prompt": "Corinth was a messy, divided church. What does Paul's answer teach us about doing life together as a church family?"
+    },
+    {
+     "t": "video",
+     "id": "d8v2",
+     "vid": "slyevQ1LW7A",
+     "title": "Agape: Love",
+     "mins": 5,
+     "prompt": "How is the Bible's kind of love different from a feeling? Who at His Place could use that kind of love from you this week?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d8q1",
+     "q": "Which of the four things in Acts 2:42 is strongest in your life right now? Which is weakest?"
+    },
+    {
+     "t": "q",
+     "id": "d8q2",
+     "q": "How connected are you to a local church, honestly? What would deeper involvement look like?"
+    },
+    {
+     "t": "q",
+     "id": "d8q3",
+     "q": "Why can't online sermons or Christian friends take the place of a local church?"
+    },
+    {
+     "t": "q",
+     "id": "d8q4",
+     "q": "Think of a time someone restored or encouraged you. What did they do that helped?"
+    },
+    {
+     "t": "q",
+     "id": "d8q5",
+     "q": "Whose burden could you help carry right now?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d8m1",
+     "ref": "Hebrews 10:24",
+     "text": "And let us consider one another to provoke unto love and to good works:"
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d8a1",
+     "title": "Deepen your church connection",
+     "how": "If you're not already committed to a local church, choose one and attend for the next month. If you are, take one step deeper: join a small group, volunteer, or meet with your pastor. Write down what you did."
+    },
+    {
+     "t": "activity",
+     "id": "d8a2",
+     "title": "Three encouragements",
+     "how": "Write three specific notes or messages of encouragement this week to believers in our church family. Record who you encouraged and what you said."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Talk about your church involvement and who you encouraged. Ask your mentor how His Place could grow stronger as a church family."
+    }
+   ]
+  },
+  {
+   "n": 9,
+   "title": "Standing Firm in Trials",
+   "reading": "James 1, 2 Corinthians 4, 1 Peter 1",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "God uses hard seasons to grow faith that lasts, and He never wastes our pain."
+    },
+    {
+     "t": "read",
+     "id": "d9r1",
+     "text": "This week, read James 1, 2 Corinthians 4, 1 Peter 1."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "James 1:2-4",
+     "text": "My brethren, count it all joy when ye fall into divers temptations; Knowing this, that the trying of your faith worketh patience. But let patience have her perfect work, that ye may be perfect and entire, wanting nothing."
+    },
+    {
+     "t": "passage",
+     "ref": "Romans 5:3-5",
+     "text": "And not only so, but we glory in tribulations also: knowing that tribulation worketh patience; And patience, experience; and experience, hope: And hope maketh not ashamed; because the love of God is shed abroad in our hearts by the Holy Ghost which is given unto us."
+    },
+    {
+     "t": "passage",
+     "ref": "2 Corinthians 4:16-18",
+     "text": "For which cause we faint not; but though our outward man perish, yet the inward man is renewed day by day. For our light affliction, which is but for a moment, worketh for us a far more exceeding and eternal weight of glory; While we look not at the things which are seen, but at the things which are not seen: for the things which are seen are temporal; but the things which are not seen are eternal."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "Jesus never promised His followers an easy road. He said, In the world ye shall have tribulation: but be of good cheer; I have overcome the world (John 16:33). Trials aren't a sign that God has abandoned you."
+    },
+    {
+     "t": "p",
+     "text": "James 1:2-4 tells us to count it all joy when ye fall into divers temptations, meaning trials, because the trying of our faith works patience. That doesn't mean we pretend pain feels good. It means we trust God is doing something in the pain: building endurance and maturity."
+    },
+    {
+     "t": "p",
+     "text": "Romans 5:3-5 traces the same path. Tribulation works patience, patience experience, which means proven character, and experience hope. That hope doesn't disappoint, because the love of God is shed abroad in our hearts by the Holy Ghost."
+    },
+    {
+     "t": "p",
+     "text": "Paul faced beatings, shipwrecks, and prison, yet he called his troubles a light affliction, which is but for a moment, compared to the eternal weight of glory ahead (2 Corinthians 4:17). The key is where we look. We look not at the things which are seen, but at the things which are not seen. Lament is allowed. The Psalms are full of honest grief. But we grieve with hope."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d9v1",
+     "vid": "qn-hLHWwRYY",
+     "title": "The Book of James",
+     "mins": 8,
+     "prompt": "James says trials can make us complete. What trial are you in right now, and what might God be building in you through it?"
+    },
+    {
+     "t": "video",
+     "id": "d9v2",
+     "vid": "b54d_GhBthI",
+     "title": "Struggles in the Wilderness",
+     "mins": 6,
+     "prompt": "Israel's time in the wilderness wasn't wasted. Think of a dry season in your life. What did God teach you there?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d9q1",
+     "q": "What trial are you facing right now, or what's the hardest season you've walked through?"
+    },
+    {
+     "t": "q",
+     "id": "d9q2",
+     "q": "How have you seen God grow your character through past hardships?"
+    },
+    {
+     "t": "q",
+     "id": "d9q3",
+     "q": "What's the difference between pretending everything is fine and counting it all joy?"
+    },
+    {
+     "t": "q",
+     "id": "d9q4",
+     "q": "Paul fixed his eyes on what is unseen. What does that look like for you in your current situation?"
+    },
+    {
+     "t": "q",
+     "id": "d9q5",
+     "q": "How could your past suffering help someone else who's hurting now? (See 2 Corinthians 1:3-4.)"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d9m1",
+     "ref": "2 Corinthians 4:17",
+     "text": "For our light affliction, which is but for a moment, worketh for us a far more exceeding and eternal weight of glory;"
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d9a1",
+     "title": "A faithfulness timeline",
+     "how": "Draw or write a timeline of the hardest seasons of your life. Next to each, write one way God was faithful, even if you only saw it later."
+    },
+    {
+     "t": "activity",
+     "id": "d9a2",
+     "title": "Comfort someone",
+     "how": "Reach out to someone going through something you've been through. Call, visit, or write. Record what you did and how it went."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Walk through your timeline together, and pray about any trial you're in right now."
+    }
+   ]
+  },
+  {
+   "n": 10,
+   "title": "Sharing Christ Boldly",
+   "reading": "Acts 1 through 4",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "Every believer is called to be a witness, ready to tell what Jesus has done."
+    },
+    {
+     "t": "read",
+     "id": "d10r1",
+     "text": "This week, read Acts 1 through 4."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "Acts 1:8",
+     "text": "But ye shall receive power, after that the Holy Ghost is come upon you: and ye shall be witnesses unto me both in Jerusalem, and in all Judaea, and in Samaria, and unto the uttermost part of the earth."
+    },
+    {
+     "t": "passage",
+     "ref": "1 Peter 3:15",
+     "text": "But sanctify the Lord God in your hearts: and be ready always to give an answer to every man that asketh you a reason of the hope that is in you with meekness and fear:"
+    },
+    {
+     "t": "passage",
+     "ref": "1 Corinthians 15:3-4",
+     "text": "For I delivered unto you first of all that which I also received, how that Christ died for our sins according to the scriptures; And that he was buried, and that he rose again the third day according to the scriptures:"
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "Before He ascended, Jesus told His followers, ye shall receive power, after that the Holy Ghost is come upon you: and ye shall be witnesses unto me (Acts 1:8). A witness simply tells what they have seen and know. You don't have to be a preacher to be a witness."
+    },
+    {
+     "t": "p",
+     "text": "Peter tells us to be ready always to give an answer to every man that asketh you a reason of the hope that is in you with meekness and fear (1 Peter 3:15). Ready means prepared. Meekness and fear mean gentleness and respect. Bold doesn't mean pushy."
+    },
+    {
+     "t": "p",
+     "text": "The heart of the message is the gospel: Christ died for our sins according to the Scriptures, was buried, and rose again (1 Corinthians 15:3-4). Your story matters because it shows the gospel at work in a real life, but your story should always point to Jesus, not to you."
+    },
+    {
+     "t": "p",
+     "text": "Results belong to God. Paul planted, Apollos watered, but God gave the increase (1 Corinthians 3:6). Our job is to be faithful and clear. The Holy Spirit is the one who opens hearts. That takes pressure off and puts courage in."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d10v1",
+     "vid": "CGbNw855ksw",
+     "title": "The Book of Acts, Part 1",
+     "mins": 8,
+     "prompt": "The first believers were ordinary people the Spirit made bold. What stood out to you about how the message spread?"
+    },
+    {
+     "t": "video",
+     "id": "d10v2",
+     "vid": "jhcmzjwbvyk",
+     "title": "Witness",
+     "mins": 4,
+     "prompt": "A witness tells what they've seen. What have you seen Jesus do in your life that you could tell someone this week?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d10q1",
+     "q": "What makes you nervous about sharing your faith?"
+    },
+    {
+     "t": "q",
+     "id": "d10q2",
+     "q": "What does it mean to share with gentleness and respect? Have you seen it done poorly?"
+    },
+    {
+     "t": "q",
+     "id": "d10q3",
+     "q": "How would you explain the gospel to a friend or neighbor who's never been to church?"
+    },
+    {
+     "t": "q",
+     "id": "d10q4",
+     "q": "Why must our personal story always point back to Jesus?"
+    },
+    {
+     "t": "q",
+     "id": "d10q5",
+     "q": "How does knowing that God gives the increase change the way you approach witnessing?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d10m1",
+     "ref": "1 Peter 3:15",
+     "text": "But sanctify the Lord God in your hearts: and be ready always to give an answer to every man that asketh you a reason of the hope that is in you with meekness and fear:"
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d10a1",
+     "title": "Write your testimony",
+     "how": "Write your story in three parts: life before Christ, how you came to trust Him, and how He's changed you. Keep it to about three minutes when spoken, and make sure it explains the gospel."
+    },
+    {
+     "t": "activity",
+     "id": "d10a2",
+     "title": "Share with one person",
+     "how": "Pray for an open door, then share your testimony or the gospel with one person this week. Write down who it was, what you said, and how they responded."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Practice telling your testimony to your mentor, and talk about your conversation with the one person."
+    }
+   ]
+  },
+  {
+   "n": 11,
+   "title": "Serving Like Jesus",
+   "reading": "Mark 10, Philippians 2, John 13",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "Jesus came to serve, and He calls us to use everything we've been given for others."
+    },
+    {
+     "t": "read",
+     "id": "d11r1",
+     "text": "This week, read Mark 10, Philippians 2, John 13."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "Mark 10:45",
+     "text": "For even the Son of man came not to be ministered unto, but to minister, and to give his life a ransom for many."
+    },
+    {
+     "t": "passage",
+     "ref": "Philippians 2:3-5",
+     "text": "Let nothing be done through strife or vainglory; but in lowliness of mind let each esteem other better than themselves. Look not every man on his own things, but every man also on the things of others. Let this mind be in you, which was also in Christ Jesus:"
+    },
+    {
+     "t": "passage",
+     "ref": "1 Peter 4:10",
+     "text": "As every man hath received the gift, even so minister the same one to another, as good stewards of the manifold grace of God."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "James and John asked Jesus for the best seats in His kingdom. Jesus answered that greatness in His kingdom looks completely different: the Son of man came not to be ministered unto, but to minister, and to give his life a ransom for many (Mark 10:45)."
+    },
+    {
+     "t": "p",
+     "text": "Philippians 2:3-5 calls us to esteem others better than ourselves and to look on the things of others, then says, Let this mind be in you, which was also in Christ Jesus. The verses that follow describe Jesus humbling Himself all the way to the cross. Christian service flows from the humility of Christ."
+    },
+    {
+     "t": "p",
+     "text": "Everything we have is on loan from God: time, money, abilities, cars, homes, and spiritual gifts. First Peter 4:10 says that as every man hath received the gift, even so minister the same one to another, as good stewards of the manifold grace of God. A steward manages what belongs to someone else."
+    },
+    {
+     "t": "p",
+     "text": "Jesus said that faithfulness in small things matters to God (Luke 16:10), and He will one day say to faithful servants, Well done (Matthew 25:21). Service done for His glory, even when nobody notices, is never wasted."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d11v1",
+     "vid": "oE9qqW1-BkU",
+     "title": "The Book of Philippians",
+     "mins": 9,
+     "prompt": "Paul wrote this joyful letter from a prison cell. What does Jesus' example in Philippians 2 ask of you right now?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d11q1",
+     "q": "How does Jesus' example in Mark 10:45 challenge the way the world thinks about greatness?"
+    },
+    {
+     "t": "q",
+     "id": "d11q2",
+     "q": "Where do you find it hardest to put others first?"
+    },
+    {
+     "t": "q",
+     "id": "d11q3",
+     "q": "What gifts, skills, or resources has God given you that could serve others?"
+    },
+    {
+     "t": "q",
+     "id": "d11q4",
+     "q": "How are you handling your money and time as a steward rather than an owner?"
+    },
+    {
+     "t": "q",
+     "id": "d11q5",
+     "q": "Where could you serve at His Place or in your community in the next month?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d11m1",
+     "ref": "Mark 10:45",
+     "text": "For even the Son of man came not to be ministered unto, but to minister, and to give his life a ransom for many."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d11a1",
+     "title": "Serve without credit",
+     "how": "Do something meaningful for someone this week without telling anyone. Describe it here only."
+    },
+    {
+     "t": "activity",
+     "id": "d11a2",
+     "title": "Steward check",
+     "how": "Look at your calendar and your bank statement from the past month. Write down what they say about your priorities, and one change you'll make to put God and others first."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Talk about what you learned from your steward check and where your mentor sees you could serve."
+    }
+   ]
+  },
+  {
+   "n": 12,
+   "title": "Making Disciples",
+   "reading": "Matthew 28, 2 Timothy 2, 1 Thessalonians 2",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "The goal of discipleship is not just to grow, but to help someone else grow too."
+    },
+    {
+     "t": "read",
+     "id": "d12r1",
+     "text": "This week, read Matthew 28, 2 Timothy 2, 1 Thessalonians 2."
+    },
+    {
+     "t": "h",
+     "text": "Key Scripture"
+    },
+    {
+     "t": "passage",
+     "ref": "Matthew 28:18-20",
+     "text": "And Jesus came and spake unto them, saying, All power is given unto me in heaven and in earth. Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost: Teaching them to observe all things whatsoever I have commanded you: and, lo, I am with you alway, even unto the end of the world. Amen."
+    },
+    {
+     "t": "passage",
+     "ref": "2 Timothy 2:2",
+     "text": "And the things that thou hast heard of me among many witnesses, the same commit thou to faithful men, who shall be able to teach others also."
+    },
+    {
+     "t": "passage",
+     "ref": "1 Thessalonians 2:8",
+     "text": "So being affectionately desirous of you, we were willing to have imparted unto you, not the gospel of God only, but also our own souls, because ye were dear unto us."
+    },
+    {
+     "t": "h",
+     "text": "Teaching"
+    },
+    {
+     "t": "p",
+     "text": "Jesus' final command before He ascended was clear. All power is given unto Him, so go and teach all nations, baptizing them and teaching them to observe all things He commanded (Matthew 28:18-20). The goal isn't just converts. It's disciples who follow and obey Jesus. And He promised, lo, I am with you alway."
+    },
+    {
+     "t": "p",
+     "text": "Paul showed how disciples multiply: the things that thou hast heard of me among many witnesses, the same commit thou to faithful men, who shall be able to teach others also (2 Timothy 2:2). That's four generations in one verse: Paul, Timothy, faithful men, and others."
+    },
+    {
+     "t": "p",
+     "text": "Discipleship is relational. Paul told the Thessalonians that he was willing to share not the gospel of God only, but also our own souls, because ye were dear unto us (1 Thessalonians 2:8). You don't need to have all the answers to disciple someone. You need to love them, walk with them, open the Word together, and point them to Jesus."
+    },
+    {
+     "t": "p",
+     "text": "You've spent twelve sessions growing. Now look around. Who is a step or two behind you? A new believer, someone new at His Place, a young person, a family member? The best way to keep growing is to help someone else grow."
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "p",
+     "text": "These short videos go along with this session. Watch them on your own, or better yet, watch them with your mentor or a friend from church and talk about them."
+    },
+    {
+     "t": "video",
+     "id": "d12v1",
+     "vid": "GGCF3OPWN14",
+     "title": "The Gospel of Matthew, Part 2",
+     "mins": 7,
+     "prompt": "Matthew ends with the Great Commission. Who's one person you could start walking with, the way someone walked with you?"
+    },
+    {
+     "t": "video",
+     "id": "d12v2",
+     "vid": "urlvnxCaL00",
+     "title": "The Book of 2 Timothy",
+     "mins": 8,
+     "prompt": "This is Paul's last letter, passing the baton to Timothy. Who passed the faith to you, and who will you pass it to?"
+    },
+    {
+     "t": "h",
+     "text": "Think it through"
+    },
+    {
+     "t": "q",
+     "id": "d12q1",
+     "q": "What's the difference between making converts and making disciples?"
+    },
+    {
+     "t": "q",
+     "id": "d12q2",
+     "q": "Who has discipled you, formally or informally? What did they do that made the difference?"
+    },
+    {
+     "t": "q",
+     "id": "d12q3",
+     "q": "Why does 2 Timothy 2:2 describe discipleship as something passed on, not just received?"
+    },
+    {
+     "t": "q",
+     "id": "d12q4",
+     "q": "What fears or excuses might keep you from discipling someone?"
+    },
+    {
+     "t": "q",
+     "id": "d12q5",
+     "q": "Who is one person God may be putting in front of you to walk with?"
+    },
+    {
+     "t": "h",
+     "text": "Memory verse"
+    },
+    {
+     "t": "memory",
+     "id": "d12m1",
+     "ref": "Matthew 28:19-20",
+     "text": "Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost: Teaching them to observe all things whatsoever I have commanded you: and, lo, I am with you alway, even unto the end of the world. Amen."
+    },
+    {
+     "t": "h",
+     "text": "Put it into practice"
+    },
+    {
+     "t": "activity",
+     "id": "d12a1",
+     "title": "Choose one",
+     "how": "Prayerfully choose one person to walk with in discipleship. Write their name and why you believe God put them on your heart."
+    },
+    {
+     "t": "activity",
+     "id": "d12a2",
+     "title": "Start meeting",
+     "how": "Reach out and set up a first time together. Read a passage of Scripture with them and pray together. Write down when you met and what you read."
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Celebrate finishing the course together. Tell your mentor who you've chosen to disciple, and ask them to pray with you and keep checking in."
+    }
+   ]
+  },
+  {
+   "n": 13,
+   "title": "Looking Back",
+   "reading": "",
+   "blocks": [
+    {
+     "t": "big",
+     "text": "Take some time to look back over the whole path and see what God has done."
+    },
+    {
+     "t": "q",
+     "id": "d13q1",
+     "q": "What is the biggest thing God taught you through this course?"
+    },
+    {
+     "t": "q",
+     "id": "d13q2",
+     "q": "Which habit has grown the most in your life: abiding, Scripture, prayer, fellowship, witness, or service?"
+    },
+    {
+     "t": "q",
+     "id": "d13q3",
+     "q": "Where do you still need to grow? Be specific."
+    },
+    {
+     "t": "q",
+     "id": "d13q4",
+     "q": "Which memory verse has stuck with you the most, and why?"
+    },
+    {
+     "t": "q",
+     "id": "d13q5",
+     "q": "What's your plan for continuing to grow over the next year?"
+    },
+    {
+     "t": "h",
+     "text": "Watch"
+    },
+    {
+     "t": "video",
+     "id": "d13v1",
+     "vid": "7_CGP-12AE0",
+     "title": "The Story of the Bible",
+     "mins": 6,
+     "prompt": "Now that you've finished, how do you see your own story fitting into God's bigger story?"
+    },
+    {
+     "t": "note",
+     "text": "Check-in with your mentor: Share your answers here, and pray together about the year ahead."
+    }
+   ]
+  }
+ ]
+}
