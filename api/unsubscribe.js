@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   if (!/^[0-9a-f-]{36}$/i.test(token)) { res.statusCode = 400; return res.end(page('That link didn’t work', 'The unsubscribe link looks incomplete. You can turn emails off anytime under My account in the member portal.')) }
   try {
     const db = getDb()
-    const { data } = await db.from('email_prefs').update({ pastor_answers: false, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: false, private_prayers: false, reported_posts: false })
+    const { data } = await db.from('email_prefs').update({ pastor_answers: false, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: false, private_prayers: false, reported_posts: false, care_reminders: false, prayer_updates: false })
       .eq('token', token).select('profile_id')
     res.statusCode = 200
     if (!data?.length) return res.end(page('Nothing to change', 'We couldn’t find email settings for that link. You can manage your emails under My account in the member portal.'))

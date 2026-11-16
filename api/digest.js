@@ -1,8 +1,10 @@
 // Morning email to members who chose updates. Runs once a day from Vercel Cron (see vercel.json).
 //   - Mondays: this week's Read together plan (for those who chose it)
 //   - Every day: titles and links for anything new in the areas each member picked, since the last run
+//   - Every day: personal care reminders and prayer updates (see _reminders.js)
 // Only titles go in the email. Details stay inside the portal.
 // Vercel Cron sends "Authorization: Bearer CRON_SECRET". Anyone else is turned away.
+import { personalEmails } from './_reminders.js'
 import { MEMBER_ROLES, alertAdmins, button, db as getDb, esc, json, layout, realEmail, sendEmails, site, unsubscribeLinks } from './_email.js'
 
 const TZ = 'America/New_York'
@@ -110,15 +112,24 @@ export default async function handler(req, res) {
   // First run, or a long gap: look back one day at most.
   const since = state?.at && now - new Date(state.at) < 3 * 86400000 ? new Date(state.at) : new Date(now - 86400000)
   await checkBackups(db)
+  // Personal emails (care reminders, prayer updates) run on their own, so a problem
+  // with one never stops the other.
+  let personal = null
+  try {
+    personal = await personalEmails(db, now)
+  } catch (e) {
+    personal = { error: e.message }
+    await alertAdmins(db, 'personal', "This morning's reminders didn't go out", `The care reminders or prayer updates failed with this message: ${e.message}. They will try again tomorrow morning.`)
+  }
   try {
     const messages = await buildDigest(db, { now, since })
     const out = messages.length ? await sendEmails(messages) : { sent: 0 }
-    if (out.skipped) return json(res, 200, { sent: 0, reason: out.skipped })
+    if (out.skipped) return json(res, 200, { sent: 0, reason: out.skipped, personal })
     await db.from('email_state').upsert({ key: 'digest', at: now.toISOString() })
-    return json(res, 200, { sent: out.sent })
+    return json(res, 200, { sent: out.sent, personal })
   } catch (e) {
     await alertAdmins(db, 'digest', "This morning's email roundup didn't go out", `The daily email to members failed with this message: ${e.message}. It will try again tomorrow morning.`)
-    return json(res, 502, { error: e.message })
+    return json(res, 502, { error: e.message, personal })
   }
 }
 

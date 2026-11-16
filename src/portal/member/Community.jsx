@@ -4,6 +4,7 @@ import { Cake, Heart, Users as UsersIcon } from 'lucide-react'
 import { supabase, friendlyError, notify } from '../supabase'
 import { Badge, Empty, Form, Notice, PageHead, fmtDate, fmtDateTime, localISO, today, useMe, usePeople, useRows } from '../ui'
 import { HideButton, PassageLinks, ReportButton, Thread, gatewayUrl } from './shared'
+import { CalendarLinks } from './calendar'
 import { squareJpeg } from '../pages/Account'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -247,6 +248,7 @@ function CarePage({ c, onChange }) {
               <span>{s.taken_by ? <>{name(s.taken_by) || 'Taken'}{s.note && <small> · {s.note}</small>}</> : <em>Open</em>}</span>
               {c.status === 'open' && (!s.taken_by || mine) && <button className={`button ${mine ? 'button-secondary' : 'button-primary'}`} onClick={() => claim(s, mine)}>{mine ? "I can't anymore" : 'I can help'}</button>}
               {manager && <button className="p-link subtle" onClick={async () => { await supabase.from('care_slots').delete().eq('id', s.id); reload() }}>Remove</button>}
+              {mine && <CalendarLinks id={`care-${s.id}`} title={`${s.label}: ${c.title}`} date={s.slot_date} location={c.drop_off} details={`${s.note ? `You're bringing: ${s.note}\n` : ''}${c.drop_off ? `Drop off: ${c.drop_off}\n` : ''}https://www.hpcchurch.church/portal/care`} />}
             </li>
           )
         })}
@@ -277,7 +279,7 @@ export function Care() {
   const closed = rows.filter((c) => c.status === 'closed')
   return (
     <>
-      <PageHead title="Care calendar" intro="When a family has a new baby, surgery, or loss, sign up to bring a meal or help.">
+      <PageHead title="Care calendar" intro="When a family has a new baby, surgery, or loss, sign up to bring a meal or help. You'll get a reminder email the morning before.">
         {me.isStaff && !adding && <button className="button button-primary" onClick={() => setAdding(true)}>Start a care calendar</button>}
       </PageHead>
       {!me.isStaff && <p className="p-muted">Know a family who could use help? <Link to="/portal/ask">Let the pastor know</Link> and a leader will set one up.</p>}
@@ -379,6 +381,7 @@ export function Gatherings() {
               <div className="p-meta strong">{fmtDateTime(g.starts_at)}{g.location && ` · ${g.location}`}</div>
               {g.details && <p className="p-pre">{g.details}</p>}
               {g.bring && <p className="p-pre"><strong>Bring: </strong>{g.bring}</p>}
+              <CalendarLinks id={`gathering-${g.id}`} title={g.title} start={g.starts_at} location={g.location} details={`${g.details ? `${g.details}\n` : ''}${g.bring ? `Bring: ${g.bring}\n` : ''}https://www.hpcchurch.church/portal/gatherings`} />
               <div className="p-meta">Hosted by {name(g.host) || 'a member'}{yes.length > 0 && ` · Going: ${yes.map((r) => name(r.user_id)).filter(Boolean).join(', ')}`}</div>
               <div className="p-row-actions">
                 {['yes', 'maybe', 'no'].map((a) => <button key={a} disabled={a === 'yes' && full} className={`chip${mine?.answer === a ? ' active' : ''}`} onClick={() => answer(g, a)}>{a === 'yes' ? (full ? 'Full' : "I'm going") : a === 'maybe' ? 'Maybe' : "Can't make it"}</button>)}
@@ -403,20 +406,26 @@ const linesToDays = (text) => (text || '').split('\n').map((l) => l.trim()).filt
   return m ? { day: m[1][0].toUpperCase() + m[1].slice(1).toLowerCase(), passage: m[2].trim() } : { day: WEEKDAYS[i] || `Day ${i + 1}`, passage: l }
 })
 
-function DayList({ w, isCurrent }) {
+function DayList({ w, isCurrent, doneDays, onToggle }) {
   if (!w.days?.length) return null
   const dow = new Date().getDay() // 0 Sunday ... 6 Saturday
   const todayName = isCurrent && dow >= 1 && dow <= 5 ? WEEKDAYS[dow - 1] : null
+  const checks = isCurrent && onToggle
   return (
     <>
-      <ol className="m-days">
-        {w.days.map((d) => (
-          <li key={d.day + d.passage} className={d.day === todayName ? 'today' : ''}>
-            <span className="m-day">{d.day === todayName ? 'Today' : d.day}</span>
-            <a href={gatewayUrl(d.passage)} target="_blank" rel="noopener noreferrer">{d.passage}</a>
-          </li>
-        ))}
+      <ol className={`m-days${checks ? ' m-days-check' : ''}`}>
+        {w.days.map((d) => {
+          const done = checks && doneDays.includes(d.day)
+          return (
+            <li key={d.day + d.passage} className={`${d.day === todayName ? 'today' : ''}${done ? ' done' : ''}`}>
+              {checks && <input type="checkbox" checked={done} onChange={() => onToggle(d.day, !done)} aria-label={`I read ${d.day}'s reading, ${d.passage}`} />}
+              <span className="m-day">{d.day === todayName ? 'Today' : d.day}</span>
+              <a href={gatewayUrl(d.passage)} target="_blank" rel="noopener noreferrer">{d.passage}</a>
+            </li>
+          )
+        })}
       </ol>
+      {checks && <p className="p-small m-days-count" aria-live="polite">{doneDays.length === 0 ? 'Check off each day as you read it. Only you see these check marks.' : doneDays.length >= w.days.length ? `All ${w.days.length} days read this week. Well done!` : `${doneDays.length} of ${w.days.length} days read this week.`}</p>}
       {isCurrent && (dow === 0 || dow === 6) && <p className="p-small">It's the weekend. Catch up on anything you missed, and share what stood out below.</p>}
     </>
   )
@@ -427,6 +436,8 @@ export function Reading() {
   const { name } = usePeople()
   const { rows, reload } = useRows('reading_weeks', { order: 'week_of' })
   const { rows: done, reload: rd } = useRows('reading_done', { order: null })
+  const { rows: myDays, reload: rdd } = useRows('reading_day_done', { order: null })
+  const [dayOverride, setDayOverride] = useState({}) // shows a check mark right away while it saves
   const [editing, setEditing] = useState(null)
   const [msg, setMsg] = useState('')
   const now = today()
@@ -467,11 +478,25 @@ export function Reading() {
       else await supabase.from('reading_done').insert({ week_id: w.id })
       rd()
     }
+    const saved = myDays.filter((x) => x.week_id === w.id).map((x) => x.day)
+    const doneDays = (w.days || []).map((d) => d.day).filter((d) => (`${w.id}|${d}` in dayOverride ? dayOverride[`${w.id}|${d}`] : saved.includes(d)))
+    const toggleDay = async (day, on) => {
+      const key = `${w.id}|${day}`
+      setDayOverride((o) => ({ ...o, [key]: on }))
+      const { error } = on
+        ? await supabase.from('reading_day_done').insert({ week_id: w.id, day })
+        : await supabase.from('reading_day_done').delete().eq('week_id', w.id).eq('user_id', me.profile.id).eq('day', day)
+      if (error && !/duplicate/.test(error.message)) setMsg("That check mark didn't save. Please try again.")
+      // Checking off the last day marks the whole week as read.
+      else if (on && !iDid && new Set([...doneDays, day]).size >= w.days.length) { await supabase.from('reading_done').insert({ week_id: w.id }); rd() }
+      await rdd()
+      setDayOverride((o) => { const n = { ...o }; delete n[key]; return n })
+    }
     return (
       <div className="p-card">
         <div className="p-item-head"><h3>{label || `Week of ${fmtDate(w.week_of)}: `}{w.passage}</h3>{!label?.startsWith('Starting') && <Badge tone="info">{readers.length} read it</Badge>}</div>
         {w.note && <p className="p-pre">{w.note}</p>}
-        <DayList w={w} isCurrent={big} />
+        <DayList w={w} isCurrent={big} doneDays={doneDays} onToggle={big ? toggleDay : null} />
         {w.question && <Notice tone="info"><strong>Think about: </strong>{w.question}</Notice>}
         {!label?.startsWith('Starting') && (
           <div className="m-lesson-bar">
