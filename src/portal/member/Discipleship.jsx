@@ -16,8 +16,8 @@ function useCourse(key) {
 }
 
 /* ======================= One session ======================= */
-function Field({ id, value, onChange, readOnly, rows = 3, label, placeholder }) {
-  if (readOnly) return <div className="d-answer">{value ? value : <em className="p-muted">No answer yet</em>}</div>
+function AnswerField({ id, value, onChange, readOnly, rows = 3, label, placeholder, emptyText = 'No answer yet' }) {
+  if (readOnly) return <div className="d-answer">{value ? value : <em className="p-muted">{emptyText}</em>}</div>
   return <textarea id={id} aria-label={label} className="d-input" rows={rows} maxLength={5000} value={value || ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
 }
 function Tick({ checked, onChange, readOnly, children }) {
@@ -38,10 +38,10 @@ function AnswersOnly({ lesson, answers }) {
       {lesson.blocks.map((b, i) => {
         switch (b.t) {
           case 'read': return <div key={i}><dt>{b.text}</dt><dd>{yes(a[b.id])}</dd></div>
-          case 'q': return <div key={i}><dt>{b.q}</dt><dd><Field value={a[b.id]} readOnly /></dd></div>
-          case 'memory': return <div key={i}><dt>Memory verse: {b.ref}</dt><dd>Can say it from memory: {yes(a[`${b.id}_ok`])}{a[b.id] && <Field value={a[b.id]} readOnly />}</dd></div>
-          case 'activity': return <div key={i}><dt>Activity: {b.title}</dt><dd>Done: {yes(a[`${b.id}_done`])}<Field value={a[b.id]} readOnly /></dd></div>
-          case 'video': return <div key={i}><dt>Video: {b.title}</dt><dd>Watched: {yes(a[`${b.id}_done`])}<p className="p-small d-prompt-ro">{b.prompt}</p><Field value={a[b.id]} readOnly /></dd></div>
+          case 'q': return <div key={i}><dt>{b.q}</dt><dd><AnswerField value={a[b.id]} readOnly /></dd></div>
+          case 'memory': return <div key={i}><dt>Memory verse: {b.ref}</dt><dd>Can say it from memory: {yes(a[`${b.id}_ok`])}{a[b.id] && <AnswerField value={a[b.id]} readOnly />}</dd></div>
+          case 'activity': return <div key={i}><dt>Activity: {b.title}</dt><dd>Done: {yes(a[`${b.id}_done`])}<AnswerField value={a[b.id]} readOnly /></dd></div>
+          case 'video': return <div key={i}><dt>Video: {b.title}</dt><dd>Watched: {yes(a[`${b.id}_done`])}<p className="p-small d-prompt-ro">{b.prompt}</p><AnswerField value={a[b.id]} readOnly /></dd></div>
           default: return null
         }
       })}
@@ -49,8 +49,10 @@ function AnswersOnly({ lesson, answers }) {
   )
 }
 
-export function SessionBody({ lesson, answers, setAnswer, readOnly }) {
+export function SessionBody({ lesson, answers, setAnswer, readOnly, preview }) {
   const a = answers || {}
+  // In a leader's preview, answer boxes show where members will write.
+  const Field = preview ? (props) => <AnswerField {...props} emptyText="Members write their answer here." /> : AnswerField
   return (
     <div className="d-session">
       {lesson.blocks.map((b, i) => {
@@ -254,7 +256,9 @@ export function DiscipleshipLeaders() {
   const canRead = (r) => me.isPastoral || r.mentor_id === me.profile.id
   return (
     <>
-      <PageHead title="Discipleship paths" intro="Assign Rooted, a twelve session discipleship path, to a member and walk through it with them. They see it in their portal once it's assigned." />
+      <PageHead title="Discipleship paths" intro="Assign Rooted, a twelve session discipleship path, to a member and walk through it with them. They see it in their portal once it's assigned.">
+        <Link className="button button-secondary" to="/portal/discipleship-preview">Preview the course</Link>
+      </PageHead>
       <form className="p-card p-form" onSubmit={assign}>
         <h2 className="p-card-title">Assign Rooted</h2>
         <div className="p-form-grid">
@@ -337,6 +341,56 @@ function MemberAnswers({ memberId, course }) {
             </li>
           )
         })}
+      </ol>
+    </>
+  )
+}
+
+/* ======================= Leaders: preview the course ======================= */
+export function CoursePreview() {
+  const { n } = useParams()
+  const course = useCourse('rooted')
+  if (!course) return <p className="p-muted">Loading...</p>
+  const base = '/portal/discipleship-preview'
+  const banner = <Notice tone="info">Preview. This is what members see once Rooted is assigned. Nothing here is saved. <Link to="/portal/discipleship-leaders">Back to Discipleship paths</Link></Notice>
+  if (n) {
+    const lesson = course.lessons.find((l) => l.n === Number(n))
+    if (!lesson) return <Empty>That session wasn't found. <Link to={base}>Back to the course</Link></Empty>
+    const prev = course.lessons.filter((l) => l.n < lesson.n).pop()
+    const next = course.lessons.find((l) => l.n > lesson.n)
+    return (
+      <>
+        <p className="p-small"><Link to={base}>{course.title}</Link> · {lesson.n <= 12 ? `Session ${lesson.n} of 12` : 'Wrapping up'}</p>
+        <PageHead title={lesson.title} />
+        {banner}
+        <SessionBody lesson={lesson} answers={{}} setAnswer={() => {}} readOnly preview />
+        <div className="d-nav">
+          {prev ? <Link className="button button-secondary" to={`${base}/${prev.n}`}>Back</Link> : <span />}
+          {next ? <Link className="button button-secondary" to={`${base}/${next.n}`}>Next</Link> : <Link className="button button-primary" to="/portal/discipleship-leaders">Done previewing</Link>}
+        </div>
+      </>
+    )
+  }
+  return (
+    <>
+      <PageHead title={`${course.title}: preview`} intro={course.subtitle} />
+      {banner}
+      <div className="p-card d-theme">
+        <blockquote className="d-passage"><p>{course.intro.theme_text}</p><cite><a href={gatewayUrl(course.intro.theme)} target="_blank" rel="noopener noreferrer">{course.intro.theme}</a></cite></blockquote>
+        {course.intro.about.map((t) => <p key={t}>{t}</p>)}
+        <h3 className="p-sub">The path</h3>
+        <ul className="d-flow">{course.intro.flow.map((t) => <li key={t}>{t}</li>)}</ul>
+        <p className="p-meta">{course.translation}.</p>
+      </div>
+      <ol className="d-list">
+        {course.lessons.map((l) => (
+          <li key={l.n}>
+            <Link to={`${base}/${l.n}`} className="d-item">
+              <Circle size={20} aria-hidden="true" />
+              <span><strong>{l.n <= 12 ? `Session ${l.n}: ` : ''}{l.title}</strong>{l.reading && <small>Read {l.reading}</small>}</span>
+            </Link>
+          </li>
+        ))}
       </ol>
     </>
   )
