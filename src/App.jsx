@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { SITE_URL, useDocumentHead } from './head'
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg'
 import { knowJesus } from './knowJesusContent'
@@ -42,7 +43,6 @@ import womensLogoSrc from './assets/womens-ministry-logo.jpg'
 /* ------------------------------------------------------------------
    Site settings. Change these in one place and the whole site updates.
 ------------------------------------------------------------------- */
-const SITE_URL = 'https://www.hpcchurch.church'
 const GIVING_URL = 'https://his-place-community-church-533980.churchcenter.com/giving'
 const FACEBOOK_URL = 'https://www.facebook.com/profile.php?id=61583261639613'
 // The church's Google Business Profile.
@@ -136,12 +136,19 @@ const galleryModules = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,webp,J
   import: 'default',
 })
 
+// Right-sized WebP copies made at build time (see vite.config.js), plus each photo's real size
+// so the page can save room for it and doesn't jump while loading.
+const gallerySrcsets = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,JPG,JPEG,PNG}', { eager: true, import: 'default', query: '?w=480;800;1200&format=webp&as=srcset' })
+const galleryMeta = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,JPG,JPEG,PNG}', { eager: true, import: 'default', query: '?as=meta:width;height' })
+const galleryWide = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,JPG,JPEG,PNG}', { eager: true, import: 'default', query: '?w=1600&format=webp' })
+
 const captionOrder = Object.keys(photoCaptions)
 const photos = Object.entries(galleryModules)
   .map(([path, src]) => {
     const key = path.split('/').pop().replace(/\.[^.]+$/, '')
     const fallback = key.replace(/[-_]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase())
-    return { key, src, alt: photoCaptions[key] || fallback }
+    const meta = galleryMeta[path] || {}
+    return { key, src, srcSet: gallerySrcsets[path] || undefined, wide: galleryWide[path] || src, width: meta.width, height: meta.height, alt: photoCaptions[key] || fallback }
   })
   .sort((a, b) => {
     const ia = captionOrder.indexOf(a.key)
@@ -150,12 +157,12 @@ const photos = Object.entries(galleryModules)
     return (ia === -1 ? -1 : ia) - (ib === -1 ? -1 : ib) || a.key.localeCompare(b.key)
   })
 
-const photo = (key) => photos.find((p) => p.key === key) || { src: '', alt: '' }
+const photo = (key) => photos.find((p) => p.key === key) || { src: '', wide: '', alt: '' }
 
-function Photo({ name, className, style }) {
+function Photo({ name, className, style, sizes = '(max-width: 700px) 100vw, 600px' }) {
   const p = photo(name)
   if (!p.src) return null
-  return <img src={p.src} alt={p.alt} className={className} style={style} loading="lazy" decoding="async" />
+  return <img src={p.src} srcSet={p.srcSet} sizes={p.srcSet ? sizes : undefined} width={p.width} height={p.height} alt={p.alt} className={className} style={style} loading="lazy" decoding="async" />
 }
 
 /* ------------------------------------------------------------------
@@ -272,42 +279,6 @@ const visitFaqs = [
 /* ------------------------------------------------------------------
    Helpers
 ------------------------------------------------------------------- */
-function useDocumentHead({ title, description }) {
-  const { pathname } = useLocation()
-
-  useEffect(() => {
-    const fullTitle = title
-      ? `${title} | His Place Community Church`
-      : 'His Place Community Church | Amelia, Beechmont & Cherry Grove, OH'
-    document.title = fullTitle
-
-    const setMeta = (attrName, attrValue, content) => {
-      let el = document.querySelector(`meta[${attrName}="${attrValue}"]`)
-      if (!el) {
-        el = document.createElement('meta')
-        el.setAttribute(attrName, attrValue)
-        document.head.appendChild(el)
-      }
-      el.setAttribute('content', content)
-    }
-
-    if (description) {
-      setMeta('name', 'description', description)
-      setMeta('property', 'og:description', description)
-    }
-    setMeta('property', 'og:title', fullTitle)
-    setMeta('property', 'og:url', `${SITE_URL}${pathname}`)
-
-    // Each page gets its own canonical address so search engines index it.
-    let canonical = document.querySelector('link[rel="canonical"]')
-    if (!canonical) {
-      canonical = document.createElement('link')
-      canonical.setAttribute('rel', 'canonical')
-      document.head.appendChild(canonical)
-    }
-    canonical.setAttribute('href', `${SITE_URL}${pathname === '/' ? '/' : pathname}`)
-  }, [title, description, pathname])
-}
 
 // Accepts M/D/YYYY, M/D/YY, or anything Date can read. Returns a friendly date.
 function formatDate(value) {
@@ -716,7 +687,7 @@ function WelcomeVideo() {
               allowFullScreen
             />
           ) : (
-            <video src={WELCOME_VIDEO} controls playsInline preload="metadata" poster={photo('sunday-full-room').src} />
+            <video src={WELCOME_VIDEO} controls playsInline preload="metadata" poster={photo('sunday-full-room').wide} />
           )}
         </div>
       </div>
@@ -746,7 +717,7 @@ function HomePage() {
 
   return (
     <>
-      <section className="hero-photo hero-home" style={{ backgroundImage: `url(${photo('sunday-full-room').src})` }}>
+      <section className="hero-photo hero-home" style={{ backgroundImage: `url(${photo('sunday-full-room').wide})` }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">A Bible based, Jesus following church</div>
           <h1>A place to belong, believe, and grow in Christ.</h1>
@@ -985,7 +956,7 @@ function VisitPage() {
 
   return (
     <>
-      <section className="hero-photo" style={{ backgroundImage: `url(${photo('porch-welcome').src})`, minHeight: 360 }}>
+      <section className="hero-photo" style={{ backgroundImage: `url(${photo('porch-welcome').wide})`, minHeight: 360 }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">Plan your visit</div>
           <h1>We would love to meet you this Sunday.</h1>
@@ -1255,6 +1226,7 @@ function FaithPage() {
           <p>His Place Community Church is a non denominational, Bible based, Jesus following church.</p>
         </div>
 
+        <h2 className="sr-only">Our beliefs</h2>
         <div className="faith-grid">
           {faithItems.map((item) => (
             <ShellCard key={item.title}>
@@ -1472,6 +1444,7 @@ function KidsPage() {
             <Photo name="his-kids-you-belong-here" className="two-col-photo" />
           </div>
 
+          <h2 className="sr-only">What kids experience</h2>
           <div className="three-up-grid">
             <ShellCard className="group-card">
               <Smile size={22} className="icon-red" />
@@ -1657,7 +1630,7 @@ function KnowJesusPage() {
 
   return (
     <>
-      <section className="hero-photo know-hero" style={{ backgroundImage: `url(${photo('listening-together').src})`, minHeight: 420 }}>
+      <section className="hero-photo know-hero" style={{ backgroundImage: `url(${photo('listening-together').wide})`, minHeight: 420 }}>
         <div className="hero-photo-inner container">
           <div className="hero-eyebrow">{k.title}</div>
           <h1>{k.headline}</h1>
@@ -2178,7 +2151,7 @@ function PhotosPage() {
         <div className="gallery-grid">
           {photos.map((p, i) => (
             <button key={p.key} className="gallery-item" onClick={() => setActive(i)} aria-label={`Open photo: ${p.alt}`}>
-              <img src={p.src} alt={p.alt} loading="lazy" decoding="async" />
+              <img src={p.src} srcSet={p.srcSet} sizes="(max-width: 700px) 50vw, 300px" width={p.width} height={p.height} alt={p.alt} loading="lazy" decoding="async" />
             </button>
           ))}
         </div>
@@ -2189,7 +2162,7 @@ function PhotosPage() {
           <button className="lightbox-btn lightbox-close" onClick={close} aria-label="Close photo"><X size={22} /></button>
           <button className="lightbox-btn lightbox-prev" onClick={(e) => { e.stopPropagation(); step(-1) }} aria-label="Previous photo"><ChevronLeft size={26} /></button>
           <figure onClick={(e) => e.stopPropagation()}>
-            <img src={photos[active].src} alt={photos[active].alt} />
+            <img src={photos[active].wide} alt={photos[active].alt} />
             <figcaption>{photos[active].alt}</figcaption>
           </figure>
           <button className="lightbox-btn lightbox-next" onClick={(e) => { e.stopPropagation(); step(1) }} aria-label="Next photo"><ChevronRight size={26} /></button>

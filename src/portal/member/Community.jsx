@@ -116,7 +116,7 @@ function MyListing({ onSaved }) {
     try {
       const blob = await squareJpeg(file, 500)
       const path = `members/${me.profile.id}/${Date.now()}.jpg`
-      const { error } = await supabase.storage.from('team-photos').upload(path, blob, { contentType: 'image/jpeg' })
+      const { error } = await supabase.storage.from('team-photos').upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' })
       if (error) throw error
       if (d.photo_path) await supabase.storage.from('team-photos').remove([d.photo_path])
       setD((x) => ({ ...x, photo_path: path }))

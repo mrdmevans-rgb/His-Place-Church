@@ -48,9 +48,10 @@ function BioEditor() {
     if (!bio) return setMsg({ tone: 'error', text: 'Save your name and bio first, then add a photo.' })
     setPhotoBusy(true)
     try {
-      const blob = await squareJpeg(file)
+      // 480px is sharp on phones at the 160px the Team page shows.
+      const blob = await squareJpeg(file, 480)
       const path = `${me.profile.id}/${Date.now()}.jpg`
-      const { error } = await supabase.storage.from('team-photos').upload(path, blob, { contentType: 'image/jpeg' })
+      const { error } = await supabase.storage.from('team-photos').upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' })
       if (error) throw error
       const old = bio.photo_path
       const { error: e2 } = await supabase.from('team_bios').update({ photo_path: path }).eq('profile_id', me.profile.id)
