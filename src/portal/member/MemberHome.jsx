@@ -6,6 +6,7 @@ import { Badge, Empty, Notice, PageHead, fmtDate, fmtDateTime, today, useMe, use
 import { Celebrations } from './Community'
 import { PassageLinks, gatewayUrl } from './shared'
 import { SermonCard } from './Sermon'
+import DailyQuestion from './Trivia'
 
 export const CONDUCT = [
   'Speak the truth in love (Ephesians 4:15). Be kind, even when you disagree.',
@@ -82,6 +83,7 @@ export default function MemberHome() {
       {!d.emailChosen && !isLoginId(me.profile.email) && <div className="p-card m-email-nudge"><strong>Get email updates?</strong> Choose emails for the weekly reading, new discussions, prayer needs, and more. <Link to="/portal/account#email-updates">Choose your emails</Link></div>}
       {d.answered.length > 0 && <Notice tone="success">The pastor has answered your question. <Link to="/portal/ask">Read the answer</Link></Notice>}
       {!serviceDay && <SermonCard sermon={d.sermon} />}
+      <DailyQuestion />
       <div className="p-dash-grid">
         <div className="p-card">
           <h2 className="p-card-title">This week's reading</h2>

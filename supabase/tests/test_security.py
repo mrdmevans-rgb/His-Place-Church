@@ -404,6 +404,31 @@ check('a member can check off a day', lambda: sql("select day from public.readin
 check('daily check marks are private', lambda: sql("select count(*) from public.reading_day_done", as_user=MEM_B), lambda r: r[0][0] == 0)
 check('nobody can check off a day for someone else', lambda: sql("insert into public.reading_day_done (week_id, user_id, day) values (%s, %s, 'Tuesday')", (wk, MEM), as_user=MEM_B), 'denied')
 
+
+# Daily Bible question (0013)
+import json as _json
+TQ = lambda who: sql("select public.trivia_today()", as_user=who)[0][0]
+check('all the questions are loaded', lambda: sql("select count(*) from public.trivia_questions"), lambda r: r[0][0] >= 200)
+check('members cannot read the question list (or its answers)', lambda: sql("select count(*) from public.trivia_questions", as_user=MEM), lambda r: r[0][0] == 0)
+check('pastors can read the question list', lambda: sql("select count(*) from public.trivia_questions", as_user=PASTOR), lambda r: r[0][0] >= 200)
+check('visitors cannot get the daily question', lambda: sql("select public.trivia_today()", anon=True), 'denied')
+check('applicants get no daily question', lambda: TQ(APPL), lambda r: r is None)
+t1 = TQ(MEM)
+check("today's question has four choices and no answer before choosing", lambda: t1, lambda r: len(r['choices']) == 4 and 'answer' not in r and r['answered'] is False)
+check('everyone gets the same question', lambda: TQ(MEM_B)['id'], lambda r: r == t1['id'])
+right = sql("select answer from public.trivia_questions where id=%s", (t1['id'],))[0][0]
+check('members cannot write an answer directly', lambda: sql("insert into public.trivia_answers (day, question_id, choice, correct) values (current_date, %s, 0, true)", (t1['id'],), as_user=MEM), 'denied')
+check('a choice outside the four is refused', lambda: sql("select public.trivia_answer(7)", as_user=MEM), 'denied')
+r1 = sql("select public.trivia_answer(%s)", (right,), as_user=MEM)[0][0]
+check('a right answer is marked correct and shows the verse', lambda: r1, lambda r: r['correct'] is True and r['answer'] == right and r['reference'] and r['explanation'])
+r1b = sql("select public.trivia_answer(%s)", ((right + 1) % 4,), as_user=MEM)[0][0]
+check('an answer cannot be changed after choosing', lambda: r1b, lambda r: r['my_choice'] == right and r['correct'] is True)
+r2 = sql("select public.trivia_answer(%s)", ((right + 1) % 4,), as_user=MEM_B)[0][0]
+check('a wrong answer is marked wrong and still shows the right one', lambda: r2, lambda r: r['correct'] is False and r['answer'] == right)
+check('everyone sees how many got it right today', lambda: r2, lambda r: r['today_count'] == 2 and r['today_right'] == 1)
+check("members cannot see each other's answers", lambda: sql("select count(*) from public.trivia_answers", as_user=MEM_B), lambda r: r[0][0] == 1)
+check('members cannot erase an answer to try again', lambda: sql("delete from public.trivia_answers where user_id=%s", (MEM,), as_user=MEM), 'denied')
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))
