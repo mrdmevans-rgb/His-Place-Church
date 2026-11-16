@@ -356,6 +356,24 @@ check('internal event notes never go public', lambda: sql("select * from public.
 check('member cannot make an announcement public', lambda: sql("insert into public.announcements (title, show_public) values ('x', true)", as_user=MEM), 'denied')
 check('pastor alert choices default to on', lambda: sql("select new_questions, private_prayers, reported_posts from public.email_prefs where profile_id=%s", (MEM,), as_user=MEM), lambda r: r == [(True, True, True)])
 
+
+# Weekly backup (0011): only the server can make a backup or touch the backups bucket.
+def as_service(q):
+    with conn.transaction():
+        with conn.cursor() as cur:
+            cur.execute("set local role service_role")
+            cur.execute(q)
+            return cur.fetchall()
+check('visitor cannot make a backup', lambda: sql("select public.backup_snapshot()", anon=True), 'denied')
+check('member cannot make a backup', lambda: sql("select public.backup_snapshot()", as_user=MEM), 'denied')
+check('even an admin cannot pull a backup from the browser', lambda: sql("select public.backup_snapshot()", as_user=ADMIN), 'denied')
+snap = as_service("select public.backup_snapshot()")[0][0]
+check('the server backup includes every table', lambda: snap, lambda r: {'profiles', 'announcements', 'member_prayers', 'pastor_questions', 'audit_log'} <= set(r['tables']) and r['counts']['profiles'] == len(r['tables']['profiles']))
+check('the backup lists logins but never passwords', lambda: snap, lambda r: len(r['auth_users']) > 0 and 'encrypted_password' not in str(r['auth_users'][0]))
+check('the backups bucket is private', lambda: sql("select public from storage.buckets where id='backups'"), lambda r: r == [(False,)])
+check('admin cannot upload into the backups bucket', lambda: sql("insert into storage.objects (bucket_id, name) values ('backups', 'x.json')", as_user=ADMIN), 'denied')
+check('admin cannot see files in the backups bucket', lambda: sql("select count(*) from storage.objects where bucket_id='backups'", as_user=ADMIN), lambda r: r[0][0] == 0)
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))

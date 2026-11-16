@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ArrowUp, ArrowDown, ChevronsUp } from 'lucide-react'
-import { supabase, ROLES, roleLabel, teamLabel, friendlyError, callAdmin, isLoginId, loginIdOf, contactLabel, pendingJoinCount } from '../supabase'
+import { supabase, ROLES, roleLabel, teamLabel, friendlyError, callAdmin, callBackup, isLoginId, loginIdOf, contactLabel, pendingJoinCount } from '../supabase'
 import { squareJpeg } from './Account'
 import { Badge, Empty, Field, Notice, PageHead, fmtDateTime, useMe, usePeople, usePortal, useRows } from '../ui'
 
@@ -367,20 +367,66 @@ function Activity() {
   )
 }
 
+function Backups() {
+  const [list, setList] = useState(null)
+  const [busy, setBusy] = useState('')
+  const [msg, setMsg] = useState({ tone: 'info', text: '' })
+  const load = () => callBackup({ action: 'list' }).then((r) => setList(r.backups)).catch((e) => { setList([]); setMsg({ tone: 'error', text: e.message }) })
+  useEffect(() => { load() }, [])
+  const runNow = async () => {
+    setBusy('run'); setMsg({ tone: 'info', text: '' })
+    try { await callBackup({ action: 'run' }); setMsg({ tone: 'success', text: 'Backup saved.' }); await load() } catch (e) { setMsg({ tone: 'error', text: e.message }) }
+    setBusy('')
+  }
+  const download = async (name) => {
+    setBusy(name)
+    try { const { url } = await callBackup({ action: 'download', name }); window.location.href = url } catch (e) { setMsg({ tone: 'error', text: e.message }) }
+    setBusy('')
+  }
+  return (
+    <div className="stack-md">
+      <div className="p-card">
+        <h2 className="p-card-title">Weekly backups</h2>
+        <p>Early every Monday morning, the portal saves a copy of everything members and leaders have entered: people, prayer requests, questions, studies, the calendar, and more. Copies are kept for about two months. Passwords aren't included, so after a restore people would reset theirs.</p>
+        <p className="p-muted">Keep any copy you download somewhere safe. It holds private information like prayer requests and phone numbers.</p>
+        <button className="button button-primary" onClick={runNow} disabled={!!busy}>{busy === 'run' ? 'Saving...' : 'Make a backup now'}</button>
+      </div>
+      {msg.text && <Notice tone={msg.tone}>{msg.text}</Notice>}
+      {list === null ? <p className="p-muted">Loading...</p> : list.length === 0 ? <Empty>No backups yet. The first one is made next Monday, or tap Make a backup now.</Empty> : (
+        <div className="p-table-wrap">
+          <table className="p-table">
+            <thead><tr><th>Saved</th><th>Size</th><th><span className="sr-only">Download</span></th></tr></thead>
+            <tbody>
+              {list.map((b) => (
+                <tr key={b.name}>
+                  <td>{fmtDateTime(b.created_at)}</td>
+                  <td>{b.size >= 1048576 ? `${(b.size / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(b.size / 1024))} KB`}</td>
+                  <td><button className="link-button" onClick={() => download(b.name)} disabled={!!busy}>{busy === b.name ? 'Getting it...' : 'Download'}</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Admin() {
   const [tab, setTab] = useState(new URLSearchParams(window.location.search).get('tab') || 'people')
   const [joinWaiting, setJoinWaiting] = useState(0)
   useEffect(() => { pendingJoinCount().then(setJoinWaiting) }, [tab])
   return (
     <>
-      <PageHead title="Admin" intro="Invite people, set roles and teams, approve website bios, and review activity." />
+      <PageHead title="Admin" intro="Invite people, set roles and teams, approve website bios, review activity, and download backups." />
       <div className="p-toolbar">
-        {[['people', 'People'], ['join', joinWaiting > 0 ? `Requests to join (${joinWaiting})` : 'Requests to join'], ['bios', 'Website bios'], ['activity', 'Activity log']].map(([v, l]) => <button key={v} className={`chip${tab === v ? ' active' : ''}`} onClick={() => setTab(v)}>{l}</button>)}
+        {[['people', 'People'], ['join', joinWaiting > 0 ? `Requests to join (${joinWaiting})` : 'Requests to join'], ['bios', 'Website bios'], ['activity', 'Activity log'], ['backups', 'Backups']].map(([v, l]) => <button key={v} className={`chip${tab === v ? ' active' : ''}`} onClick={() => setTab(v)}>{l}</button>)}
       </div>
       {tab === 'people' && <People />}
       {tab === 'join' && <JoinRequests />}
       {tab === 'bios' && <Bios />}
       {tab === 'activity' && <Activity />}
+      {tab === 'backups' && <Backups />}
     </>
   )
 }
