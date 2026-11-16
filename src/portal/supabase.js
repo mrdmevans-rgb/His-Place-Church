@@ -53,9 +53,12 @@ export function friendlyError(error) {
 }
 
 // Calls the secure server tool (api/admin.js) as the signed-in person.
-export async function callAdmin(body) {
+export const callAdmin = (body) => callApi('/api/admin', body)
+export const callBackup = (body) => callApi('/api/backup', body)
+
+async function callApi(path, body) {
   const { data: { session } } = await supabase.auth.getSession()
-  const res = await fetch('/api/admin', {
+  const res = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
     body: JSON.stringify(body),
