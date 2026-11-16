@@ -15,6 +15,7 @@ export function useMe() {
     isPastoral: role === 'admin' || role === 'pastor',
     isStaff: role === 'admin' || role === 'pastor' || role === 'leader',
     isMember: ['admin', 'pastor', 'leader', 'member'].includes(role),
+    hasDiscipleship: !!profile?.hasDiscipleship,
     onTeam: (t) => ['admin', 'pastor', 'leader'].includes(role) && (profile?.teams || []).includes(t),
   }
 }

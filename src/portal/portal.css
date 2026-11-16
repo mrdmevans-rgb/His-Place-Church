@@ -328,3 +328,40 @@
 .m-trivia-choice.wrong .m-trivia-letter { background: #9B2C2C; color: #fff; }
 .m-trivia-result { margin-top: 12px; }
 .m-trivia-verdict { font-weight: 700; font-size: 1.05rem; }
+
+/* Discipleship paths */
+.d-theme .d-passage { margin-top: 0; }
+.d-flow { padding-left: 20px; line-height: 1.6; }
+.d-progress { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+.d-bar { flex: 1; max-width: 360px; height: 8px; border-radius: 999px; background: var(--paper); border: 1px solid var(--stone-border); overflow: hidden; }
+.d-bar span { display: block; height: 100%; background: var(--sage, #4E6B4A); }
+.d-list { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.d-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border: 1px solid var(--stone-border); border-radius: 10px; background: var(--paper-light, #F8F4EC); color: var(--ink); font: inherit; text-decoration: none; cursor: pointer; }
+.d-item:hover { border-color: var(--oxblood); }
+.d-item > span { flex: 1; display: flex; flex-direction: column; }
+.d-item small { color: var(--ink-faint); }
+.d-item svg { flex: none; color: var(--ink-faint); }
+.d-item.done svg { color: #2F6B3A; }
+.d-session { display: grid; gap: 12px; }
+.d-big { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.25rem; font-weight: 600; line-height: 1.4; margin: 0; }
+.d-h { margin: 14px 0 0; }
+.d-p { line-height: 1.7; margin: 0; }
+.d-passage { margin: 0; padding: 10px 16px; border-left: 3px solid var(--oxblood); background: var(--paper); border-radius: 0 8px 8px 0; }
+.d-passage p { margin: 0 0 6px; font-family: 'Source Serif 4', Georgia, serif; line-height: 1.6; }
+.d-passage cite { font-style: normal; font-size: 14px; font-weight: 600; }
+.d-q label, .d-prompt { display: block; font-weight: 600; margin-bottom: 6px; line-height: 1.45; }
+.d-input { box-sizing: border-box; display: block; width: 100%; max-width: 100%; font: inherit; font-size: 16px; line-height: 1.5; padding: 10px 12px; border: 1px solid var(--stone-border); border-radius: 8px; background: #fff; resize: vertical; }
+.d-answer { padding: 10px 12px; border-radius: 8px; background: #fff; border: 1px dashed var(--stone-border); white-space: pre-wrap; }
+.d-tick { margin: 8px 0; }
+.d-activity h3, .d-video h3 { margin: 0 0 6px; }
+.d-frame { position: relative; padding-top: 56.25%; border-radius: 8px; overflow: hidden; background: #111; margin-bottom: 10px; }
+.d-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.d-savebar { position: sticky; top: 0; z-index: 2; background: var(--paper, #EDE6D9); padding: 6px 0; margin-bottom: 8px; }
+.d-nav { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 24px 0 8px; }
+.d-readonly { padding: 12px 4px 4px; }
+.d-mentor-pick select { font: inherit; font-size: 14px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--stone-border); background: #fff; }
+@media print { .d-frame, .d-nav, .d-savebar { display: none; } }
+.d-answers { margin: 0; display: grid; gap: 14px; }
+.d-answers dt { font-weight: 600; margin-bottom: 4px; }
+.d-answers dd { margin: 0; display: grid; gap: 6px; }
+.d-prompt-ro { margin: 0; }
