@@ -282,3 +282,4 @@
 .m-email-choices { display: grid; gap: 4px; margin: 6px 0 4px; }
 .m-email-choices .p-check small { display: block; color: var(--ink-faint); font-size: 13px; margin-top: 2px; }
 .m-email-nudge { border-left: 4px solid var(--gold); }
+.p-public-copy { background: var(--paper); border-left: 3px solid var(--sage); padding: 8px 12px; border-radius: 4px; }

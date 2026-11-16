@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Cake, Heart, Users as UsersIcon } from 'lucide-react'
-import { supabase, friendlyError } from '../supabase'
+import { supabase, friendlyError, notify } from '../supabase'
 import { Badge, Empty, Form, Notice, PageHead, fmtDate, fmtDateTime, localISO, today, useMe, usePeople, useRows } from '../ui'
 import { HideButton, PassageLinks, ReportButton, Thread, gatewayUrl } from './shared'
 import { squareJpeg } from '../pages/Account'
@@ -63,7 +63,9 @@ export function MemberPrayer() {
   const { rows: praying, reload: rp } = useRows('member_praying', { order: 'created_at' })
   const refresh = () => { reload(); rp() }
   const create = async (v) => {
-    const { error } = await supabase.from('member_prayers').insert({ title: v.title, body: v.body, pastors_only: !!v.pastors_only })
+    const { data: added, error } = await supabase.from('member_prayers').insert({ title: v.title, body: v.body, pastors_only: !!v.pastors_only }).select('id').single()
+    // Private requests are emailed to the pastors right away.
+    if (!error && v.pastors_only) notify('prayer', added.id)
     if (error) return error
     setAdding(false); setMsg(v.pastors_only ? 'Sent to the pastors. They are praying for you.' : 'Shared. Your church family is praying with you.'); refresh(); return null
   }

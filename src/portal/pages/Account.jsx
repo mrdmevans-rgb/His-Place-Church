@@ -167,6 +167,12 @@ export const EMAIL_CHOICES = [
   ['gatherings', 'New gatherings', 'In the morning email: what, when, and a link to RSVP.'],
   ['care', 'New care calendars', 'In the morning email: when a family could use meals or help.'],
 ]
+// Pastors and admins also get these, sent right away. On unless turned off.
+export const PASTOR_CHOICES = [
+  ['new_questions', 'New Ask the Pastor questions', 'Sent right away, with the question and who asked.'],
+  ['private_prayers', 'Private prayer requests', 'Sent right away when someone sends a request to the pastors only.'],
+  ['reported_posts', 'Reported posts', 'Sent right away when someone reports a post for a pastor to look at.'],
+]
 
 function EmailUpdates() {
   const me = useMe()
@@ -177,7 +183,7 @@ function EmailUpdates() {
   useEffect(() => {
     supabase.from('email_prefs').select('*').eq('profile_id', me.profile.id).maybeSingle().then(({ data }) => {
       setSaved(!!data)
-      setPrefs(data || { pastor_answers: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false })
+      setPrefs(data || { pastor_answers: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true })
     })
     if (window.location.hash === '#email-updates') setTimeout(() => document.getElementById('email-updates')?.scrollIntoView({ behavior: 'smooth' }), 300)
   }, [me.profile.id])
@@ -185,7 +191,7 @@ function EmailUpdates() {
   const toggle = (k) => setPrefs({ ...prefs, [k]: !prefs[k] })
   const save = async (e) => {
     e.preventDefault()
-    const row = Object.fromEntries(EMAIL_CHOICES.map(([k]) => [k, !!prefs[k]]))
+    const row = Object.fromEntries([...EMAIL_CHOICES, ...(me.isPastoral ? PASTOR_CHOICES : [])].map(([k]) => [k, !!prefs[k]]))
     const { error } = saved
       ? await supabase.from('email_prefs').update(row).eq('profile_id', me.profile.id)
       : await supabase.from('email_prefs').insert(row)
@@ -193,7 +199,7 @@ function EmailUpdates() {
     setSaved(true)
     setMsg({ tone: 'success', text: 'Saved. You can change these anytime.' })
   }
-  const all = (on) => setPrefs({ ...prefs, ...Object.fromEntries(EMAIL_CHOICES.map(([k]) => [k, on])) })
+  const all = (on) => setPrefs({ ...prefs, ...Object.fromEntries([...EMAIL_CHOICES, ...(me.isPastoral ? PASTOR_CHOICES : [])].map(([k]) => [k, on])) })
   return (
     <form className="p-card p-form" id="email-updates" onSubmit={save}>
       <h2 className="p-card-title">Email updates</h2>
@@ -208,6 +214,19 @@ function EmailUpdates() {
           </label>
         ))}
       </div>
+      {me.isPastoral && (
+        <>
+          <h3 className="p-sub">For pastors</h3>
+          <div className="m-email-choices">
+            {PASTOR_CHOICES.map(([k, label, help]) => (
+              <label className="p-check" key={k}>
+                <input type="checkbox" checked={prefs[k] !== false} onChange={() => setPrefs({ ...prefs, [k]: prefs[k] === false })} disabled={noEmail} />
+                <span>{label}<small>{help}</small></span>
+              </label>
+            ))}
+          </div>
+        </>
+      )}
       <Notice tone={msg.tone || 'info'}>{msg.text}</Notice>
       <div className="p-form-actions">
         <button className="button button-primary" disabled={noEmail}>Save email choices</button>
