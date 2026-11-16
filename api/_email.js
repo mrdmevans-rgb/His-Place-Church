@@ -69,3 +69,22 @@ export async function sendEmails(messages) {
   }
   return { sent }
 }
+
+// Tell admins something behind the scenes needs attention. Sent at most once a day per kind,
+// so a problem that keeps happening doesn't flood anyone's inbox.
+export async function alertAdmins(db, kind, subject, message) {
+  try {
+    const key = `alert:${kind}`
+    const { data: last } = await db.from('email_state').select('at').eq('key', key).maybeSingle()
+    if (last?.at && Date.now() - new Date(last.at) < 20 * 3600000) return { sent: 0, reason: 'already alerted today' }
+    const { data: admins } = await db.from('profiles').select('email').eq('role', 'admin').eq('active', true)
+    const to = (admins || []).map((a) => a.email).filter(realEmail)
+    if (!to.length) return { sent: 0, reason: 'no admin email' }
+    const body = `<p>${esc(message)}</p><p>Nothing is lost. This is just a heads-up so it can be looked at.</p>${button(`${site()}/portal/admin?tab=backups`, 'Open Admin')}`
+    const out = await sendEmails([{ to, subject, html: layout(subject, body, 'Sent to His Place portal admins.'), text: `${message}\n\nNothing is lost. This is just a heads-up so it can be looked at.\n${site()}/portal/admin?tab=backups` }])
+    if (out.sent) await db.from('email_state').upsert({ key, at: new Date().toISOString() })
+    return out
+  } catch (e) {
+    return { sent: 0, reason: e.message }
+  }
+}

@@ -5,7 +5,7 @@
 //     { action: 'run' }             make a copy right now
 //     { action: 'download', name }  a short-lived private download link
 // Copies live in the private "backups" bucket. Only this server code can reach it.
-import { db as getDb, json, readBody } from './_email.js'
+import { alertAdmins, db as getDb, json, readBody } from './_email.js'
 
 const BUCKET = 'backups'
 const KEEP_DAYS = 60 // about 8 weekly copies
@@ -37,6 +37,15 @@ export async function tidy(db) {
   return old.length
 }
 
+// The morning email runs every day. If it ran before but not in the last 3 days, it has stopped.
+export async function checkDigest(db) {
+  const { data } = await db.from('email_state').select('at').eq('key', 'digest').maybeSingle()
+  if (!data?.at) return null // never run yet, so nothing has stopped
+  const days = (Date.now() - new Date(data.at)) / 86400000
+  if (days > 3) await alertAdmins(db, 'digest-missing', 'The morning email roundup has stopped', `The daily email to members last ran ${Math.floor(days)} days ago. It should run every morning.`)
+  return days
+}
+
 export default async function handler(req, res) {
   let db
   try { db = getDb() } catch (e) { return json(res, 500, { error: e.message }) }
@@ -50,8 +59,10 @@ export default async function handler(req, res) {
       const made = await makeBackup(db)
       const removed = await tidy(db)
       await db.from('audit_log').insert({ action: 'weekly backup made', entity: 'backup', entity_id: made.name, details: { size_kb: Math.round(made.size / 1024), old_copies_removed: removed } })
+      await checkDigest(db)
       return json(res, 200, { saved: made.name, removed })
     } catch (e) {
+      await alertAdmins(db, 'backup', "This week's backup didn't save", `The weekly backup failed with this message: ${e.message}. You can try again from Admin, Backups with Make a backup now.`)
       return json(res, 502, { error: e.message })
     }
   }

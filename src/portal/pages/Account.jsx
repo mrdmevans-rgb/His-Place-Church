@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, roleLabel, teamLabel, friendlyError, callAdmin, isLoginId, loginIdOf, contactLabel } from '../supabase'
 import { Badge, Form, Notice, PageHead, useMe, usePortal } from '../ui'
+import { deviceKind, useInstall } from '../install'
 
 // Crop to a centered square and shrink to 800px so every team photo matches.
 export async function squareJpeg(file, size = 800) {
@@ -237,6 +238,45 @@ function EmailUpdates() {
   )
 }
 
+// Optional. Each person decides whether to add the portal to their phone or computer.
+function AppCard() {
+  const app = useInstall()
+  const [done, setDone] = useState('')
+  const kind = deviceKind()
+  const signInTip = <p className="p-muted">Tip: inside the app, sign in with your password. Sign-in links from email open in your web browser, not the app. If you haven't set a password yet, you can do it below.</p>
+  return (
+    <div className="p-card" id="app">
+      <h2 className="p-card-title">Use the portal like an app (optional)</h2>
+      {app.installed ? (
+        <p>You're using the portal as an app on this device. To remove it, delete the His Place icon like any other app.</p>
+      ) : (
+        <>
+          <p>If you'd like, you can put a His Place icon on your home screen. It opens the portal full screen, like an app. Nothing to download from an app store, and it's completely up to you. The portal works exactly the same in your web browser.</p>
+          {done && <Notice tone="success">{done}</Notice>}
+          {app.canInstall ? (
+            <button className="button button-primary" onClick={async () => { if (await app.install()) setDone('Added. Look for the His Place icon on your home screen.') }}>Add the His Place app</button>
+          ) : kind === 'ios' ? (
+            <ol className="p-steps">
+              <li>Open this page in <strong>Safari</strong>.</li>
+              <li>Tap the <strong>Share</strong> button (the square with an arrow pointing up).</li>
+              <li>Scroll down and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+            </ol>
+          ) : kind === 'android' ? (
+            <ol className="p-steps">
+              <li>Open this page in <strong>Chrome</strong>.</li>
+              <li>Tap the <strong>menu</strong> (three dots, top right).</li>
+              <li>Tap <strong>Add to Home screen</strong> or <strong>Install app</strong>.</li>
+            </ol>
+          ) : (
+            <p className="p-muted">On a computer, Chrome and Edge show an install button at the right side of the address bar. On a phone, open this page there and you'll see the steps.</p>
+          )}
+          {kind === 'ios' && signInTip}
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function Account() {
   const me = useMe()
   const { reloadProfile } = usePortal()
@@ -259,6 +299,7 @@ export default function Account() {
       </div>
       <EmailCard />
       <EmailUpdates />
+      <AppCard />
       {me.isStaff && <BioEditor />}
       <Password />
     </>

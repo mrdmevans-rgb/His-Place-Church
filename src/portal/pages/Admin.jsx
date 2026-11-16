@@ -130,6 +130,46 @@ function Person({ p, onSaved, onShare }) {
   )
 }
 
+// People who were approved but have never signed in. Shows only when there are some.
+function NotSignedIn({ onShare }) {
+  const [list, setList] = useState([])
+  const [busy, setBusy] = useState('')
+  const [msg, setMsg] = useState({ tone: 'success', text: '' })
+  const load = () => callAdmin({ action: 'not-signed-in' }).then((r) => setList(r.people)).catch(() => {})
+  useEffect(() => { load() }, [])
+  if (!list.length) return null
+  const emailLink = async (p) => {
+    setBusy(p.id); setMsg({ text: '' })
+    try { const r = await callAdmin({ action: 'email-link', id: p.id }); setMsg({ tone: 'success', text: `Sign-in link emailed to ${r.email}.` }); load() } catch (e) { setMsg({ tone: 'error', text: e.message }) }
+    setBusy('')
+  }
+  const textLink = async (p) => {
+    setBusy(p.id); setMsg({ text: '' })
+    try { const r = await callAdmin({ action: 'link', email: p.email }); onShare({ link: r.link, person: p }); load() } catch (e) { setMsg({ tone: 'error', text: e.message }) }
+    setBusy('')
+  }
+  return (
+    <div className="p-card p-waiting">
+      <h2 className="p-card-title">{list.length === 1 ? '1 person hasn\'t' : `${list.length} people haven't`} signed in yet</h2>
+      <p className="p-muted">They were approved but haven't used the portal. Sign-in links expire after 24 hours, so a fresh one often does the trick.</p>
+      {msg.text && <Notice tone={msg.tone}>{msg.text}</Notice>}
+      <ul className="p-waiting-list">
+        {list.map((p) => (
+          <li key={p.id}>
+            <div>
+              <strong>{p.full_name || contactLabel(p.email)}</strong> <span className="p-small">{roleLabel(p.role)}</span>
+              <div className="p-small">Approved {fmtDateTime(p.invited_at)}{p.last_link_at ? `. Last link ${fmtDateTime(p.last_link_at)}` : ''}</div>
+            </div>
+            {isLoginId(p.email)
+              ? <button className="p-link" disabled={!!busy} onClick={() => textLink(p)}>{busy === p.id ? 'Getting it...' : 'Get a link to text'}</button>
+              : <button className="p-link" disabled={!!busy} onClick={() => emailLink(p)}>{busy === p.id ? 'Sending...' : 'Email a fresh link'}</button>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function People() {
   const { reloadProfile } = usePortal()
   const { people } = usePeople()
@@ -150,6 +190,7 @@ function People() {
       <Notice tone="success">{msg}</Notice>
       {inviting && <Invite onDone={(r) => { setInviting(false); if (r) { reloadProfile(); if (r.link) setShare(r); else setMsg(`Invitation emailed to ${r.person.email}.`) } }} />}
       {share && <ShareLink link={share.link} person={share.person} onClose={() => setShare(null)} />}
+      {!q && <NotSignedIn onShare={(sh) => { setShare(sh); window.scrollTo(0, 0) }} />}
       <div className="p-list">{list.map((p) => <Person key={p.id} p={p} onSaved={saved} onShare={(s) => { setShare(s); window.scrollTo(0, 0) }} />)}</div>
     </>
   )
