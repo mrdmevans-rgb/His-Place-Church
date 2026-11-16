@@ -140,7 +140,8 @@ const galleryModules = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,webp,J
 // so the page can save room for it and doesn't jump while loading.
 const gallerySrcsets = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,JPG,JPEG,PNG}', { eager: true, import: 'default', query: '?w=480;800;1200&format=webp&as=srcset' })
 const galleryMeta = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,JPG,JPEG,PNG}', { eager: true, import: 'default', query: '?as=meta:width;height' })
-const galleryWide = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,JPG,JPEG,PNG}', { eager: true, import: 'default', query: '?w=1600&format=webp' })
+// Banner photos sit behind a dark overlay, so a lighter WebP at their natural 1200px is plenty sharp.
+const galleryWide = import.meta.glob('./assets/gallery/*.{jpg,jpeg,png,JPG,JPEG,PNG}', { eager: true, import: 'default', query: '?w=1200&quality=70&format=webp' })
 
 const captionOrder = Object.keys(photoCaptions)
 const photos = Object.entries(galleryModules)
