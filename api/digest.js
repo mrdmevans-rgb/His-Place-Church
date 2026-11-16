@@ -3,7 +3,7 @@
 //   - Every day: titles and links for anything new in the areas each member picked, since the last run
 // Only titles go in the email. Details stay inside the portal.
 // Vercel Cron sends "Authorization: Bearer CRON_SECRET". Anyone else is turned away.
-import { MEMBER_ROLES, button, db as getDb, esc, json, layout, realEmail, sendEmails, site, unsubscribeLinks } from './_email.js'
+import { MEMBER_ROLES, alertAdmins, button, db as getDb, esc, json, layout, realEmail, sendEmails, site, unsubscribeLinks } from './_email.js'
 
 const TZ = 'America/New_York'
 const localDate = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d)
@@ -109,6 +109,7 @@ export default async function handler(req, res) {
   const { data: state } = await db.from('email_state').select('at').eq('key', 'digest').maybeSingle()
   // First run, or a long gap: look back one day at most.
   const since = state?.at && now - new Date(state.at) < 3 * 86400000 ? new Date(state.at) : new Date(now - 86400000)
+  await checkBackups(db)
   try {
     const messages = await buildDigest(db, { now, since })
     const out = messages.length ? await sendEmails(messages) : { sent: 0 }
@@ -116,6 +117,18 @@ export default async function handler(req, res) {
     await db.from('email_state').upsert({ key: 'digest', at: now.toISOString() })
     return json(res, 200, { sent: out.sent })
   } catch (e) {
+    await alertAdmins(db, 'digest', "This morning's email roundup didn't go out", `The daily email to members failed with this message: ${e.message}. It will try again tomorrow morning.`)
     return json(res, 502, { error: e.message })
   }
+}
+
+// The weekly backup runs on Mondays. If the newest copy is more than 8 days old, it has stopped.
+// (The digest checks this so a stopped backup can't go unnoticed, and the backup checks the digest.)
+export async function checkBackups(db) {
+  const { data } = await db.storage.from('backups').list('', { limit: 1, sortBy: { column: 'name', order: 'desc' } })
+  const newest = (data || []).find((f) => f.name.startsWith('hisplace-backup-'))
+  if (!newest) return null // no copies yet, so nothing has stopped
+  const days = (Date.now() - new Date(newest.created_at)) / 86400000
+  if (days > 8) await alertAdmins(db, 'backup-missing', 'The weekly backup has stopped', `The newest backup copy is ${Math.floor(days)} days old. A new one should be made every Monday morning. You can make one now from Admin, Backups.`)
+  return days
 }

@@ -283,3 +283,11 @@
 .m-email-choices .p-check small { display: block; color: var(--ink-faint); font-size: 13px; margin-top: 2px; }
 .m-email-nudge { border-left: 4px solid var(--gold); }
 .p-public-copy { background: var(--paper); border-left: 3px solid var(--sage); padding: 8px 12px; border-radius: 4px; }
+
+/* Admin: people who haven't signed in yet */
+.p-waiting { border-left: 4px solid var(--oxblood); }
+.p-waiting-list { list-style: none; margin: 12px 0 0; padding: 0; }
+.p-waiting-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--stone-border); flex-wrap: wrap; }
+
+/* My account: optional app steps */
+.p-steps { margin: 8px 0 12px; padding-left: 22px; line-height: 1.7; }

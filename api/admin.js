@@ -6,6 +6,7 @@
 //   SUPABASE_SERVICE_ROLE_KEY    secret, from Supabase project settings
 //   SITE_URL                     https://www.hpcchurch.church
 import { createClient } from '@supabase/supabase-js'
+import { button, esc, layout, sendEmails } from './_email.js'
 
 const ROLES = ['admin', 'pastor', 'leader', 'member', 'applicant']
 const TEAMS = ['worship', 'sound', 'media', 'children', 'safety', 'outreach']
@@ -122,6 +123,50 @@ export default async function handler(req, res) {
       if (error) throw error
       await admin.from('audit_log').insert({ actor: who.user.id, action: 'sign-in link created', entity: 'profile', entity_id: data.user.id, details: { email } })
       return json(res, 200, { ok: true, link: data.properties.action_link })
+    }
+
+    if (action === 'not-signed-in') {
+      // Active people who were approved but have never signed in.
+      const never = new Map()
+      for (let page = 1; page <= 20; page++) {
+        const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 })
+        if (error) throw error
+        for (const u of data.users) if (!u.last_sign_in_at) never.set(u.id, u.created_at)
+        if (data.users.length < 1000) break
+      }
+      if (!never.size) return json(res, 200, { people: [] })
+      const ids = [...never.keys()]
+      const [{ data: people }, { data: sent }] = await Promise.all([
+        admin.from('profiles').select('id, full_name, email, phone, role').eq('active', true).neq('role', 'applicant').in('id', ids),
+        admin.from('audit_log').select('entity_id, at').in('action', ['sign-in link created', 'sign-in link emailed']).in('entity_id', ids).order('at', { ascending: false }),
+      ])
+      const lastSent = {}
+      for (const r of sent || []) lastSent[r.entity_id] = lastSent[r.entity_id] || r.at
+      const out = (people || []).map((p) => ({ ...p, invited_at: never.get(p.id), last_link_at: lastSent[p.id] || null }))
+        .sort((a, b) => new Date(a.invited_at) - new Date(b.invited_at))
+      return json(res, 200, { people: out })
+    }
+
+    if (action === 'email-link') {
+      // Email a fresh sign-in link to someone who has a real email address.
+      const id = String(body.id || '')
+      const { data: p } = await admin.from('profiles').select('id, full_name, email, active').eq('id', id).single()
+      if (!p?.active) return json(res, 404, { error: 'That person was not found.' })
+      if (!p.email || p.email.endsWith(`@${LOGIN_DOMAIN}`)) return json(res, 400, { error: 'They don\'t have an email address. Use Get a link to text instead.' })
+      const { data, error } = await admin.auth.admin.generateLink({ type: 'magiclink', email: p.email, options: { redirectTo } })
+      if (error) throw error
+      const first = (p.full_name || '').split(' ')[0]
+      const link = data.properties.action_link
+      const html = layout('Your His Place portal is ready', `<p>Hi${first ? ` ${esc(first)}` : ''},</p>
+<p>You've been approved for the His Place member portal, but it looks like you haven't signed in yet. Tap the button to sign in. No password needed.</p>
+${button(link, 'Sign in to the portal')}
+<p style="font-size:14px;color:#5B5147">This button works once and for 24 hours. After that, go to <a style="color:#7A2E2E" href="${site}/portal">${site.replace(/^https?:\/\//, '')}/portal</a>, choose Email me a link, and enter ${esc(p.email)}.</p>
+<p>See you there!</p>`)
+      const text = `Hi${first ? ` ${first}` : ''},\n\nYou've been approved for the His Place member portal, but it looks like you haven't signed in yet. Use this link to sign in (no password needed):\n${link}\n\nThe link works once and for 24 hours. After that, go to ${site}/portal, choose Email me a link, and enter ${p.email}.`
+      const out = await sendEmails([{ to: [p.email], subject: 'Your His Place portal is ready', html, text }])
+      if (out.skipped) return json(res, 503, { error: out.skipped })
+      await admin.from('audit_log').insert({ actor: who.user.id, action: 'sign-in link emailed', entity: 'profile', entity_id: p.id, details: { email: p.email } })
+      return json(res, 200, { ok: true, email: p.email })
     }
 
     if (action === 'remove') {

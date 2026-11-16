@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail, pendingJoinCount } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
+import { usePortalAppTags } from './install'
 import './portal.css'
 import Dashboard from './pages/Dashboard'
 import Requests from './pages/Requests'
@@ -69,6 +70,7 @@ function useNoIndex() {
 
 export default function PortalApp() {
   useNoIndex()
+  usePortalAppTags()
   const [session, setSession] = useState(undefined)
   const [recovering, setRecovering] = useState(false)
   const [profile, setProfile] = useState(null)
