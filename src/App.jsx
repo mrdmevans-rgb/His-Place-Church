@@ -5,6 +5,7 @@ import {
   HandHeart,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Mail,
   MapPin,
   Clock,
@@ -174,7 +175,7 @@ const navItems = [
   { to: '/visit', label: 'Plan Your Visit' },
   { to: '/know-jesus', label: 'Know Jesus' },
   { to: '/questions', label: 'Honest Questions', mobileOnly: true }, // the desktop menu is full; it's in the footer there
-  { to: '/about', label: 'About' },
+  { to: '/about', label: 'About', children: [{ to: '/team', label: 'Meet the Team' }] },
   { to: '/sermons', label: 'Sermons' },
   { to: '/kids', label: 'His Kids' },
   { to: '/groups', label: 'Groups' },
@@ -194,6 +195,27 @@ const footerItems = [
   { to: '/serve', label: 'Serve With Us' },
   { to: '/team', label: 'Meet the Team' },
 ]
+
+// A menu item with a small dropdown (About > Meet the Team). Opens on hover, on keyboard focus,
+// or by tapping the arrow. Closes when you move away, press Escape, or go to a page.
+function NavDropdown({ item }) {
+  const [open, setOpen] = useState(false)
+  const location = useLocation()
+  useEffect(() => { setOpen(false) }, [location.pathname])
+  const here = [item.to, ...item.children.map((c) => c.to)].some((t) => location.pathname === t)
+  return (
+    <div className={`nav-dd${open ? ' open' : ''}`} onMouseLeave={() => setOpen(false)} onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false) }}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false) }}>
+      <NavLink to={item.to} className={`nav-link ${here ? 'active' : ''}`.trim()} onMouseEnter={() => setOpen(true)}>{item.label}</NavLink>
+      <button type="button" className="nav-dd-toggle" aria-expanded={open} aria-label={`More under ${item.label}`} onClick={() => setOpen(!open)} onMouseEnter={() => setOpen(true)}>
+        <ChevronDown size={14} aria-hidden="true" />
+      </button>
+      <div className="nav-dd-menu">
+        {item.children.map((c) => <NavLink key={c.to} to={c.to} className={({ isActive }) => `nav-dd-link ${isActive ? 'active' : ''}`.trim()}>{c.label}</NavLink>)}
+      </div>
+    </div>
+  )
+}
 
 const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`
 
@@ -611,7 +633,7 @@ function NavBar() {
         </Link>
 
         <nav className="nav-desktop" aria-label="Main navigation">
-          {navItems.filter((item) => !item.mobileOnly).map((item) => (
+          {navItems.filter((item) => !item.mobileOnly).map((item) => (item.children ? <NavDropdown key={item.to} item={item} /> : (
             <NavLink
               key={item.to}
               to={item.to}
@@ -620,7 +642,7 @@ function NavBar() {
             >
               {item.label}
             </NavLink>
-          ))}
+          )))}
           <a className="button button-primary nav-give" href={GIVING_URL} target="_blank" rel="noreferrer">
             Give
           </a>
@@ -639,7 +661,7 @@ function NavBar() {
       {open && (
         <div className="mobile-menu">
           <div className="container mobile-menu-inner">
-            {navItems.map((item) => (
+            {navItems.flatMap((item) => [
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -647,8 +669,13 @@ function NavBar() {
                 className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`.trim()}
               >
                 {item.label}
-              </NavLink>
-            ))}
+              </NavLink>,
+              ...(item.children || []).map((c) => (
+                <NavLink key={c.to} to={c.to} className={({ isActive }) => `mobile-nav-link mobile-nav-sub ${isActive ? 'active' : ''}`.trim()}>
+                  {c.label}
+                </NavLink>
+              )),
+            ])}
             <a className="button button-primary mobile-give" href={GIVING_URL} target="_blank" rel="noreferrer">
               Give
             </a>
