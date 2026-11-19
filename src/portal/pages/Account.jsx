@@ -163,6 +163,7 @@ export const EMAIL_CHOICES = [
   ['pastor_answers', 'When the pastor answers my question', 'Sent right away. Only you see your question and the answer.'],
   ['care_reminders', 'A reminder when I signed up to help a family', 'The morning before your day on the Care calendar: what you signed up for and where to drop it off.'],
   ['prayer_updates', 'When people pray for my requests', 'A short morning note when someone starts praying for your request or leaves an encouragement.'],
+  ['post_replies', 'When people reply to or appreciate my comments', 'A short morning note when someone replies to something you shared, or says Amen, Love this, Thank you, or Praying.'],
   ['weekly_reading', "This week's Read together plan", 'Monday morning: the week’s five readings and the question to think about.'],
   ['discussions', 'New Bible study and reading discussions', 'In the morning email: which lessons and readings have new comments.'],
   ['help_board', 'New needs and offers on the Help board', 'In the morning email: titles of new posts.'],
@@ -186,7 +187,7 @@ function EmailUpdates() {
   useEffect(() => {
     supabase.from('email_prefs').select('*').eq('profile_id', me.profile.id).maybeSingle().then(({ data }) => {
       setSaved(!!data)
-      setPrefs(data || { pastor_answers: true, care_reminders: true, prayer_updates: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true })
+      setPrefs(data || { pastor_answers: true, care_reminders: true, prayer_updates: true, post_replies: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true })
     })
     if (window.location.hash === '#email-updates') setTimeout(() => document.getElementById('email-updates')?.scrollIntoView({ behavior: 'smooth' }), 300)
   }, [me.profile.id])
