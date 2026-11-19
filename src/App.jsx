@@ -25,7 +25,7 @@ import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { SITE_URL, useDocumentHead } from './head'
 import { CHURCH_ADDRESS, SUNDAY_SERVICE_TIME } from './churchInfo'
-import { ChurchWordsPage, HonestQuestionsPage, HopeSignup, NextStepsPage, PrayerRequestForm, insertRow, notify as notifyApi, useAfterDecision, useApproved } from './seekers'
+import { ChurchWordsPage, HonestQuestionsPage, HopePage, HopeSignup, NextStepsPage, PrayerRequestForm, insertRow, notify as notifyApi, useAfterDecision, useApproved } from './seekers'
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg?w=360&format=webp'
 import { knowJesus } from './knowJesusContent'
@@ -2453,6 +2453,7 @@ export default function App() {
           <Route path="/sermons" element={<SermonsPage />} />
           <Route path="/photos" element={<PhotosPage />} />
           <Route path="/prayer" element={<PrayerPage />} />
+          <Route path="/hope" element={<HopePage />} />
           <Route path="/questions" element={<HonestQuestionsPage />} />
           <Route path="/words" element={<ChurchWordsPage />} />
           <Route path="/next-steps" element={<NextStepsPage />} />

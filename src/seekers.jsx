@@ -278,6 +278,33 @@ export function NextStepsPage() {
   )
 }
 
+// A page of its own for Seven Days of Hope, so it's easy to share: hpcchurch.church/hope
+export function HopePage() {
+  const approved = useApproved()
+  useDocumentHead({ title: 'Seven Days of Hope', description: 'Seven short emails, one each morning, walking through the Gospel of John. For anyone searching for hope, peace, and Jesus. No church background needed.' })
+  if (approved === null) return <section className="section page-section"><div className="container"><p>Loading...</p></div></section>
+  if (!approved.hope) return <ComingSoon />
+  return (
+    <>
+      <section className="section page-section sk-hope-hero">
+        <div className="container section-intro">
+          <div className="section-label">For anyone searching</div>
+          <h1>Looking for hope?</h1>
+          <p>Maybe life feels heavy right now. Maybe you've got questions about God, or you're just curious about Jesus. You don't need to have anything figured out. For seven mornings, we'll send you a short email with a passage from the Gospel of John, a few honest thoughts, and a simple prayer.</p>
+          <Verse k="matt11:28" />
+        </div>
+      </section>
+      <HopeSignup />
+      <section className="section">
+        <div className="container sk-also">
+          <p>Not ready for emails? <Link to="/questions">Read honest answers to hard questions</Link>, <Link to="/prayer">ask us to pray for you</Link>, or <Link to="/know-jesus">learn how to know Jesus</Link>.</p>
+          <p className="translation-note">{BIBLE_NOTICE}</p>
+        </div>
+      </section>
+    </>
+  )
+}
+
 function ComingSoon() {
   return (
     <section className="section page-section">

@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/hope",
+      "destination": "/hope/index.html"
+    },
+    {
+      "source": "/questions",
+      "destination": "/questions/index.html"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
