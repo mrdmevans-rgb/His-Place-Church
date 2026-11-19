@@ -3,6 +3,7 @@
 //   POST { kind: 'answer', id }  + sign-in   -> tell a member the pastor answered their question (called by the pastor)
 //   POST { kind: 'question' | 'prayer' | 'report', id } + sign-in
 //                                            -> tell pastors about a new question, private prayer request, or reported post
+//   POST { kind: 'visitor' }                 -> tell pastors about new Plan Your Visit sign-ups (called by the visit form)
 // Each item is emailed once. Until RESEND_API_KEY is set in Vercel, this quietly does nothing.
 import { button, db as getDb, esc, json, layout, readBody, realEmail, sendEmails, site, unsubscribeLinks } from './_email.js'
 
@@ -81,7 +82,7 @@ async function pastorAnswer(db, req, res, id) {
 }
 
 // ---------- Pastor alerts ----------
-const AREA = { lesson_comments: 'Bible study discussion', member_prayers: 'Prayer wall', member_prayer_comments: 'Prayer wall encouragement', help_posts: 'Help board', help_replies: 'Help board reply', gatherings: 'Gatherings', reading_comments: 'Read together discussion' }
+const AREA = { lesson_comments: 'Bible study discussion', member_prayers: 'Prayer wall', member_prayer_comments: 'Prayer wall encouragement', help_posts: 'Help board', help_replies: 'Help board reply', gatherings: 'Gatherings', reading_comments: 'Read together discussion', praise_reports: 'Praise report', praise_comments: 'Praise report comment' }
 
 async function signedIn(db, req) {
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
@@ -93,6 +94,38 @@ async function signedIn(db, req) {
 }
 
 // Pastors and admins who want this kind of alert (on unless they turned it off).
+async function newVisitors(db, res) {
+  // Claim new sign-ups first so two calls can't double-send.
+  const since = new Date(Date.now() - 86400000).toISOString()
+  const { data: fresh, error } = await db.from('visitors').update({ notified_at: new Date().toISOString() })
+    .eq('source', 'website').is('notified_at', null).gte('created_at', since)
+    .select('id, full_name, email, phone, visit_date, adults, kids, notes')
+  if (error) return json(res, 500, { error: error.message })
+  if (!fresh?.length) return json(res, 200, { sent: false, reason: 'Nothing new.' })
+  const release = () => db.from('visitors').update({ notified_at: null }).in('id', fresh.map((f) => f.id))
+  const pastors = await pastorsWanting(db, 'new_visitors')
+  if (!pastors.length) { await release(); return json(res, 200, { sent: false, reason: 'No pastors want this email.' }) }
+  const when = (d) => (d ? new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'long', month: 'long', day: 'numeric' }) : 'Not sure yet')
+  const link = `${site()}/portal/visitors`
+  const n = fresh.length
+  const subject = n === 1 ? `${fresh[0].full_name} is planning to visit ${fresh[0].visit_date ? when(fresh[0].visit_date) : 'soon'}` : `${n} people are planning to visit`
+  const item = (v) => `<li style="margin-bottom:10px"><strong>${esc(v.full_name)}</strong>, ${esc(when(v.visit_date))}<br>${esc([v.email, v.phone].filter(Boolean).join(', '))}<br>${v.adults} adult${v.adults === 1 ? '' : 's'}${v.kids ? `, kids: ${esc(v.kids)}` : ''}${v.notes ? `<br><em>${esc(v.notes)}</em>` : ''}</li>`
+  const bodyHtml = `<p>Someone filled out Plan Your Visit:</p><ul>${fresh.map(item).join('')}</ul>${button(link, 'Open the visitor list')}<p style="color:#8C8171;font-size:13px">A quick welcome text before Sunday goes a long way. The visitor list has one ready to send.</p>`
+  const bodyText = `Someone filled out Plan Your Visit:\n\n${fresh.map((v) => `- ${v.full_name}, ${when(v.visit_date)}\n  ${[v.email, v.phone].filter(Boolean).join(', ')}\n  ${v.adults} adult(s)${v.kids ? `, kids: ${v.kids}` : ''}${v.notes ? `\n  "${v.notes}"` : ''}`).join('\n')}\n\nVisitor list: ${link}`
+  const messages = pastors.map((p) => {
+    const links = unsubscribeLinks(p.token)
+    return { to: [p.email], subject, headers: links.headers, html: layout('A visitor is coming', bodyHtml, links.footer), text: `${bodyText}\n\nUnsubscribe: ${links.unsub}` }
+  })
+  try {
+    const out = await sendEmails(messages)
+    if (out.skipped) { await release(); return json(res, 200, { sent: false, reason: out.skipped }) }
+    return json(res, 200, { sent: true, count: n })
+  } catch (e) {
+    await release()
+    return json(res, 502, { sent: false, error: e.message })
+  }
+}
+
 async function pastorsWanting(db, pref) {
   const { data: people } = await db.from('profiles').select('id, full_name, email').eq('active', true).in('role', ['admin', 'pastor'])
   const list = (people || []).filter((p) => realEmail(p.email))
@@ -172,6 +205,7 @@ export default async function handler(req, res) {
   try { db = getDb() } catch (e) { return json(res, 500, { error: e.message }) }
   const body = await readBody(req)
   if (body.kind === 'answer') return pastorAnswer(db, req, res, String(body.id || ''))
+  if (body.kind === 'visitor') return newVisitors(db, res)
   if (['question', 'prayer', 'report'].includes(body.kind)) return pastorAlert(db, req, res, body.kind, String(body.id || ''))
   return joinRequests(db, res)
 }

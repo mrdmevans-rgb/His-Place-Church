@@ -384,3 +384,17 @@
 .m-foryou-list li.new { border-left: 3px solid var(--oxblood); }
 .m-foryou-list a { color: var(--ink); text-decoration: none; }
 .m-foryou-list a:hover { text-decoration: underline; }
+
+/* Visitors */
+.v-contact { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 6px 0; font-size: 14px; }
+.v-contact a { display: inline-flex; align-items: center; gap: 5px; color: var(--oxblood); }
+.v-notes { font-style: italic; }
+.v-steps { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.v-step { padding: 8px 10px; border-radius: 8px; background: #fff; border: 1px solid var(--stone-border); display: grid; gap: 6px; }
+.v-step.done { background: #EEF6EE; border-color: #CFE3CF; }
+.v-step-label { font-weight: 600; }
+.v-step .p-check small { display: block; color: var(--ink-faint); }
+.v-reach { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 14px; }
+.v-card.v-closed { opacity: 0.75; }
+.v-follow { margin-top: 4px; }

@@ -56,7 +56,7 @@ export const nameList = (names) => names.length <= 1 ? (names[0] || '')
   : names.length === 3 ? `${names[0]}, ${names[1]}, and ${names[2]}`
   : `${names[0]}, ${names[1]}, and ${names.length - 2} others`
 
-function Reactions({ table, c, mine, list, onChange }) {
+export function Reactions({ table, c, mine, list, onChange }) {
   const { name } = usePeople()
   const [busy, setBusy] = useState(false)
   const react = async (kind, on) => {

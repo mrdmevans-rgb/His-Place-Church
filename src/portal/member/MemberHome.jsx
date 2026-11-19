@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, Heart, MessageCircleQuestion, CalendarHeart, HandHelping, Users, BookMarked, Soup } from 'lucide-react'
+import { Sparkles, BookOpen, Heart, MessageCircleQuestion, CalendarHeart, HandHelping, Users, BookMarked, Soup } from 'lucide-react'
 import { supabase, friendlyError, isLoginId } from '../supabase'
 import { Badge, Empty, Notice, PageHead, fmtDate, fmtDateTime, today, useMe, usePeople, usePortal } from '../ui'
 import { Celebrations } from './Community'
@@ -44,6 +44,7 @@ const TILES = [
   ['/portal/study', 'Bible study library', BookOpen],
   ['/portal/read', 'Read together', BookMarked],
   ['/portal/pray', 'Prayer wall', Heart],
+  ['/portal/praise', 'Praise reports', Sparkles],
   ['/portal/ask', 'Ask the Pastor', MessageCircleQuestion],
   ['/portal/gatherings', 'Gatherings', CalendarHeart],
   ['/portal/care', 'Care calendar', Soup],
@@ -140,7 +141,7 @@ export function Moderation() {
     await supabase.from('content_reports').update({ resolved: true }).eq('id', r.id)
     load()
   }
-  const label = { lesson_comments: 'Study discussion', member_prayers: 'Prayer request', member_prayer_comments: 'Prayer encouragement', help_posts: 'Help board post', help_replies: 'Help board reply', gatherings: 'Gathering', reading_comments: 'Reading comment' }
+  const label = { lesson_comments: 'Study discussion', member_prayers: 'Prayer request', member_prayer_comments: 'Prayer encouragement', help_posts: 'Help board post', help_replies: 'Help board reply', gatherings: 'Gathering', reading_comments: 'Reading comment', praise_reports: 'Praise report', praise_comments: 'Praise report comment' }
   return (
     <>
       <PageHead title="Reported posts" intro="Posts members have flagged for a pastor to review. Hiding a post removes it for everyone except its author." />

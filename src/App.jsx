@@ -24,6 +24,7 @@ import {
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { SITE_URL, useDocumentHead } from './head'
+import { CHURCH_ADDRESS, SUNDAY_SERVICE_TIME } from './churchInfo'
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg?w=360&format=webp'
 import { knowJesus } from './knowJesusContent'
@@ -51,8 +52,6 @@ const GOOGLE_PROFILE_URL = 'https://www.google.com/search?kgmid=/g/11zcs2m5nk&q=
 // the link, it looks like https://g.page/r/...). A "Leave us a review" button
 // then appears on Plan Your Visit and in the footer. Leave '' to hide it.
 const GOOGLE_REVIEW_URL = ''
-const CHURCH_ADDRESS = '523 Cincinnati-Batavia Pike, Cincinnati, Ohio 45244'
-const SUNDAY_SERVICE_TIME = 'Sundays at 11:00 AM'
 const CONTACT_EMAIL = 'info@hpcchurch.church'
 // The church phone number. It appears in the footer, on Plan Your Visit,
 // His Kids, and Serve. Clear it ('') to hide it everywhere.
@@ -1112,57 +1111,90 @@ function VisitPage() {
 }
 
 function PlanVisitForm() {
-  const [submitted, setSubmitted] = useState(false)
+  const [state, setState] = useState({ sending: false, done: false, error: '' })
   const sunday = nextSunday()
   const sundays = [0, 1, 2, 3].map((w) => {
     const d = new Date(sunday)
     d.setDate(d.getDate() + w * 7)
-    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    return { iso: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, label: d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) }
   })
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     const f = new FormData(event.currentTarget)
     const v = (k) => (f.get(k) || '').toString().trim()
-    openEmail(`Planning a visit: ${v('name')}`, [
-      `Name: ${v('name')}`,
-      `Email: ${v('email')}`,
-      `Phone: ${v('phone') || 'Not given'}`,
-      `Planning to come: ${v('when')}`,
-      `Adults: ${v('adults') || '1'}`,
-      `Kids and ages: ${v('kids') || 'None'}`,
-      '',
-      'Anything we should know:',
-      v('notes') || 'Nothing else',
-    ])
-    setSubmitted(true)
+    if (v('name').length < 2) return setState({ sending: false, done: false, error: 'Please tell us your name.' })
+    if (!v('email') && !v('phone')) return setState({ sending: false, done: false, error: 'Please give us an email or a phone number so we can say hello.' })
+    if (v('website')) return setState({ sending: false, done: true, error: '' }) // a hidden field only automated spam fills in
+    const visit = {
+      full_name: v('name'), email: v('email'), phone: v('phone'), visit_date: v('when') || null,
+      adults: Math.min(20, Math.max(1, Number(v('adults')) || 1)), kids: v('kids'), notes: v('notes'),
+    }
+    const url = PUBLIC_API, key = PUBLIC_KEY
+    setState({ sending: true, done: false, error: '' })
+    try {
+      if (!url || !key) throw new Error('not set up')
+      const r = await fetch(`${url}/rest/v1/visitors`, {
+        method: 'POST',
+        headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify(visit),
+      })
+      if (!r.ok) throw new Error(String(r.status))
+      fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: 'visitor' }) }).catch(() => {})
+      setState({ sending: false, done: true, error: '' })
+    } catch {
+      // If saving didn't work, fall back to an email with the answers filled in.
+      openEmail(`Planning a visit: ${visit.full_name}`, [
+        `Name: ${visit.full_name}`, `Email: ${visit.email || 'Not given'}`, `Phone: ${visit.phone || 'Not given'}`,
+        `Planning to come: ${sundays.find((x) => x.iso === visit.visit_date)?.label || 'Not sure yet'}`,
+        `Adults: ${visit.adults}`, `Kids and ages: ${visit.kids || 'None'}`, '', 'Anything we should know:', visit.notes || 'Nothing else',
+      ])
+      setState({ sending: false, done: false, error: `We couldn't send that just now, so your email app should open with your answers filled in. If nothing happens, email ${CONTACT_EMAIL}${CHURCH_PHONE ? ` or call ${CHURCH_PHONE}` : ''}.` })
+    }
+  }
+
+  if (state.done) {
+    return (
+      <ShellCard className="prayer-form-card">
+        <div role="status">
+          <h2>We can't wait to meet you!</h2>
+          <p>Thanks for letting us know. Someone from His Place will reach out before Sunday to say hello and answer any questions.</p>
+          <p>We meet {SUNDAY_SERVICE_TIME} at {CHURCH_ADDRESS}. Come as you are.</p>
+          <div className="hero-actions">
+            <button type="button" className="button button-secondary" onClick={addSundayToCalendar}><CalendarPlus size={16} /> Add Sundays to my calendar</button>
+            <a className="button button-secondary" href={directionsUrl} target="_blank" rel="noreferrer">Get Directions</a>
+          </div>
+        </div>
+      </ShellCard>
+    )
   }
 
   return (
     <ShellCard className="prayer-form-card">
       <h2>Plan your visit</h2>
-      <p>This opens an email to us with your answers filled in. Just hit send.</p>
-      <form className="prayer-form" onSubmit={handleSubmit}>
+      <p>Tell us a little about you, and we'll be ready to welcome you.</p>
+      <form className="prayer-form" onSubmit={handleSubmit} noValidate>
         <div className="form-row">
           <div className="form-field">
             <label htmlFor="visit-name">Your name</label>
-            <input id="visit-name" name="name" type="text" autoComplete="name" required />
+            <input id="visit-name" name="name" type="text" autoComplete="name" maxLength={120} required />
           </div>
           <div className="form-field">
             <label htmlFor="visit-email">Email</label>
-            <input id="visit-email" name="email" type="email" autoComplete="email" required />
+            <input id="visit-email" name="email" type="email" autoComplete="email" maxLength={200} />
           </div>
         </div>
         <div className="form-row">
           <div className="form-field">
-            <label htmlFor="visit-phone">Phone (optional)</label>
-            <input id="visit-phone" name="phone" type="tel" autoComplete="tel" />
+            <label htmlFor="visit-phone">Phone</label>
+            <input id="visit-phone" name="phone" type="tel" autoComplete="tel" maxLength={40} />
+            <small>Email or phone, whichever you prefer.</small>
           </div>
           <div className="form-field">
             <label htmlFor="visit-when">Which Sunday?</label>
-            <select id="visit-when" name="when" defaultValue={sundays[0]}>
-              {sundays.map((s) => <option key={s}>{s}</option>)}
-              <option>Not sure yet</option>
+            <select id="visit-when" name="when" defaultValue={sundays[0].iso}>
+              {sundays.map((s) => <option key={s.iso} value={s.iso}>{s.label}</option>)}
+              <option value="">Not sure yet</option>
             </select>
           </div>
         </div>
@@ -1173,22 +1205,21 @@ function PlanVisitForm() {
           </div>
           <div className="form-field">
             <label htmlFor="visit-kids">Kids and their ages</label>
-            <input id="visit-kids" name="kids" type="text" placeholder="For example: 2, ages 4 and 7" />
+            <input id="visit-kids" name="kids" type="text" maxLength={200} placeholder="For example: 2, ages 4 and 7" />
           </div>
         </div>
         <div className="form-field">
           <label htmlFor="visit-notes">Anything we should know? (optional)</label>
-          <textarea id="visit-notes" name="notes" rows="3" placeholder="Accessibility needs, questions, anything at all" />
+          <textarea id="visit-notes" name="notes" rows="3" maxLength={1000} placeholder="Accessibility needs, questions, anything at all" />
         </div>
-        <button type="submit" className="button button-primary full-width">
-          <Send size={15} /> Let us know you're coming
+        <div className="join-hp" aria-hidden="true">
+          <label htmlFor="visit-website">Leave this empty</label>
+          <input id="visit-website" name="website" tabIndex={-1} autoComplete="off" />
+        </div>
+        {state.error && <p className="join-error" role="alert">{state.error}</p>}
+        <button type="submit" className="button button-primary full-width" disabled={state.sending}>
+          <Send size={15} /> {state.sending ? 'Sending...' : "Let us know you're coming"}
         </button>
-        {submitted && (
-          <p className="events-helper-text" role="status">
-            Your email app should be opening now. If nothing happens, email {CONTACT_EMAIL}
-            {CHURCH_PHONE ? ` or call ${CHURCH_PHONE}` : ''}.
-          </p>
-        )}
       </form>
     </ShellCard>
   )

@@ -489,6 +489,40 @@ sql("delete from public.lesson_comments where id=%s", (c1,), as_user=MEM)
 check('deleting a comment removes its replies and reactions', lambda: sql("select (select count(*) from public.lesson_comments where id in (%s, %s)), (select count(*) from public.comment_reactions where item_id=%s)", (r1, r2, c1)), lambda r: r == [(0, 0)])
 check('reply and reaction emails default to on', lambda: sql("select post_replies from public.email_prefs where profile_id=%s", (MEM,), as_user=MEM), lambda r: r == [(True,)])
 
+
+# Visitors (0016)
+check('a visitor can say they are coming', lambda: sql("insert into public.visitors (full_name, email, visit_date, adults, kids) values ('Pat Visitor', 'pat@x.org', current_date + 3, 2, '1, age 6')", anon=True), 'ok')
+check('a visitor needs an email or phone', lambda: sql("insert into public.visitors (full_name) values ('No Contact')", anon=True), 'denied')
+check('a visitor cannot fill in leader fields', lambda: sql("insert into public.visitors (full_name, email, leader_notes) values ('Sneaky', 's@x.org', 'vip')", anon=True), 'denied')
+check('a visitor cannot pick a date far away', lambda: sql("insert into public.visitors (full_name, email, visit_date) values ('Far', 'f@x.org', current_date + 400)", anon=True), 'denied')
+check('visitors cannot read the list', lambda: sql("select count(*) from public.visitors", anon=True), lambda r: r[0][0] == 0)
+check('members cannot read the list', lambda: sql("select count(*) from public.visitors", as_user=MEM), lambda r: r[0][0] == 0)
+check('leaders see visitors', lambda: sql("select count(*) from public.visitors", as_user=WORSHIP), lambda r: r[0][0] >= 1)
+check('leaders can mark follow-up', lambda: sql("update public.visitors set welcomed_at=now(), status='came', leader_notes='Sat with the Smiths' where full_name='Pat Visitor'", as_user=WORSHIP), lambda r: r == 1)
+check('members cannot change a visitor', lambda: sql("update public.visitors set status='closed'", as_user=MEM), 'denied')
+check('leaders can add a walk-in', lambda: sql("insert into public.visitors (full_name, phone, source, status) values ('Walk In', '555-1212', 'leader', 'came')", as_user=WORSHIP), 'ok')
+check('only pastors can delete a visitor', lambda: sql("delete from public.visitors where full_name='Walk In'", as_user=WORSHIP), 'denied')
+check('pastor visitor emails default to on', lambda: sql("select new_visitors from public.email_prefs where profile_id=%s", (MEM,), as_user=MEM), lambda r: r == [(True,)])
+
+# Praise reports (0016)
+my_prayer = sql("insert into public.member_prayers (title) values ('Surgery Tuesday') returning id", as_user=MEM)[0][0]
+sql("update public.member_prayers set answered=true where id=%s", (my_prayer,), as_user=MEM)
+pr1 = sql("insert into public.praise_reports (title, body, prayer_id, ok_to_share) values ('Surgery went well', 'Thank you for praying', %s, true) returning id", (my_prayer,), as_user=MEM)[0][0]
+check('a member can share a praise report from their answered prayer', lambda: sql("select count(*) from public.praise_reports where id=%s", (pr1,), as_user=MEM_B), lambda r: r[0][0] == 1)
+check("nobody can attach someone else's prayer", lambda: sql("insert into public.praise_reports (title, prayer_id) values ('x', %s)", (my_prayer,), as_user=MEM_B), 'denied')
+check('applicants cannot see praise reports', lambda: sql("select count(*) from public.praise_reports", as_user=APPL), lambda r: r[0][0] == 0)
+check('visitors cannot see praise reports', lambda: sql("select count(*) from public.praise_reports", anon=True), lambda r: r[0][0] == 0)
+check('only a pastor can mark one shared on Sunday', lambda: sql("update public.praise_reports set shared_on=current_date where id=%s", (pr1,), as_user=MEM), 'denied')
+check('a pastor can mark it shared', lambda: sql("update public.praise_reports set shared_on=current_date where id=%s", (pr1,), as_user=PASTOR), lambda r: r == 1)
+pc1 = sql("insert into public.praise_comments (report_id, body) values (%s, 'Praise God!') returning id", (pr1,), as_user=MEM_B)[0][0]
+check('members can celebrate with a comment', lambda: sql("select count(*) from public.praise_comments", as_user=MEM), lambda r: r[0][0] == 1)
+check('and react to the praise report', lambda: sql("insert into public.comment_reactions (item_table, item_id, kind) values ('praise_reports', %s, 'love')", (pr1,), as_user=MEM_B), 'ok')
+check('praise shows up in For you', lambda: sql("select what from public.my_activity() where item_table='praise_reports'", as_user=MEM), lambda r: sorted(x[0] for x in r) == ['love', 'reply'])
+check('a praise report can be reported to a pastor', lambda: sql("insert into public.content_reports (item_table, item_id, reason) values ('praise_reports', %s, 'test')", (pr1,), as_user=MEM_B), 'ok')
+check('only pastors can hide a praise report', lambda: sql("update public.praise_reports set hidden=true where id=%s", (pr1,), as_user=MEM_B), 'denied')
+sql("update public.praise_reports set hidden=true where id=%s", (pr1,), as_user=PASTOR)
+check('hidden praise reports disappear for members', lambda: sql("select count(*) from public.praise_reports where id=%s", (pr1,), as_user=MEM_B), lambda r: r[0][0] == 0)
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))

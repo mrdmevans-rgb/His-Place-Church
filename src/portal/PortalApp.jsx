@@ -3,7 +3,7 @@ import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from
 import {
   LayoutDashboard, Megaphone, ClipboardList, Heart, FolderOpen, CalendarDays, ListOrdered, Users, Music,
   Wrench, Baby, FileWarning, ShieldCheck, UserCog, LogOut, Menu, X, KeyRound,
-  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen, Sprout,
+  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen, Sprout, Sparkles, UserPlus,
 } from 'lucide-react'
 import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail, pendingJoinCount } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
@@ -25,6 +25,8 @@ import LibraryManage from './member/LibraryManage'
 import AskPastor from './member/AskPastor'
 import { MemberPrayer, Directory, Care, HelpBoard, Gatherings, Reading } from './member/Community'
 import { SermonNotes } from './member/Sermon'
+import Praise from './member/Praise'
+import Visitors from './pages/Visitors'
 import { MyDiscipleship, DiscipleshipLeaders, CoursePreview } from './member/Discipleship'
 
 const NAV = [
@@ -35,6 +37,7 @@ const NAV = [
   { to: '/portal/notes', label: 'Sermon notes', icon: NotebookPen, show: (m) => m.isMember },
   { to: '/portal/discipleship', label: 'Discipleship', icon: Sprout, show: (m) => m.isMember && m.hasDiscipleship },
   { to: '/portal/pray', label: 'Prayer wall', icon: HeartHandshake, show: (m) => m.isMember },
+  { to: '/portal/praise', label: 'Praise reports', icon: Sparkles, show: (m) => m.isMember },
   { to: '/portal/ask', label: 'Ask the Pastor', icon: MessageCircleQuestion, show: (m) => m.isMember },
   { to: '/portal/gatherings', label: 'Gatherings', icon: CalendarHeart, show: (m) => m.isMember },
   { to: '/portal/care', label: 'Care calendar', icon: Soup, show: (m) => m.isMember },
@@ -42,6 +45,7 @@ const NAV = [
   { to: '/portal/directory', label: 'Directory', icon: Contact, show: (m) => m.isMember },
   { group: 'Leaders', show: (m) => m.isStaff },
   { to: '/portal', label: 'Leader dashboard', icon: LayoutDashboard, show: (m) => m.isStaff, end: true },
+  { to: '/portal/visitors', label: 'Visitors', icon: UserPlus, show: (m) => m.isStaff },
   { to: '/portal/announcements', label: 'Announcements', icon: Megaphone, show: (m) => m.isStaff },
   { to: '/portal/requests', label: 'Requests', icon: ClipboardList, show: (m) => m.isStaff },
   { to: '/portal/prayer', label: 'Leader prayer', icon: Heart, show: (m) => m.isStaff },
@@ -301,6 +305,7 @@ function Layout() {
                 <Route path="study/:seriesId/:lessonId" element={<LessonPage />} />
                 <Route path="read" element={<Reading />} />
                 <Route path="notes" element={<SermonNotes />} />
+                <Route path="praise" element={<Praise />} />
                 <Route path="discipleship" element={<MyDiscipleship />} />
                 <Route path="discipleship/:n" element={<MyDiscipleship />} />
                 <Route path="pray" element={<MemberPrayer />} />
@@ -320,6 +325,7 @@ function Layout() {
             {me.isStaff && (
               <>
                 <Route path="announcements" element={<Announcements />} />
+                <Route path="visitors" element={<Visitors />} />
                 <Route path="discipleship-leaders" element={<DiscipleshipLeaders />} />
                 <Route path="discipleship-leaders/:memberId" element={<DiscipleshipLeaders />} />
                 <Route path="discipleship-preview" element={<CoursePreview />} />
