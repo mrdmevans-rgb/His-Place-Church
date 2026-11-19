@@ -41,6 +41,7 @@ function PrayerCard({ p, praying, onChange }) {
       </div>
       {p.body && <p className="p-pre">{p.body}</p>}
       {p.answered && p.answered_note && <Notice tone="success"><strong>Praise report: </strong>{p.answered_note}</Notice>}
+      {p.answered && mine && <p className="p-small"><Link to={`/portal/praise?prayer=${p.id}`}>Share it as a praise report</Link> so the whole church can rejoice with you.</p>}
       <div className="p-meta">{name(p.author) || 'A member'} · {fmtDateTime(p.created_at)}</div>
       <div className="p-row-actions">
         {!p.pastors_only && <button className={`button ${iPray ? 'button-primary' : 'button-secondary'} p-pray-btn`} onClick={toggle} aria-pressed={iPray}><Heart size={14} /> {iPray ? "I'm praying" : 'I will pray'}{ids.length > 0 && ` (${ids.length})`}</button>}

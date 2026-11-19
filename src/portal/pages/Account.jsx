@@ -176,6 +176,7 @@ export const PASTOR_CHOICES = [
   ['new_questions', 'New Ask the Pastor questions', 'Sent right away, with the question and who asked.'],
   ['private_prayers', 'Private prayer requests', 'Sent right away when someone sends a request to the pastors only.'],
   ['reported_posts', 'Reported posts', 'Sent right away when someone reports a post for a pastor to look at.'],
+  ['new_visitors', 'New visitors', 'Sent right away when someone fills out Plan Your Visit on the website.'],
 ]
 
 function EmailUpdates() {
@@ -187,7 +188,7 @@ function EmailUpdates() {
   useEffect(() => {
     supabase.from('email_prefs').select('*').eq('profile_id', me.profile.id).maybeSingle().then(({ data }) => {
       setSaved(!!data)
-      setPrefs(data || { pastor_answers: true, care_reminders: true, prayer_updates: true, post_replies: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true })
+      setPrefs(data || { pastor_answers: true, care_reminders: true, prayer_updates: true, post_replies: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true, new_visitors: true })
     })
     if (window.location.hash === '#email-updates') setTimeout(() => document.getElementById('email-updates')?.scrollIntoView({ behavior: 'smooth' }), 300)
   }, [me.profile.id])

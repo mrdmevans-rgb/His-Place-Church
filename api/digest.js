@@ -17,7 +17,7 @@ export async function buildDigest(db, { now = new Date(), since } = {}) {
   const isMonday = weekday(now) === 'Monday'
   const range = (q) => q.gt('created_at', sinceIso).lte('created_at', nowIso)
 
-  const [week, lessonC, readingC, help, prayers, gatherings, care] = await Promise.all([
+  const [week, lessonC, readingC, help, prayers, gatherings, care, praise] = await Promise.all([
     isMonday ? db.from('reading_weeks').select('passage, days, note, question').eq('week_of', localDate(now)).maybeSingle().then((r) => r.data) : null,
     range(db.from('lesson_comments').select('author, lesson_id, study_lessons(title, series_id, study_series(status))').eq('hidden', false)).then((r) => r.data || []),
     range(db.from('reading_comments').select('author, reading_weeks(passage)').eq('hidden', false)).then((r) => r.data || []),
@@ -25,6 +25,7 @@ export async function buildDigest(db, { now = new Date(), since } = {}) {
     range(db.from('member_prayers').select('author, title').eq('hidden', false).eq('pastors_only', false)).then((r) => r.data || []),
     range(db.from('gatherings').select('host, title, starts_at').eq('hidden', false).gte('starts_at', nowIso)).then((r) => r.data || []),
     range(db.from('care_pages').select('created_by, title').eq('status', 'open')).then((r) => r.data || []),
+    range(db.from('praise_reports').select('author, title').eq('hidden', false)).then((r) => r.data || []),
   ])
 
   const [{ data: people }, { data: prefs }] = await Promise.all([
@@ -68,7 +69,10 @@ export async function buildDigest(db, { now = new Date(), since } = {}) {
       if (items.length) sections.push(list('New on the Help board', items))
     }
     if (pr.prayer_wall) {
-      const items = prayers.filter((p) => !mine(p.author)).map((p) => ({ text: p.title, link: url('/portal/pray') }))
+      const items = [
+        ...prayers.filter((p) => !mine(p.author)).map((p) => ({ text: p.title, link: url('/portal/pray') })),
+        ...praise.filter((p) => !mine(p.author)).map((p) => ({ text: `Praise report: ${p.title}`, link: url('/portal/praise') })),
+      ]
       if (items.length) sections.push(list('New on the Prayer wall', items))
     }
     if (pr.gatherings) {
