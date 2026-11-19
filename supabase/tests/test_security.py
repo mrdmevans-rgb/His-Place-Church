@@ -458,6 +458,37 @@ n_before = sql("select count(*) from public.audit_log where action like 'discipl
 sql("update public.disciple_assignments set assigned_by=null where member_id=%s", (MEM,))
 check('clearing who assigned it is not logged as a change', lambda: sql("select count(*) from public.audit_log where action like 'discipleship%%'"), lambda r: r[0][0] == n_before)
 
+
+# Reactions and replies (0015)
+c1 = sql("insert into public.lesson_comments (lesson_id, body) values (%s, 'Grace is a gift') returning id", (l1,), as_user=MEM)[0][0]
+r1 = sql("insert into public.lesson_comments (lesson_id, body, parent_id) values (%s, 'So true, thank you', %s) returning id", (l1, c1), as_user=MEM_B)[0][0]
+check('a member can reply to a comment', lambda: sql("select parent_id from public.lesson_comments where id=%s", (r1,), as_user=MEM), lambda r: r == [(c1,)])
+r2 = sql("insert into public.lesson_comments (lesson_id, body, parent_id) values (%s, 'Agreed', %s) returning id", (l1, r1), as_user=MEM)[0][0]
+check('a reply to a reply joins the original conversation', lambda: sql("select parent_id from public.lesson_comments where id=%s", (r2,)), lambda r: r == [(c1,)])
+l2 = sql("insert into public.study_lessons (series_id, title, video_url) values (%s, 'Romans 2', 'https://youtube.com/watch?v=y') returning id", (s1,), as_user=PASTOR)[0][0]
+check('a reply cannot jump to a different discussion', lambda: sql("insert into public.lesson_comments (lesson_id, body, parent_id) values (%s, 'x', %s)", (l2, c1), as_user=MEM_B), 'denied')
+check('a member can say Amen to a comment', lambda: sql("insert into public.comment_reactions (item_table, item_id, kind) values ('lesson_comments', %s, 'amen')", (c1,), as_user=MEM_B), 'ok')
+check('the same reaction only counts once', lambda: sql("insert into public.comment_reactions (item_table, item_id, kind) values ('lesson_comments', %s, 'amen')", (c1,), as_user=MEM_B), 'denied')
+check('only the four reactions are allowed', lambda: sql("insert into public.comment_reactions (item_table, item_id, kind) values ('lesson_comments', %s, 'angry')", (c1,), as_user=MEM_B), 'denied')
+check('nobody can react for someone else', lambda: sql("insert into public.comment_reactions (item_table, item_id, user_id, kind) values ('lesson_comments', %s, %s, 'love')", (c1, MEM), as_user=MEM_B), 'denied')
+check('applicants cannot react', lambda: sql("insert into public.comment_reactions (item_table, item_id, kind) values ('lesson_comments', %s, 'love')", (c1,), as_user=APPL), 'denied')
+check('visitors cannot see reactions', lambda: sql("select count(*) from public.comment_reactions", anon=True), lambda r: r[0][0] == 0)
+check('members see reactions', lambda: sql("select count(*) from public.comment_reactions where item_id=%s", (c1,), as_user=MEM), lambda r: r[0][0] == 1)
+# Private prayer request: only pastors (and the author) see its comments, so nobody else can react.
+pp = sql("insert into public.member_prayers (title, pastors_only) values ('Private', true) returning id", as_user=MEM)[0][0]
+pc = sql("insert into public.member_prayer_comments (prayer_id, body) values (%s, 'Praying for you') returning id", (pp,), as_user=PASTOR)[0][0]
+check('no reacting to a comment you cannot see', lambda: sql("insert into public.comment_reactions (item_table, item_id, kind) values ('member_prayer_comments', %s, 'praying')", (pc,), as_user=MEM_B), 'denied')
+check('reactions on a private comment stay private', lambda: (sql("insert into public.comment_reactions (item_table, item_id, kind) values ('member_prayer_comments', %s, 'thanks')", (pc,), as_user=MEM), sql("select count(*) from public.comment_reactions where item_id=%s", (pc,), as_user=MEM_B))[1], lambda r: r[0][0] == 0)
+check('members can remove their own reaction only', lambda: sql("delete from public.comment_reactions where item_id=%s", (c1,), as_user=MEM), 'denied')
+act = sql("select what, reply_text from public.my_activity() order by what", as_user=MEM)
+check('For you shows the reply and the Amen on my comment', lambda: act, lambda r: ('amen', None) in r and ('reply', 'So true, thank you') in r)
+check("my own replies don't show up as activity for me", lambda: act, lambda r: not any(t == 'Agreed' for _, t in r))
+check('visitors cannot read anyone\'s activity', lambda: sql("select * from public.my_activity()", anon=True), 'denied')
+check('activity for another person is server only', lambda: sql("select * from public.activity_for(%s, now() - interval '1 day')", (MEM,), as_user=MEM_B), 'denied')
+sql("delete from public.lesson_comments where id=%s", (c1,), as_user=MEM)
+check('deleting a comment removes its replies and reactions', lambda: sql("select (select count(*) from public.lesson_comments where id in (%s, %s)), (select count(*) from public.comment_reactions where item_id=%s)", (r1, r2, c1)), lambda r: r == [(0, 0)])
+check('reply and reaction emails default to on', lambda: sql("select post_replies from public.email_prefs where profile_id=%s", (MEM,), as_user=MEM), lambda r: r == [(True,)])
+
 failed = [r for r in results if not r[0]]
 for ok, name, detail in results:
     print(('PASS ' if ok else 'FAIL ') + name + (f'  [{detail}]' if detail else ''))

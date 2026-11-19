@@ -1,6 +1,7 @@
 // Personal morning emails, sent by the daily run in api/digest.js:
 //   - Care reminders: the morning before someone's day on a Care calendar.
 //   - Prayer updates: when people start praying for your request or leave an encouragement.
+//   - Reply updates: when someone replies to or reacts to a comment you shared.
 // Both are on unless the person turns them off in My account.
 import { button, esc, layout, realEmail, sendEmails, site, unsubscribeLinks } from './_email.js'
 
@@ -13,12 +14,12 @@ const firstName = (p) => (p?.full_name || '').trim().split(/\s+/)[0] || ''
 // defaults (these two emails on) so their email can carry an unsubscribe link.
 async function prefsFor(db, ids) {
   if (!ids.length) return {}
-  const { data } = await db.from('email_prefs').select('profile_id, token, care_reminders, prayer_updates').in('profile_id', ids)
+  const { data } = await db.from('email_prefs').select('profile_id, token, care_reminders, prayer_updates, post_replies').in('profile_id', ids)
   const have = Object.fromEntries((data || []).map((p) => [p.profile_id, p]))
   const missing = ids.filter((id) => !have[id])
   if (missing.length) {
     await db.from('email_prefs').upsert(missing.map((id) => ({ profile_id: id })), { onConflict: 'profile_id', ignoreDuplicates: true })
-    const { data: added } = await db.from('email_prefs').select('profile_id, token, care_reminders, prayer_updates').in('profile_id', missing)
+    const { data: added } = await db.from('email_prefs').select('profile_id, token, care_reminders, prayer_updates, post_replies').in('profile_id', missing)
     for (const p of added || []) have[p.profile_id] = p
   }
   return have
@@ -132,7 +133,49 @@ ${button(`${site()}/portal/pray`, 'Open the prayer wall')}
   return messages.length ? sendEmails(messages) : { sent: 0 }
 }
 
-// Run both. Each keeps its own "last run" time so one failing never affects the other.
+const REACTED = { amen: 'said Amen to', love: 'loved', thanks: 'thanked you for', praying: 'is praying about' }
+
+// Replies and reactions to what someone shared in a discussion.
+export async function replyUpdates(db, { since, now = new Date() }) {
+  const { data: members } = await db.from('profiles').select('id, full_name, email').eq('active', true).in('role', ['admin', 'pastor', 'leader', 'member'])
+  const found = []
+  for (const m of (members || []).filter((x) => realEmail(x.email))) {
+    const { data, error } = await db.rpc('activity_for', { p_user: m.id, p_since: since.toISOString() })
+    if (error) throw new Error(error.message)
+    const items = (data || []).filter((i) => new Date(i.at) <= now)
+    if (items.length) found.push([m, items])
+  }
+  if (!found.length) return { sent: 0 }
+  const prefs = await prefsFor(db, found.map(([m]) => m.id))
+  const who = await people(db, [...new Set(found.flatMap(([, items]) => items.map((i) => i.actor)))])
+  const quote = (t) => `"${t.length > 80 ? `${t.slice(0, 80).trim()}...` : t}"`
+  const messages = []
+  for (const [m, items] of found) {
+    const pr = prefs[m.id]
+    if (!pr || pr.post_replies === false) continue
+    const lines = items.map((i) => {
+      const n = firstName(who[i.actor]) || 'Someone'
+      return i.what === 'reply'
+        ? { text: `${n} replied to your comment ${quote(i.my_text)}`, extra: i.reply_text, link: i.link }
+        : { text: `${n} ${REACTED[i.what] || 'appreciated'} your comment ${quote(i.my_text)}`, link: i.link }
+    })
+    const replies = items.filter((i) => i.what === 'reply')
+    const subject = replies.length === 1 && items.length === 1 ? `${firstName(who[replies[0].actor]) || 'Someone'} replied to you`
+      : replies.length ? 'New replies to what you shared' : 'People appreciated what you shared'
+    const links = unsubscribeLinks(pr.token), first = firstName(m)
+    const body = `<p>Hi${first ? ` ${esc(first)}` : ''},</p>
+<ul style="padding-left:18px">${lines.map((l) => `<li style="margin-bottom:8px"><a style="color:#2B2420" href="${esc(site() + l.link)}">${esc(l.text)}</a>${l.extra ? `<br><em style="color:#5B5147">${esc(l.extra)}</em>` : ''}</li>`).join('')}</ul>
+${button(`${site()}/portal/home`, 'Open the portal')}`
+    messages.push({
+      to: [m.email], subject, headers: links.headers,
+      html: layout(subject, body, links.footer),
+      text: `Hi${first ? ` ${first}` : ''},\n\n${lines.map((l) => `${l.text}${l.extra ? `\n  "${l.extra}"` : ''}`).join('\n')}\n\n${site()}/portal/home${footerText(links)}`,
+    })
+  }
+  return messages.length ? sendEmails(messages) : { sent: 0 }
+}
+
+// Run each. Each keeps its own "last run" time so one failing never affects the other.
 export async function personalEmails(db, now = new Date()) {
   const out = {}
   out.care = await careReminders(db, now)
@@ -140,5 +183,9 @@ export async function personalEmails(db, now = new Date()) {
   const since = st?.at && now - new Date(st.at) < 3 * 86400000 ? new Date(st.at) : new Date(now - 86400000)
   out.prayer = await prayerUpdates(db, { since, now })
   if (!out.prayer.skipped) await db.from('email_state').upsert({ key: 'prayer_updates', at: now.toISOString() })
+  const { data: rs } = await db.from('email_state').select('at').eq('key', 'post_replies').maybeSingle()
+  const rsince = rs?.at && now - new Date(rs.at) < 3 * 86400000 ? new Date(rs.at) : new Date(now - 86400000)
+  out.replies = await replyUpdates(db, { since: rsince, now })
+  if (!out.replies.skipped) await db.from('email_state').upsert({ key: 'post_replies', at: now.toISOString() })
   return out
 }

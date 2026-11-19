@@ -365,3 +365,22 @@
 .d-answers dt { font-weight: 600; margin-bottom: 4px; }
 .d-answers dd { margin: 0; display: grid; gap: 6px; }
 .d-prompt-ro { margin: 0; }
+
+/* Discussions: replies and reactions */
+.m-thread { display: grid; gap: 6px; }
+.p-comment.m-reply { margin-left: 22px; border-left: 3px solid var(--stone-border); }
+.m-reply-form { margin-left: 22px; align-items: center; }
+.m-react { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.m-react-btn { display: inline-flex; align-items: center; gap: 5px; font: inherit; font-size: 13px; padding: 4px 10px; min-height: 32px; border-radius: 999px; border: 1px solid var(--stone-border); background: var(--paper-light); color: var(--ink-soft); cursor: pointer; }
+.m-react-btn:hover:not(:disabled) { border-color: var(--oxblood); color: var(--oxblood); }
+.m-react-btn.on { background: #F4E7E7; border-color: var(--oxblood); color: var(--oxblood); font-weight: 600; }
+.m-react-btn:disabled { cursor: default; }
+.m-react-n { font-weight: 700; }
+.m-react-who { margin-top: 4px; }
+/* For you */
+.m-foryou-n { margin-left: 8px; font-size: 12px; font-weight: 700; background: var(--oxblood); color: #fff; border-radius: 999px; padding: 2px 8px; vertical-align: middle; font-family: Inter, sans-serif; }
+.m-foryou-list { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 8px; }
+.m-foryou-list li { padding: 8px 10px; border-radius: 8px; background: #fff; font-size: 14px; line-height: 1.45; }
+.m-foryou-list li.new { border-left: 3px solid var(--oxblood); }
+.m-foryou-list a { color: var(--ink); text-decoration: none; }
+.m-foryou-list a:hover { text-decoration: underline; }
