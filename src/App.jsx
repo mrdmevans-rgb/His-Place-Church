@@ -173,6 +173,7 @@ const navItems = [
   { to: '/', label: 'Home' },
   { to: '/visit', label: 'Plan Your Visit' },
   { to: '/know-jesus', label: 'Know Jesus' },
+  { to: '/questions', label: 'Honest Questions', mobileOnly: true }, // the desktop menu is full; it's in the footer there
   { to: '/about', label: 'About' },
   { to: '/sermons', label: 'Sermons' },
   { to: '/kids', label: 'His Kids' },
@@ -184,9 +185,11 @@ const navItems = [
 ]
 
 const footerItems = [
-  ...navItems.slice(0, 3),
+  ...navItems.slice(0, 4),
+  { to: '/words', label: 'Church Words' },
+  { to: '/next-steps', label: 'Next Steps' },
   { to: '/faith', label: 'Statement of Faith' },
-  ...navItems.slice(3),
+  ...navItems.slice(4),
   { to: '/announcements', label: 'Announcements' },
   { to: '/serve', label: 'Serve With Us' },
   { to: '/team', label: 'Meet the Team' },
@@ -608,7 +611,7 @@ function NavBar() {
         </Link>
 
         <nav className="nav-desktop" aria-label="Main navigation">
-          {navItems.map((item) => (
+          {navItems.filter((item) => !item.mobileOnly).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -1858,7 +1861,12 @@ function KnowJesusPage() {
             </form>
           </ShellCard>
         </div>
-        {approved?.questions && <p className="container sk-also">Still have questions? <Link to="/questions">Read honest answers to hard questions</Link>.</p>}
+        {(approved?.questions || approved?.words) && (
+          <p className="container sk-also">
+            {approved?.questions && <>Still have questions? <Link to="/questions">Read honest answers to hard questions</Link>. </>}
+            {approved?.words && <>New to church words? <Link to="/words">See what they mean</Link>.</>}
+          </p>
+        )}
         <HopeSignup compact />
         <p className="container translation-note">{k.translationNote}</p>
       </section>
@@ -1994,6 +2002,7 @@ function StudyPage() {
             <div className="section-label">{s.title}</div>
             <h1>{s.headline}</h1>
             {s.intro.map((t) => <p key={t}>{t}</p>)}
+            <p>New to the Bible? <Link to="/words">Church Words Decoded</Link> explains words like grace, gospel, and repent in plain language.</p>
           </div>
           <div className="verse-list study-intro-verses">
             {s.introVerses.map((v) => <StudyVerse key={v.ref} v={v} />)}

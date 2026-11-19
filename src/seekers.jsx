@@ -71,6 +71,7 @@ export function HopeSignup({ compact = false, preview = false }) {
           <h2>{HOPE.title}</h2>
           <p>{HOPE.intro}</p>
           <ul className="sk-hope-days">{HOPE.days.map((d, i) => <li key={d.title}><span>Day {i + 1}</span> {d.title}</li>)}</ul>
+          {!compact && <p className="sk-fine">Wrestling with something specific? Read <Link to="/questions">honest answers to hard questions</Link>, or see what <Link to="/words">church words</Link> mean.</p>}
         </div>
         <div className="card sk-hope-card">
           {state.done ? (
@@ -170,6 +171,7 @@ export function HonestQuestionsPage() {
           <p>You don't have to have it all figured out to come to God. Here are short, honest answers from the Bible to some of the hardest questions. Tap a question to read.</p>
         </div>
         <QuestionsBody />
+        <p className="sk-also">Hearing words you don't know? <Link to="/words">Church Words Decoded</Link> explains them in plain language. Ready to follow Jesus? <Link to="/know-jesus">Here's how</Link>.</p>
         <HopeSignup compact />
         <p className="translation-note">{BIBLE_NOTICE}</p>
       </div>
@@ -211,6 +213,7 @@ export function ChurchWordsPage() {
           <p>Church has its own vocabulary, and nobody should feel lost. Here are plain explanations of words you'll hear often.</p>
         </div>
         <WordsBody />
+        <p className="sk-also">Have bigger questions? <Link to="/questions">Read honest answers</Link>, or <Link to="/know-jesus">learn how to know Jesus</Link>.</p>
       </div>
     </section>
   )
@@ -268,6 +271,7 @@ export function NextStepsPage() {
           <p>{NEXT_STEPS.intro}</p>
         </div>
         <NextStepsBody />
+        <p className="sk-also">Hearing words like grace, repent, or baptism? <Link to="/words">Church Words Decoded</Link> explains them.</p>
         <p className="translation-note">{BIBLE_NOTICE}</p>
       </div>
     </section>
