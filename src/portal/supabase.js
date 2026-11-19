@@ -76,6 +76,13 @@ export const pendingJoinCount = async () => {
 
 // Ask the server to send an instant email (pastor alerts, answer emails).
 // Fire and forget: if email isn't set up, the server quietly does nothing.
+// Same as notify, but waits for the answer (for buttons that show whether an email went out).
+export async function notifyResult(kind, id) {
+  const { data: { session } } = await supabase.auth.getSession()
+  const r = await fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` }, body: JSON.stringify({ kind, id }) })
+  return r.json().catch(() => ({}))
+}
+
 export async function notify(kind, id) {
   try {
     const { data: { session } } = await supabase.auth.getSession()

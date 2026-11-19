@@ -1,6 +1,45 @@
-import { useState } from 'react'
-import { supabase, friendlyError } from '../supabase'
+import { useEffect, useState } from 'react'
+import { supabase, friendlyError, notifyResult } from '../supabase'
 import { Badge, Empty, Form, Notice, PageHead, fmtDateTime, useMe, usePeople, useRows } from '../ui'
+
+// Prayer requests sent from the public website. Pray, then tap the button and they get a short note.
+function WebPrayers() {
+  const me = useMe()
+  const { name } = usePeople()
+  const [rows, setRows] = useState(null)
+  const [showDone, setShowDone] = useState(false)
+  const [msg, setMsg] = useState({ tone: 'success', text: '' })
+  const load = () => supabase.from('web_prayers').select('*').order('created_at', { ascending: false }).then(({ data }) => setRows(data || []))
+  useEffect(() => { load() }, [])
+  if (!rows) return <p className="p-muted">Loading...</p>
+  const prayed = async (r) => {
+    const { error } = await supabase.from('web_prayers').update({ prayed_at: new Date().toISOString(), prayed_by: me.profile.id }).eq('id', r.id)
+    if (error) return setMsg({ tone: 'error', text: friendlyError(error) })
+    if (r.email && r.wants_note) {
+      const out = await notifyResult('prayed', r.id)
+      setMsg(out.sent ? { tone: 'success', text: `${r.full_name.split(' ')[0]} got a note saying we prayed for them today.` } : { tone: 'warn', text: `Marked prayed. The note didn't go out${out.reason ? `: ${out.reason}` : '.'}` })
+    } else setMsg({ tone: 'success', text: 'Marked prayed. They didn\'t leave an email, so no note was sent.' })
+    load()
+  }
+  const open = rows.filter((r) => !r.prayed_at)
+  const done = rows.filter((r) => r.prayed_at)
+  const Card = ({ r }) => (
+    <div className="p-card">
+      <div className="p-item-head"><h3>{r.full_name}</h3><span className="p-badges">{r.pastors_only && <Badge tone="info">Pastors only</Badge>}{r.prayed_at && <Badge tone="success">Prayed {fmtDateTime(r.prayed_at)}{r.prayed_by ? ` by ${name(r.prayed_by)}` : ''}</Badge>}{r.told_at && <Badge>Note sent</Badge>}</span></div>
+      <p className="p-pre">{r.request}</p>
+      <div className="p-meta">From the website, {fmtDateTime(r.created_at)}{r.email ? ` · ${r.email}` : ' · no email given'}</div>
+      {!r.prayed_at && <div className="p-row-actions"><button className="button button-primary" onClick={() => prayed(r)}>{r.email && r.wants_note ? 'We prayed for you (send the note)' : 'Mark as prayed for'}</button></div>}
+    </div>
+  )
+  return (
+    <>
+      <Notice tone={msg.tone}>{msg.text}</Notice>
+      <p className="p-muted">These came from the prayer form on the website. Pray for each one by name. When you tap the button, they get a short email saying our church prayed for them today, if they asked for one.</p>
+      {open.length === 0 ? <Empty>No new prayer requests from the website.</Empty> : <div className="p-list">{open.map((r) => <Card key={r.id} r={r} />)}</div>}
+      {done.length > 0 && <details className="m-older" open={showDone} onToggle={(e) => setShowDone(e.currentTarget.open)}><summary>Prayed for ({done.length})</summary><div className="p-list">{done.map((r) => <Card key={r.id} r={r} />)}</div></details>}
+    </>
+  )
+}
 
 function PrayerCard({ p, praying, onChange }) {
   const me = useMe()
@@ -84,10 +123,12 @@ function PrayerCard({ p, praying, onChange }) {
 }
 
 export default function Prayer() {
-  const [view, setView] = useState('active')
+  const [view, setView] = useState(new URLSearchParams(window.location.search).get('tab') === 'web' ? 'web' : 'active')
   const [adding, setAdding] = useState(false)
   const [msg, setMsg] = useState('')
   const { rows, loading, error, reload } = useRows('prayers', { filter: (q) => q.eq('answered', view === 'answered'), deps: [view] })
+  const [webCount, setWebCount] = useState(0)
+  useEffect(() => { supabase.from('web_prayers').select('id', { count: 'exact', head: true }).is('prayed_at', null).then(({ count }) => setWebCount(count || 0)) }, [view])
   const { rows: praying, reload: reloadPraying } = useRows('prayer_praying', { order: 'created_at' })
   const refresh = () => { reload(); reloadPraying() }
 
@@ -124,9 +165,10 @@ export default function Prayer() {
       <div className="p-toolbar">
         <button className={`chip${view === 'active' ? ' active' : ''}`} onClick={() => setView('active')}>Current needs</button>
         <button className={`chip${view === 'answered' ? ' active' : ''}`} onClick={() => setView('answered')}>Answered prayers</button>
+        <button className={`chip${view === 'web' ? ' active' : ''}`} onClick={() => setView('web')}>From the website{webCount ? ` (${webCount})` : ''}</button>
       </div>
       <Notice tone="error">{error}</Notice>
-      {loading ? <p className="p-muted">Loading...</p> : rows.length === 0 ? <Empty>{view === 'active' ? 'No prayer needs right now.' : 'No answered prayers recorded yet.'}</Empty> : (
+      {view === 'web' ? <WebPrayers /> : loading ? <p className="p-muted">Loading...</p> : rows.length === 0 ? <Empty>{view === 'active' ? 'No prayer needs right now.' : 'No answered prayers recorded yet.'}</Empty> : (
         <div className="p-list">{rows.map((p) => <PrayerCard key={p.id} p={p} praying={praying} onChange={refresh} />)}</div>
       )}
     </>

@@ -177,6 +177,8 @@ export const PASTOR_CHOICES = [
   ['private_prayers', 'Private prayer requests', 'Sent right away when someone sends a request to the pastors only.'],
   ['reported_posts', 'Reported posts', 'Sent right away when someone reports a post for a pastor to look at.'],
   ['new_visitors', 'New visitors', 'Sent right away when someone fills out Plan Your Visit on the website.'],
+  ['new_decisions', 'Someone said yes to Jesus', 'Sent right away when someone shares on the Know Jesus page that they trusted Jesus, are coming back, or have questions.'],
+  ['web_prayers', 'Prayer requests from the website', 'Sent right away when someone asks for prayer on the website. Leaders get these too.'],
 ]
 
 function EmailUpdates() {
@@ -188,15 +190,17 @@ function EmailUpdates() {
   useEffect(() => {
     supabase.from('email_prefs').select('*').eq('profile_id', me.profile.id).maybeSingle().then(({ data }) => {
       setSaved(!!data)
-      setPrefs(data || { pastor_answers: true, care_reminders: true, prayer_updates: true, post_replies: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true, new_visitors: true })
+      setPrefs(data || { pastor_answers: true, care_reminders: true, prayer_updates: true, post_replies: true, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: true, private_prayers: true, reported_posts: true, new_visitors: true, new_decisions: true, web_prayers: true })
     })
     if (window.location.hash === '#email-updates') setTimeout(() => document.getElementById('email-updates')?.scrollIntoView({ behavior: 'smooth' }), 300)
   }, [me.profile.id])
   if (!me.isMember || !prefs) return null
+  // Pastors see every staff alert; leaders only get website prayer requests.
+  const myStaffChoices = PASTOR_CHOICES.filter(([k]) => me.isPastoral || (me.isStaff && k === 'web_prayers'))
   const toggle = (k) => setPrefs({ ...prefs, [k]: !prefs[k] })
   const save = async (e) => {
     e.preventDefault()
-    const row = Object.fromEntries([...EMAIL_CHOICES, ...(me.isPastoral ? PASTOR_CHOICES : [])].map(([k]) => [k, !!prefs[k]]))
+    const row = Object.fromEntries([...EMAIL_CHOICES, ...myStaffChoices].map(([k]) => [k, !!prefs[k]]))
     const { error } = saved
       ? await supabase.from('email_prefs').update(row).eq('profile_id', me.profile.id)
       : await supabase.from('email_prefs').insert(row)
@@ -204,7 +208,7 @@ function EmailUpdates() {
     setSaved(true)
     setMsg({ tone: 'success', text: 'Saved. You can change these anytime.' })
   }
-  const all = (on) => setPrefs({ ...prefs, ...Object.fromEntries([...EMAIL_CHOICES, ...(me.isPastoral ? PASTOR_CHOICES : [])].map(([k]) => [k, on])) })
+  const all = (on) => setPrefs({ ...prefs, ...Object.fromEntries([...EMAIL_CHOICES, ...myStaffChoices].map(([k]) => [k, on])) })
   return (
     <form className="p-card p-form" id="email-updates" onSubmit={save}>
       <h2 className="p-card-title">Email updates</h2>
@@ -219,11 +223,11 @@ function EmailUpdates() {
           </label>
         ))}
       </div>
-      {me.isPastoral && (
+      {myStaffChoices.length > 0 && (
         <>
-          <h3 className="p-sub">For pastors</h3>
+          <h3 className="p-sub">{me.isPastoral ? 'For pastors' : 'For leaders'}</h3>
           <div className="m-email-choices">
-            {PASTOR_CHOICES.map(([k, label, help]) => (
+            {myStaffChoices.map(([k, label, help]) => (
               <label className="p-check" key={k}>
                 <input type="checkbox" checked={prefs[k] !== false} onChange={() => setPrefs({ ...prefs, [k]: prefs[k] === false })} disabled={noEmail} />
                 <span>{label}<small>{help}</small></span>

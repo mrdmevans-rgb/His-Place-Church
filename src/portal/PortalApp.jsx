@@ -3,7 +3,7 @@ import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from
 import {
   LayoutDashboard, Megaphone, ClipboardList, Heart, FolderOpen, CalendarDays, ListOrdered, Users, Music,
   Wrench, Baby, FileWarning, ShieldCheck, UserCog, LogOut, Menu, X, KeyRound,
-  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen, Sprout, Sparkles, UserPlus,
+  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen, Sprout, Sparkles, UserPlus, Footprints, FileCheck,
 } from 'lucide-react'
 import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail, pendingJoinCount } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
@@ -27,6 +27,8 @@ import { MemberPrayer, Directory, Care, HelpBoard, Gatherings, Reading } from '.
 import { SermonNotes } from './member/Sermon'
 import Praise from './member/Praise'
 import Visitors from './pages/Visitors'
+import ContentReview from './pages/ContentReview'
+import WalkWithMe from './member/WalkWithMe'
 import { MyDiscipleship, DiscipleshipLeaders, CoursePreview } from './member/Discipleship'
 
 const NAV = [
@@ -36,6 +38,7 @@ const NAV = [
   { to: '/portal/read', label: 'Read together', icon: BookMarked, show: (m) => m.isMember },
   { to: '/portal/notes', label: 'Sermon notes', icon: NotebookPen, show: (m) => m.isMember },
   { to: '/portal/discipleship', label: 'Discipleship', icon: Sprout, show: (m) => m.isMember && m.hasDiscipleship },
+  { to: '/portal/walk-with-me', label: 'Walk With Me', icon: Footprints, show: (m) => m.isMember },
   { to: '/portal/pray', label: 'Prayer wall', icon: HeartHandshake, show: (m) => m.isMember },
   { to: '/portal/praise', label: 'Praise reports', icon: Sparkles, show: (m) => m.isMember },
   { to: '/portal/ask', label: 'Ask the Pastor', icon: MessageCircleQuestion, show: (m) => m.isMember },
@@ -46,6 +49,7 @@ const NAV = [
   { group: 'Leaders', show: (m) => m.isStaff },
   { to: '/portal', label: 'Leader dashboard', icon: LayoutDashboard, show: (m) => m.isStaff, end: true },
   { to: '/portal/visitors', label: 'Visitors', icon: UserPlus, show: (m) => m.isStaff },
+  { to: '/portal/content-review', label: 'Content to review', icon: FileCheck, show: (m) => m.isStaff },
   { to: '/portal/announcements', label: 'Announcements', icon: Megaphone, show: (m) => m.isStaff },
   { to: '/portal/requests', label: 'Requests', icon: ClipboardList, show: (m) => m.isStaff },
   { to: '/portal/prayer', label: 'Leader prayer', icon: Heart, show: (m) => m.isStaff },
@@ -306,6 +310,8 @@ function Layout() {
                 <Route path="read" element={<Reading />} />
                 <Route path="notes" element={<SermonNotes />} />
                 <Route path="praise" element={<Praise />} />
+                <Route path="walk-with-me" element={<WalkWithMe />} />
+                <Route path="walk-with-me/:memberId" element={<WalkWithMe />} />
                 <Route path="discipleship" element={<MyDiscipleship />} />
                 <Route path="discipleship/:n" element={<MyDiscipleship />} />
                 <Route path="pray" element={<MemberPrayer />} />
@@ -326,6 +332,7 @@ function Layout() {
               <>
                 <Route path="announcements" element={<Announcements />} />
                 <Route path="visitors" element={<Visitors />} />
+                <Route path="content-review" element={<ContentReview />} />
                 <Route path="discipleship-leaders" element={<DiscipleshipLeaders />} />
                 <Route path="discipleship-leaders/:memberId" element={<DiscipleshipLeaders />} />
                 <Route path="discipleship-preview" element={<CoursePreview />} />

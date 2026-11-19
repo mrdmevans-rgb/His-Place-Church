@@ -10,13 +10,29 @@ const page = (title, msg) => `<!doctype html><html lang="en"><head><meta charset
 <p><a href="${site()}/portal/account#email-updates" style="color:#7A2E2E">Choose your email updates</a></p></div></body></html>`
 
 export default async function handler(req, res) {
-  const token = String(new URL(req.url, 'http://x').searchParams.get('t') || '')
+  const params = new URL(req.url, 'http://x').searchParams
+  // Seven Days of Hope uses its own stop link (?h=token).
+  const hope = String(params.get('h') || '')
+  if (hope) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    res.setHeader('Cache-Control', 'no-store')
+    if (!/^[0-9a-f-]{36}$/i.test(hope)) { res.statusCode = 400; return res.end(page('That link didn’t work', 'The link looks incomplete.')) }
+    try {
+      const { data } = await getDb().from('hope_signups').update({ stopped: true }).eq('token', hope).select('id')
+      res.statusCode = 200
+      return res.end(page(data?.length ? 'Emails stopped' : 'Nothing to change', data?.length ? 'You won’t get any more Seven Days of Hope emails. If you ever want to talk with someone, you can always reach us at info@hpcchurch.church. We’re praying for you.' : 'We couldn’t find that sign-up. It may already be stopped.'))
+    } catch {
+      res.statusCode = 500
+      return res.end(page('Something went wrong', 'Please try again in a little while.'))
+    }
+  }
+  const token = String(params.get('t') || '')
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.setHeader('Cache-Control', 'no-store')
   if (!/^[0-9a-f-]{36}$/i.test(token)) { res.statusCode = 400; return res.end(page('That link didn’t work', 'The unsubscribe link looks incomplete. You can turn emails off anytime under My account in the member portal.')) }
   try {
     const db = getDb()
-    const { data } = await db.from('email_prefs').update({ pastor_answers: false, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: false, private_prayers: false, reported_posts: false, care_reminders: false, prayer_updates: false, post_replies: false, new_visitors: false })
+    const { data } = await db.from('email_prefs').update({ pastor_answers: false, weekly_reading: false, discussions: false, help_board: false, prayer_wall: false, gatherings: false, care: false, new_questions: false, private_prayers: false, reported_posts: false, care_reminders: false, prayer_updates: false, post_replies: false, new_visitors: false, web_prayers: false, new_decisions: false })
       .eq('token', token).select('profile_id')
     res.statusCode = 200
     if (!data?.length) return res.end(page('Nothing to change', 'We couldn’t find email settings for that link. You can manage your emails under My account in the member portal.'))

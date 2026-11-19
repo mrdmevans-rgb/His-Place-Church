@@ -25,6 +25,7 @@ import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { SITE_URL, useDocumentHead } from './head'
 import { CHURCH_ADDRESS, SUNDAY_SERVICE_TIME } from './churchInfo'
+import { ChurchWordsPage, HonestQuestionsPage, HopeSignup, NextStepsPage, PrayerRequestForm, insertRow, notify as notifyApi, useAfterDecision, useApproved } from './seekers'
 import logoSrc from './assets/logo.jpg'
 import hisKidsLogoSrc from './assets/his-kids-logo.jpg?w=360&format=webp'
 import { knowJesus } from './knowJesusContent'
@@ -811,6 +812,8 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+      <HopeSignup />
 
       <section className="section">
         <div className="container">
@@ -1694,12 +1697,27 @@ function KnowJesusPage() {
   })
   const k = knowJesus
   const [submitted, setSubmitted] = useState(false)
+  const [kjError, setKjError] = useState('')
+  const approved = useApproved()
+  const afterDecision = useAfterDecision()
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     const f = new FormData(event.currentTarget)
     const v = (key) => (f.get(key) || '').toString().trim()
     const picked = f.getAll('about').map(String)
+    // Once a pastor approves Next Steps, responses save straight to the portal and pastors are emailed.
+    if (approved?.next_steps) {
+      try {
+        await insertRow('decisions', { full_name: v('name'), email: v('email'), phone: v('phone'), note: v('message'), about: picked })
+        notifyApi('decision')
+        if (picked.some((p) => /trust in Jesus|coming back/i.test(p))) return afterDecision()
+        setSubmitted('saved')
+        return
+      } catch {
+        setKjError("We couldn't send that just now, so your email app should open instead.")
+      }
+    }
     openEmail(`Know Jesus: ${v('name')}`, [
       `Name: ${v('name')}`,
       `Email: ${v('email')}`,
@@ -1799,7 +1817,7 @@ function KnowJesusPage() {
 
           <ShellCard className="prayer-form-card">
             <h2>We'd love to hear from you</h2>
-            <p>This opens an email to us with your answers filled in. Just hit send. It's private, and we'll reach out personally.</p>
+            <p>{approved?.next_steps ? "It's private, and a pastor will reach out to you personally." : "This opens an email to us with your answers filled in. Just hit send. It's private, and we'll reach out personally."}</p>
             <form className="prayer-form" onSubmit={handleSubmit}>
               <fieldset className="serve-options">
                 <legend>Check anything that fits</legend>
@@ -1831,14 +1849,17 @@ function KnowJesusPage() {
               <button type="submit" className="button button-primary full-width">
                 <Send size={15} /> Send
               </button>
+              {kjError && <p className="join-error" role="alert">{kjError}</p>}
               {submitted && (
                 <p className="events-helper-text" role="status">
-                  Your email app should be opening now. If nothing happens, email {CONTACT_EMAIL} directly.
+                  {submitted === 'saved' ? "Thank you! A pastor will reach out to you soon. We're so glad you wrote." : `Your email app should be opening now. If nothing happens, email ${CONTACT_EMAIL} directly.`}
                 </p>
               )}
             </form>
           </ShellCard>
         </div>
+        {approved?.questions && <p className="container sk-also">Still have questions? <Link to="/questions">Read honest answers to hard questions</Link>.</p>}
+        <HopeSignup compact />
         <p className="container translation-note">{k.translationNote}</p>
       </section>
     </>
@@ -2263,22 +2284,6 @@ function PrayerPage() {
     description: 'Submit a prayer request to His Place Community Church. We believe prayer matters and would be honored to pray for you.',
   })
 
-  const [submitted, setSubmitted] = useState(false)
-
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    const data = new FormData(event.currentTarget)
-    const name = (data.get('name') || '').toString()
-    const email = (data.get('email') || '').toString()
-    const request = (data.get('request') || '').toString()
-
-    const subject = encodeURIComponent(`Prayer Request from ${name}`)
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nPrayer Request:\n${request}`)
-
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`
-    setSubmitted(true)
-  }
-
   return (
     <section className="section page-section">
       <div className="container prayer-grid">
@@ -2309,32 +2314,8 @@ function PrayerPage() {
 
         <ShellCard className="prayer-form-card">
           <h2>Prayer Request Form</h2>
-          <p>
-            This opens an email to {CONTACT_EMAIL} with your request filled in. Prefer to
-            email us directly instead? <a href={`mailto:${CONTACT_EMAIL}`}>Click here</a>.
-          </p>
-          <form className="prayer-form" onSubmit={handleSubmit}>
-            <div className="form-field">
-              <label htmlFor="prayer-name">Your name</label>
-              <input id="prayer-name" name="name" type="text" autoComplete="name" required />
-            </div>
-            <div className="form-field">
-              <label htmlFor="prayer-email">Email address</label>
-              <input id="prayer-email" name="email" type="email" autoComplete="email" required />
-            </div>
-            <div className="form-field">
-              <label htmlFor="prayer-request">How can we pray for you?</label>
-              <textarea id="prayer-request" name="request" rows="7" required />
-            </div>
-            <button type="submit" className="button button-primary full-width">
-              <Send size={15} /> Submit Prayer Request
-            </button>
-            {submitted && (
-              <p className="events-helper-text" role="status">
-                Your email app should be opening now. If nothing happens, please email {CONTACT_EMAIL} directly.
-              </p>
-            )}
-          </form>
+          <p>Real people from our church will pray for you by name. Share as much or as little as you like.</p>
+          <PrayerRequestForm openEmail={openEmail} />
         </ShellCard>
       </div>
     </section>
@@ -2463,6 +2444,9 @@ export default function App() {
           <Route path="/sermons" element={<SermonsPage />} />
           <Route path="/photos" element={<PhotosPage />} />
           <Route path="/prayer" element={<PrayerPage />} />
+          <Route path="/questions" element={<HonestQuestionsPage />} />
+          <Route path="/words" element={<ChurchWordsPage />} />
+          <Route path="/next-steps" element={<NextStepsPage />} />
           <Route path="/team" element={<Suspense fallback={<div className="section container">Loading...</div>}><TeamPage /></Suspense>} />
           <Route path="/join" element={<Suspense fallback={<div className="section container">Loading...</div>}><JoinPage /></Suspense>} />
           <Route path="*" element={<NotFoundPage />} />

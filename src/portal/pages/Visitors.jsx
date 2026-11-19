@@ -120,6 +120,79 @@ function VisitorCard({ v, leaders, onSaved }) {
   )
 }
 
+
+// People who told us on the Know Jesus page that they trusted Jesus, are coming back, or have questions.
+function Decisions({ leaders }) {
+  const me = useMe()
+  const [rows, setRows] = useState(null)
+  const load = () => supabase.from('decisions').select('*').order('created_at', { ascending: false }).then(({ data }) => setRows(data || []))
+  useEffect(() => { load() }, [])
+  if (!rows) return null
+  const myName = first(me.profile.full_name) || 'a friend'
+  const save = async (r, patch) => { await supabase.from('decisions').update(patch).eq('id', r.id); load() }
+  const welcome = (r) => ({ subject: 'Welcome to the family!', text: `Hi ${first(r.full_name)}! This is ${myName} from His Place Community Church. We are so glad you reached out${(r.about || []).some((a) => /trust in Jesus/i.test(a)) ? ' and that you have put your trust in Jesus' : ''}. I'd love to meet with you, answer any questions, and pray with you. When would be a good time?` })
+  const open = rows.filter((r) => !r.connected_at)
+  return (
+    <>
+      <h2 className="p-sub">Said yes to Jesus ({open.length})</h2>
+      {open.length === 0 ? <Empty>When someone shares on the Know Jesus page that they trusted Jesus, they'll show up here.</Empty> : (
+        <div className="p-list">
+          {open.map((r) => {
+            const m = welcome(r)
+            return (
+              <div className="p-card v-card" key={r.id}>
+                <div className="p-item-head"><h3>{r.full_name}</h3><span className="p-badges">{(r.about || []).map((a) => <Badge key={a} tone={/trust in Jesus|coming back/i.test(a) ? 'success' : 'neutral'}>{a}</Badge>)}</span></div>
+                <div className="v-contact">
+                  {r.phone && <a href={`tel:${r.phone.replace(/[^\d+]/g, '')}`}><Phone size={13} aria-hidden="true" /> {r.phone}</a>}
+                  {r.email && <a href={`mailto:${r.email}`}><Mail size={13} aria-hidden="true" /> {r.email}</a>}
+                  {!r.phone && !r.email && <span className="p-muted">No contact info given</span>}
+                </div>
+                {r.note && <p className="p-pre v-notes">"{r.note}"</p>}
+                <div className="p-meta">Shared {fmtDateTime(r.created_at)}</div>
+                <ol className="v-steps">
+                  <Step done={r.welcomed_at} label="Welcome them and set a time to meet" onToggle={(on) => save(r, { welcomed_at: on ? new Date().toISOString() : null })}>
+                    <span className="v-reach">
+                      {r.phone && <a className="button button-secondary v-btn" href={smsLink(r.phone, m.text)}><MessageSquare size={14} aria-hidden="true" /> Text</a>}
+                      {r.email && <a className="button button-secondary v-btn" href={mailLink(r.email, m.subject, m.text)}><Mail size={14} aria-hidden="true" /> Email</a>}
+                    </span>
+                  </Step>
+                  <Step done={r.baptism_at} label="Talk with them about baptism" onToggle={(on) => save(r, { baptism_at: on ? new Date().toISOString() : null })} />
+                  <Step done={r.connected_at} label="Connected: member portal, Rooted, and a Walk With Me mentor" onToggle={(on) => save(r, { connected_at: on ? new Date().toISOString() : null })} />
+                </ol>
+                <div className="p-form-grid v-follow">
+                  <div className="p-field half">
+                    <label htmlFor={`dfu-${r.id}`}>Who is following up?</label>
+                    <select id={`dfu-${r.id}`} value={r.followup_by || ''} onChange={(e) => save(r, { followup_by: e.target.value || null })}>
+                      <option value="">Nobody yet</option>
+                      {leaders.map((p) => <option key={p.id} value={p.id}>{p.full_name || p.email}{p.id === me.profile.id ? ' (you)' : ''}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
+}
+
+// Who is on the Seven Days of Hope journey, so leaders can pray for them by name.
+function HopeList() {
+  const [rows, setRows] = useState(null)
+  useEffect(() => { supabase.from('hope_signups').select('*').order('created_at', { ascending: false }).limit(100).then(({ data }) => setRows(data || [])) }, [])
+  if (!rows || !rows.length) return null
+  return (
+    <details className="m-older">
+      <summary>Seven Days of Hope ({rows.filter((r) => !r.stopped && r.last_day < 7).length} on the journey now)</summary>
+      <p className="p-muted">People who signed up on the website for a week of daily emails. Pray for them by name. On day 7 they're invited to reply, visit, or follow Jesus.</p>
+      <ul className="p-team-list">
+        {rows.map((r) => <li key={r.id}><strong>{r.first_name || 'No name given'}</strong> <span className="p-meta">{r.email} · {r.stopped ? 'Stopped' : r.last_day >= 7 ? 'Finished all 7 days' : `Day ${r.last_day} of 7`} · Started {fmtDate(r.created_at)}</span></li>)}
+      </ul>
+    </details>
+  )
+}
+
 export default function Visitors() {
   const { people } = usePeople()
   const [rows, setRows] = useState(null)
@@ -145,7 +218,7 @@ export default function Visitors() {
   const list = (items) => <div className="p-list">{items.map((v) => <VisitorCard key={v.id} v={v} leaders={leaders} onSaved={load} />)}</div>
   return (
     <>
-      <PageHead title="Visitors" intro="People who told us they're coming through Plan Your Visit, plus first-time guests you add. Follow up so nobody falls through the cracks.">
+      <PageHead title="Visitors" intro="People who told us they're coming, first-time guests, people who said yes to Jesus, and those on the Seven Days of Hope journey. Follow up so nobody falls through the cracks.">
         {!adding && <button className="button button-primary" onClick={() => { setAdding(true); setMsg('') }}>Add a visitor</button>}
       </PageHead>
       <Notice tone="success">{msg}</Notice>
@@ -168,6 +241,8 @@ export default function Visitors() {
       <h2 className="p-sub">Follow up ({followUp.length})</h2>
       {followUp.length ? list(followUp) : <Empty>Everyone who visited has been followed up with.</Empty>}
       {done.length > 0 && <details className="m-older"><summary>Connected and closed ({done.length})</summary>{list(done)}</details>}
+      <Decisions leaders={leaders} />
+      <HopeList />
     </>
   )
 }
