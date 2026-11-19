@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CheckCircle2, Circle, Sprout } from 'lucide-react'
-import { supabase, friendlyError } from '../supabase'
+import { supabase, friendlyError, notifyResult } from '../supabase'
 import { Badge, Empty, Notice, PageHead, fmtDate, fmtDateTime, useMe, usePeople, usePortal } from '../ui'
 import { gatewayUrl } from './shared'
+import { Glossed } from './Glossary'
 
 // Courses live in the code. Loaded only when someone opens one.
 const COURSES = { rooted: () => import('./courses/rooted.json').then((m) => m.default) }
 export const COURSE_NAMES = { rooted: 'Rooted' }
 
-function useCourse(key) {
+export function useCourse(key) {
   const [c, setC] = useState(null)
   useEffect(() => { COURSES[key]?.().then(setC) }, [key])
   return c
@@ -57,9 +58,9 @@ export function SessionBody({ lesson, answers, setAnswer, readOnly, preview }) {
     <div className="d-session">
       {lesson.blocks.map((b, i) => {
         switch (b.t) {
-          case 'big': return <p key={i} className="d-big">{b.text}</p>
+          case 'big': return <p key={i} className="d-big"><Glossed text={b.text} /></p>
           case 'h': return <h2 key={i} className="p-sub d-h">{b.text}</h2>
-          case 'p': return <p key={i} className="d-p">{b.text}</p>
+          case 'p': return <p key={i} className="d-p"><Glossed text={b.text} /></p>
           case 'note': return <Notice key={i} tone="info">{b.text}</Notice>
           case 'passage': return <blockquote key={i} className="d-passage"><p>{b.text}</p><cite><a href={gatewayUrl(b.ref)} target="_blank" rel="noopener noreferrer">{b.ref}</a></cite></blockquote>
           case 'read': return <div key={i} className="p-card d-read"><p>{b.text}</p><Tick checked={a[b.id]} readOnly={readOnly} onChange={(v) => setAnswer(b.id, v)}>I read it</Tick></div>
@@ -281,6 +282,7 @@ export function DiscipleshipLeaders() {
         <div className="p-form-actions"><button className="button button-primary" disabled={!form.member}>Assign</button></div>
       </form>
       <Notice tone={msg.tone}>{msg.text}</Notice>
+      <WalkWithMeLeaders leaders={leaders} onPaired={load} />
       {rows.length === 0 ? <Empty>Nobody has been assigned a path yet.</Empty> : (
         <div className="p-list">
           {rows.map((r) => {
@@ -313,7 +315,7 @@ export function DiscipleshipLeaders() {
   )
 }
 
-function MemberAnswers({ memberId, course }) {
+export function MemberAnswers({ memberId, course, backTo = '/portal/discipleship-leaders', backLabel = 'Discipleship paths' }) {
   const { name } = usePeople()
   const [work, setWork] = useState(null)
   const [open, setOpen] = useState(null)
@@ -325,7 +327,7 @@ function MemberAnswers({ memberId, course }) {
   const who = name(memberId) || 'This member'
   return (
     <>
-      <p className="p-small"><Link to="/portal/discipleship-leaders">Discipleship paths</Link></p>
+      <p className="p-small"><Link to={backTo}>{backLabel}</Link></p>
       <PageHead title={`${who}: ${course.title}`} intro="Read only. Use what they wrote to guide your time together." />
       {Object.keys(work).length === 0 && <Empty>{who} hasn't written anything yet, or you aren't their mentor.</Empty>}
       <ol className="d-list">
@@ -393,6 +395,71 @@ export function CoursePreview() {
         ))}
       </ol>
     </>
+  )
+}
+
+/* ======================= Leaders: Walk With Me pairing ======================= */
+function WalkWithMeLeaders({ leaders, onPaired }) {
+  const me = useMe()
+  const { name } = usePeople()
+  const [reqs, setReqs] = useState([])
+  const [vols, setVols] = useState([])
+  const [pick, setPick] = useState({})
+  const [rooted, setRooted] = useState({})
+  const [msg, setMsg] = useState({ tone: 'success', text: '' })
+  const load = async () => {
+    const [{ data: r }, { data: v }] = await Promise.all([
+      supabase.from('mentor_requests').select('*').neq('status', 'closed').order('created_at'),
+      supabase.from('mentor_volunteers').select('*').eq('active', true),
+    ])
+    setReqs(r || []); setVols(v || [])
+  }
+  useEffect(() => { load() }, [])
+  const waiting = reqs.filter((r) => r.status === 'waiting')
+  const paired = reqs.filter((r) => r.status === 'paired')
+  const choices = [...new Map([...vols.map((v) => [v.profile_id, `${name(v.profile_id) || 'A member'} (volunteer)`]), ...leaders.map((l) => [l.id, `${l.full_name || l.email} (leader)`])]).entries()]
+  const pair = async (r) => {
+    const mentor = pick[r.id]
+    if (!mentor) return setMsg({ tone: 'error', text: 'Choose a mentor first.' })
+    const { error } = await supabase.from('mentor_requests').update({ status: 'paired', mentor_id: mentor, paired_by: me.profile.id, paired_at: new Date().toISOString() }).eq('id', r.id)
+    if (error) return setMsg({ tone: 'error', text: friendlyError(error) })
+    if (rooted[r.id] !== false) {
+      const { data: has } = await supabase.from('disciple_assignments').select('member_id').eq('member_id', r.member_id).eq('course', 'rooted').maybeSingle()
+      const res = has
+        ? await supabase.from('disciple_assignments').update({ mentor_id: mentor, active: true }).eq('member_id', r.member_id).eq('course', 'rooted')
+        : await supabase.from('disciple_assignments').insert({ member_id: r.member_id, course: 'rooted', mentor_id: mentor })
+      if (res.error) setMsg({ tone: 'warn', text: `Paired, but Rooted wasn't assigned: ${friendlyError(res.error)}` })
+    }
+    const out = await notifyResult('paired', r.id)
+    setMsg({ tone: 'success', text: `${name(r.member_id)} is paired with ${name(mentor)}.${out.sent ? ' They both got an email.' : ''}` })
+    load(); onPaired()
+  }
+  if (!waiting.length && !paired.length && !vols.length) return null
+  return (
+    <div className="p-card">
+      <h2 className="p-card-title">Walk With Me</h2>
+      <p className="p-muted">Members who asked for a mentor, and members who volunteered to walk with someone. Pair them, and they'll both get an email. Mentors who aren't leaders can see their person's Rooted progress and answers.</p>
+      <Notice tone={msg.tone}>{msg.text}</Notice>
+      {waiting.length === 0 ? <p className="p-small">Nobody is waiting for a mentor right now.</p> : (
+        <ul className="p-team-list">
+          {waiting.map((r) => (
+            <li key={r.id} className="wm-wait">
+              <div><strong>{name(r.member_id) || 'A member'}</strong> <span className="p-meta">asked {fmtDate(r.created_at)}</span>{r.note && <div className="p-small">"{r.note}"</div>}</div>
+              <div className="p-row-actions">
+                <select aria-label={`Mentor for ${name(r.member_id)}`} value={pick[r.id] || ''} onChange={(e) => setPick({ ...pick, [r.id]: e.target.value })}>
+                  <option value="">Choose a mentor</option>
+                  {choices.filter(([id]) => id !== r.member_id).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                </select>
+                <label className="p-check inline"><input type="checkbox" checked={rooted[r.id] !== false} onChange={(e) => setRooted({ ...rooted, [r.id]: e.target.checked })} /><span>Start Rooted together</span></label>
+                <button className="button button-primary" onClick={() => pair(r)}>Pair</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {paired.length > 0 && <p className="p-small">Walking together now: {paired.map((r) => `${name(r.member_id)} with ${name(r.mentor_id)}`).join('; ')}.</p>}
+      {vols.length > 0 && <details className="m-older"><summary>Volunteers ({vols.length})</summary><ul className="p-team-list">{vols.map((v) => <li key={v.profile_id}><strong>{name(v.profile_id)}</strong>{v.note && <span className="p-meta"> · {v.note}</span>}</li>)}</ul></details>}
+    </div>
   )
 }
 

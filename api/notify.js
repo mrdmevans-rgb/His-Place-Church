@@ -4,8 +4,14 @@
 //   POST { kind: 'question' | 'prayer' | 'report', id } + sign-in
 //                                            -> tell pastors about a new question, private prayer request, or reported post
 //   POST { kind: 'visitor' }                 -> tell pastors about new Plan Your Visit sign-ups (called by the visit form)
+//   POST { kind: 'hope' }                    -> send day 1 of Seven Days of Hope to new sign-ups
+//   POST { kind: 'webprayer' }               -> tell leaders about new prayer requests from the website
+//   POST { kind: 'decision' }                -> tell pastors someone said yes to Jesus
+//   POST { kind: 'prayed', id } + sign-in    -> tell a website prayer requester we prayed for them
+//   POST { kind: 'paired', id } + sign-in    -> tell a member and their Walk With Me mentor they've been paired
 // Each item is emailed once. Until RESEND_API_KEY is set in Vercel, this quietly does nothing.
 import { button, db as getDb, esc, json, layout, readBody, realEmail, sendEmails, site, unsubscribeLinks } from './_email.js'
+import { REPLY_TO, hopeDue } from './_hope.js'
 
 async function joinRequests(db, res) {
   // Claim new requests first so two calls can't double-send.
@@ -89,7 +95,7 @@ async function signedIn(db, req) {
   if (!token) return null
   const { data } = await db.auth.getUser(token)
   if (!data?.user) return null
-  const { data: me } = await db.from('profiles').select('id, active').eq('id', data.user.id).single()
+  const { data: me } = await db.from('profiles').select('id, active, role').eq('id', data.user.id).single()
   return me?.active ? me : null
 }
 
@@ -126,8 +132,103 @@ async function newVisitors(db, res) {
   }
 }
 
-async function pastorsWanting(db, pref) {
-  const { data: people } = await db.from('profiles').select('id, full_name, email').eq('active', true).in('role', ['admin', 'pastor'])
+// Claim rows not yet emailed (last 24 hours) so two calls can't double-send.
+async function claimNew(db, table, cols, extra = (q) => q) {
+  const since = new Date(Date.now() - 86400000).toISOString()
+  const { data, error } = await extra(db.from(table).update({ notified_at: new Date().toISOString() }).is('notified_at', null).gte('created_at', since)).select(cols)
+  if (error) throw new Error(error.message)
+  return data || []
+}
+async function sendToMany(people, subject, title, bodyHtml, bodyText, release) {
+  if (!people.length) { await release(); return { sent: false, reason: 'Nobody wants this email.' } }
+  const messages = people.map((p) => {
+    const links = unsubscribeLinks(p.token)
+    return { to: [p.email], subject, headers: links.headers, html: layout(title, bodyHtml, links.footer), text: `${bodyText}\n\nUnsubscribe: ${links.unsub}` }
+  })
+  try {
+    const out = await sendEmails(messages)
+    if (out.skipped) { await release(); return { sent: false, reason: out.skipped } }
+    return { sent: true, count: out.sent }
+  } catch (e) { await release(); return { sent: false, error: e.message } }
+}
+const quoteBox = (t) => `<div style="border-left:3px solid #B8862F;background:#EDE6D9;padding:10px 14px;border-radius:4px;white-space:pre-wrap">${esc(t)}</div>`
+
+async function webPrayers(db, res) {
+  let rows
+  try { rows = await claimNew(db, 'web_prayers', 'id, full_name, email, request, pastors_only') } catch (e) { return json(res, 500, { error: e.message }) }
+  if (!rows.length) return json(res, 200, { sent: false, reason: 'Nothing new.' })
+  const out = {}
+  for (const group of [rows.filter((r) => !r.pastors_only), rows.filter((r) => r.pastors_only)]) {
+    if (!group.length) continue
+    const priv = group[0].pastors_only
+    const people = await pastorsWanting(db, 'web_prayers', !priv)
+    const link = `${site()}/portal/prayer?tab=web`
+    const subject = group.length === 1 ? `Prayer request from ${group[0].full_name}${priv ? ' (pastors only)' : ''}` : `${group.length} new prayer requests from the website`
+    const html = `<p>${priv ? 'For pastors only. Please keep this confidential.' : 'New from the website prayer form:'}</p>${group.map((r) => `<p><strong>${esc(r.full_name)}</strong></p>${quoteBox(r.request)}`).join('')}${button(link, 'Pray, then let them know')}<p style="color:#8C8171;font-size:13px">After you pray, tap "We prayed for you" and they'll get a short note saying so.</p>`
+    const text = `${group.map((r) => `${r.full_name}:\n${r.request}`).join('\n\n')}\n\nOpen: ${link}`
+    out[priv ? 'pastors' : 'leaders'] = await sendToMany(people, subject, 'Someone asked for prayer', html, text, () => db.from('web_prayers').update({ notified_at: null }).in('id', group.map((g) => g.id)))
+  }
+  return json(res, 200, out)
+}
+
+async function decisions(db, res) {
+  let rows
+  try { rows = await claimNew(db, 'decisions', 'id, full_name, email, phone, note') } catch (e) { return json(res, 500, { error: e.message }) }
+  if (!rows.length) return json(res, 200, { sent: false, reason: 'Nothing new.' })
+  const people = await pastorsWanting(db, 'new_decisions')
+  const link = `${site()}/portal/visitors`
+  const subject = rows.length === 1 ? `${rows[0].full_name} said yes to Jesus` : `${rows.length} people said yes to Jesus`
+  const html = `<p>Someone shared on the website that they've decided to follow Jesus. Praise God!</p>${rows.map((r) => `<p><strong>${esc(r.full_name)}</strong>${[r.email, r.phone].filter(Boolean).length ? `<br>${esc([r.email, r.phone].filter(Boolean).join(', '))}` : '<br><em>No contact info given</em>'}</p>${r.note ? quoteBox(r.note) : ''}`).join('')}${button(link, 'Welcome them')}<p style="color:#8C8171;font-size:13px">The first few days matter most. A welcome, a talk about baptism, and a mentor can help them put down deep roots.</p>`
+  const text = `Someone said yes to Jesus on the website:\n\n${rows.map((r) => `${r.full_name} ${[r.email, r.phone].filter(Boolean).join(', ')}${r.note ? `\n"${r.note}"` : ''}`).join('\n\n')}\n\nWelcome them: ${link}`
+  return json(res, 200, await sendToMany(people, subject, 'Someone said yes to Jesus', html, text, () => db.from('decisions').update({ notified_at: null }).in('id', rows.map((r) => r.id))))
+}
+
+async function prayedFor(db, req, res, id) {
+  const me = await signedIn(db, req)
+  if (!me || !['admin', 'pastor', 'leader'].includes(me.role)) return json(res, 403, { error: 'Leaders only.' })
+  const claimed = (await db.from('web_prayers').update({ told_at: new Date().toISOString() }).eq('id', id).not('prayed_at', 'is', null).is('told_at', null).eq('wants_note', true).neq('email', '').select('id, full_name, email, pastors_only').maybeSingle()).data
+  if (!claimed) return json(res, 200, { sent: false, reason: 'Already sent, no email, or not marked prayed yet.' })
+  if (claimed.pastors_only && !['admin', 'pastor'].includes(me.role)) { await db.from('web_prayers').update({ told_at: null }).eq('id', id); return json(res, 403, { error: 'Pastors only.' }) }
+  const first = claimed.full_name.trim().split(/\s+/)[0]
+  const subject = 'We prayed for you today'
+  const html = layout(subject, `<p>Hi ${esc(first)},</p><p>We wanted you to know that our church prayed for you by name today. You're not alone in what you're carrying, and God hears every word.</p><p>If you'd like to talk with someone, or there's an update you'd like to share, just reply to this email. A real person will read it.</p>${button(`${site()}/visit`, "You're always welcome at His Place")}<p>With love,<br>His Place Community Church</p>`, `You're getting this because you asked us to pray for you at hpcchurch.church.`)
+  const text = `Hi ${first},\n\nWe wanted you to know that our church prayed for you by name today. You're not alone in what you're carrying, and God hears every word.\n\nIf you'd like to talk with someone, or there's an update you'd like to share, just reply to this email. A real person will read it.\n\nWith love,\nHis Place Community Church\n${site()}`
+  try {
+    const out = await sendEmails([{ to: [claimed.email], reply_to: REPLY_TO, subject, html, text }])
+    if (out.skipped) { await db.from('web_prayers').update({ told_at: null }).eq('id', id); return json(res, 200, { sent: false, reason: out.skipped }) }
+    return json(res, 200, { sent: true })
+  } catch (e) {
+    await db.from('web_prayers').update({ told_at: null }).eq('id', id)
+    return json(res, 502, { sent: false, error: e.message })
+  }
+}
+
+async function paired(db, req, res, id) {
+  const me = await signedIn(db, req)
+  if (!me || !['admin', 'pastor', 'leader'].includes(me.role)) return json(res, 403, { error: 'Leaders only.' })
+  const r = (await db.from('mentor_requests').update({ notified_at: new Date().toISOString() }).eq('id', id).eq('status', 'paired').is('notified_at', null).select('member_id, mentor_id').maybeSingle()).data
+  if (!r) return json(res, 200, { sent: false, reason: 'Already sent.' })
+  const { data: ppl } = await db.from('profiles').select('id, full_name, email').in('id', [r.member_id, r.mentor_id])
+  const by = Object.fromEntries((ppl || []).map((p) => [p.id, p]))
+  const member = by[r.member_id], mentor = by[r.mentor_id]
+  const f = (p) => (p?.full_name || '').split(' ')[0] || 'friend'
+  const link = `${site()}/portal/walk-with-me`
+  const msgs = []
+  if (realEmail(member?.email)) msgs.push({ to: [member.email], subject: `${mentor?.full_name || 'Someone'} will walk with you`, html: layout('You have a mentor', `<p>Hi ${esc(f(member))},</p><p>${esc(mentor?.full_name || 'A mentor')} has agreed to walk with you in your faith. They'll reach out soon to find a time to meet, pray, and open God's Word together.</p>${button(link, 'Open Walk With Me')}`), text: `Hi ${f(member)},\n\n${mentor?.full_name || 'A mentor'} has agreed to walk with you in your faith. They'll reach out soon.\n\n${link}` })
+  if (realEmail(mentor?.email)) msgs.push({ to: [mentor.email], subject: `You're walking with ${member?.full_name || 'someone new'}`, html: layout('Thank you for walking with someone', `<p>Hi ${esc(f(mentor))},</p><p>You've been paired with <strong>${esc(member?.full_name || 'a member')}</strong> through Walk With Me. Reach out this week to say hello and find a time to meet. You don't need all the answers. Love them, pray with them, and open the Word together.</p>${button(link, 'See who you are walking with')}`), text: `Hi ${f(mentor)},\n\nYou've been paired with ${member?.full_name || 'a member'} through Walk With Me. Reach out this week to say hello.\n\n${link}` })
+  if (!msgs.length) return json(res, 200, { sent: false, reason: 'No email addresses.' })
+  try {
+    const out = await sendEmails(msgs)
+    if (out.skipped) { await db.from('mentor_requests').update({ notified_at: null }).eq('id', id); return json(res, 200, { sent: false, reason: out.skipped }) }
+    return json(res, 200, { sent: true, count: out.sent })
+  } catch (e) {
+    await db.from('mentor_requests').update({ notified_at: null }).eq('id', id)
+    return json(res, 502, { sent: false, error: e.message })
+  }
+}
+
+async function pastorsWanting(db, pref, includeLeaders = false) {
+  const { data: people } = await db.from('profiles').select('id, full_name, email').eq('active', true).in('role', includeLeaders ? ['admin', 'pastor', 'leader'] : ['admin', 'pastor'])
   const list = (people || []).filter((p) => realEmail(p.email))
   if (!list.length) return []
   const { data: prefs } = await db.from('email_prefs').select('*').in('profile_id', list.map((p) => p.id))
@@ -206,6 +307,11 @@ export default async function handler(req, res) {
   const body = await readBody(req)
   if (body.kind === 'answer') return pastorAnswer(db, req, res, String(body.id || ''))
   if (body.kind === 'visitor') return newVisitors(db, res)
+  if (body.kind === 'webprayer') return webPrayers(db, res)
+  if (body.kind === 'decision') return decisions(db, res)
+  if (body.kind === 'prayed') return prayedFor(db, req, res, String(body.id || ''))
+  if (body.kind === 'paired') return paired(db, req, res, String(body.id || ''))
+  if (body.kind === 'hope') { try { return json(res, 200, await hopeDue(db, { onlyNew: true })) } catch (e) { return json(res, 502, { error: e.message }) } }
   if (['question', 'prayer', 'report'].includes(body.kind)) return pastorAlert(db, req, res, body.kind, String(body.id || ''))
   return joinRequests(db, res)
 }

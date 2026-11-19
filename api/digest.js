@@ -5,6 +5,7 @@
 // Only titles go in the email. Details stay inside the portal.
 // Vercel Cron sends "Authorization: Bearer CRON_SECRET". Anyone else is turned away.
 import { personalEmails } from './_reminders.js'
+import { hopeDue } from './_hope.js'
 import { MEMBER_ROLES, alertAdmins, button, db as getDb, esc, json, layout, realEmail, sendEmails, site, unsubscribeLinks } from './_email.js'
 
 const TZ = 'America/New_York'
@@ -124,6 +125,12 @@ export default async function handler(req, res) {
   } catch (e) {
     personal = { error: e.message }
     await alertAdmins(db, 'personal', "This morning's reminders didn't go out", `The care reminders or prayer updates failed with this message: ${e.message}. They will try again tomorrow morning.`)
+  }
+  // Seven Days of Hope runs on its own too.
+  try {
+    personal = { ...(personal || {}), hope: await hopeDue(db, { now }) }
+  } catch (e) {
+    await alertAdmins(db, 'hope', "This morning's Seven Days of Hope emails didn't go out", `The Seven Days of Hope emails failed with this message: ${e.message}. They will try again tomorrow morning.`)
   }
   try {
     const messages = await buildDigest(db, { now, since })
