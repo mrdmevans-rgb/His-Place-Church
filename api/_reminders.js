@@ -155,13 +155,20 @@ export async function replyUpdates(db, { since, now = new Date() }) {
     if (!pr || pr.post_replies === false) continue
     const lines = items.map((i) => {
       const n = firstName(who[i.actor]) || 'Someone'
+      if (i.what === 'welcome') return { text: `${n} welcomed you to the portal`, extra: i.reply_text, link: i.link }
+      if (i.what === 'prayed_name') return { text: `${n} prayed for you by name`, link: i.link }
       return i.what === 'reply'
         ? { text: `${n} replied to your comment ${quote(i.my_text)}`, extra: i.reply_text, link: i.link }
         : { text: `${n} ${REACTED[i.what] || 'appreciated'} your comment ${quote(i.my_text)}`, link: i.link }
     })
     const replies = items.filter((i) => i.what === 'reply')
-    const subject = replies.length === 1 && items.length === 1 ? `${firstName(who[replies[0].actor]) || 'Someone'} replied to you`
-      : replies.length ? 'New replies to what you shared' : 'People appreciated what you shared'
+    const welcomes = items.filter((i) => i.what === 'welcome'), prayedBy = items.filter((i) => i.what === 'prayed_name')
+    const others = items.length - welcomes.length - prayedBy.length
+    const subject = welcomes.length === items.length ? (welcomes.length === 1 ? `${firstName(who[welcomes[0].actor]) || 'Someone'} welcomed you to His Place` : 'Your church family welcomed you')
+      : prayedBy.length === items.length ? (prayedBy.length === 1 ? `${firstName(who[prayedBy[0].actor]) || 'Someone'} prayed for you by name` : `${prayedBy.length} people prayed for you by name`)
+      : replies.length === 1 && items.length === 1 ? `${firstName(who[replies[0].actor]) || 'Someone'} replied to you`
+      : replies.length ? 'New replies to what you shared'
+      : others ? 'People appreciated what you shared' : 'Your church family is thinking of you'
     const links = unsubscribeLinks(pr.token), first = firstName(m)
     const body = `<p>Hi${first ? ` ${esc(first)}` : ''},</p>
 <ul style="padding-left:18px">${lines.map((l) => `<li style="margin-bottom:8px"><a style="color:#2B2420" href="${esc(site() + l.link)}">${esc(l.text)}</a>${l.extra ? `<br><em style="color:#5B5147">${esc(l.extra)}</em>` : ''}</li>`).join('')}</ul>

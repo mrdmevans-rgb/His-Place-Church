@@ -14,7 +14,11 @@ const PERKS = [
 ]
 
 export default function JoinPage() {
-  const [form, setForm] = useState({ full_name: '', email: '', phone: '', message: '', website: '' })
+  // An invite link from a member carries their name (?from=...), so the admin knows who invited them.
+  const [form, setForm] = useState(() => {
+    const from = typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('from') || '').trim().slice(0, 80) : ''
+    return { full_name: '', email: '', phone: '', message: from ? `${from} invited me.` : '', website: '' }
+  })
   const [state, setState] = useState({ sending: false, done: false, error: '' })
   useDocumentHead({ title: 'Request Member Access', description: 'Ask to join the His Place member portal: Bible studies, a shared reading plan, the prayer wall, and ways to care for each other all week long.' })
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })

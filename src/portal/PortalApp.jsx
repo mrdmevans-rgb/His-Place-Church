@@ -3,7 +3,7 @@ import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from
 import {
   LayoutDashboard, Megaphone, ClipboardList, Heart, FolderOpen, CalendarDays, ListOrdered, Users, Music,
   Wrench, Baby, FileWarning, ShieldCheck, UserCog, LogOut, Menu, X, KeyRound,
-  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen, Sprout, Sparkles, UserPlus, Footprints, FileCheck,
+  Home, BookOpen, BookMarked, HeartHandshake, MessageCircleQuestion, CalendarHeart, Soup, HandHelping, Contact, Library as LibraryIcon, Flag, NotebookPen, Sprout, Sparkles, UserPlus, Footprints, FileCheck, Send,
 } from 'lucide-react'
 import { supabase, portalConfigured, friendlyError, roleLabel, toAccountEmail, pendingJoinCount } from './supabase'
 import { PortalContext, Notice, useMe } from './ui'
@@ -26,6 +26,7 @@ import AskPastor from './member/AskPastor'
 import { MemberPrayer, Directory, Care, HelpBoard, Gatherings, Reading } from './member/Community'
 import { SermonNotes } from './member/Sermon'
 import Praise from './member/Praise'
+import Invite from './member/Invite'
 import Visitors from './pages/Visitors'
 import ContentReview from './pages/ContentReview'
 import WalkWithMe from './member/WalkWithMe'
@@ -46,6 +47,7 @@ const NAV = [
   { to: '/portal/care', label: 'Care calendar', icon: Soup, show: (m) => m.isMember },
   { to: '/portal/help', label: 'Help board', icon: HandHelping, show: (m) => m.isMember },
   { to: '/portal/directory', label: 'Directory', icon: Contact, show: (m) => m.isMember },
+  { to: '/portal/invite', label: 'Invite someone', icon: Send, show: (m) => m.isMember },
   { group: 'Leaders', show: (m) => m.isStaff },
   { to: '/portal', label: 'Leader dashboard', icon: LayoutDashboard, show: (m) => m.isStaff, end: true },
   { to: '/portal/visitors', label: 'Visitors', icon: UserPlus, show: (m) => m.isStaff },
@@ -320,6 +322,7 @@ function Layout() {
                 <Route path="care" element={<Care />} />
                 <Route path="help" element={<HelpBoard />} />
                 <Route path="directory" element={<Directory />} />
+                <Route path="invite" element={<Invite />} />
               </>
             )}
             {me.isPastoral && (
