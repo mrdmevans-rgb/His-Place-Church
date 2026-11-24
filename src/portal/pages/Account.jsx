@@ -163,7 +163,7 @@ export const EMAIL_CHOICES = [
   ['pastor_answers', 'When the pastor answers my question', 'Sent right away. Only you see your question and the answer.'],
   ['care_reminders', 'A reminder when I signed up to help a family', 'The morning before your day on the Care calendar: what you signed up for and where to drop it off.'],
   ['prayer_updates', 'When people pray for my requests', 'A short morning note when someone starts praying for your request or leaves an encouragement.'],
-  ['post_replies', 'When people reply to or appreciate my comments', 'A short morning note when someone replies to something you shared, or says Amen, Love this, Thank you, or Praying.'],
+  ['post_replies', 'When people reply to me, welcome me, or pray for me', 'A short morning note when someone replies to something you shared, says Amen, Love this, Thank you, or Praying, welcomes you, or prays for you by name.'],
   ['weekly_reading', "This week's Read together plan", 'Monday morning: the week’s five readings and the question to think about.'],
   ['discussions', 'New Bible study and reading discussions', 'In the morning email: which lessons and readings have new comments.'],
   ['help_board', 'New needs and offers on the Help board', 'In the morning email: titles of new posts.'],

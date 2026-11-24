@@ -73,7 +73,10 @@ export default function ForYou() {
             <div className="m-foryou-text">
               <Link to={i.link}>
                 <strong>{name(i.actor) || 'A member'}</strong>{' '}
-                {i.what === 'reply' ? <>replied to your comment {quote(i.my_text)}: <em>{i.reply_text}</em></> : <>{REACTION_WORDS[i.what] || 'appreciated'} your comment {quote(i.my_text)}</>}
+                {i.what === 'welcome' ? <>welcomed you to the portal{i.reply_text && <>: <em>{i.reply_text}</em></>}</>
+                  : i.what === 'prayed_name' ? <>prayed for you by name</>
+                  : i.what === 'reply' ? <>replied to your comment {quote(i.my_text)}: <em>{i.reply_text}</em></>
+                  : <>{REACTION_WORDS[i.what] || 'appreciated'} your comment {quote(i.my_text)}</>}
               </Link>
               <span className="p-meta"> {fmtDateTime(i.at)}</span>
             </div>

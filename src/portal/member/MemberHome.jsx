@@ -7,6 +7,7 @@ import { Celebrations } from './Community'
 import { PassageLinks, gatewayUrl } from './shared'
 import DailyQuestion from './Trivia'
 import ForYou from './ForYou'
+import { InviteNudge, NewMembers, PrayForOne } from './Together'
 
 export const CONDUCT = [
   'Speak the truth in love (Ephesians 4:15). Be kind, even when you disagree.',
@@ -80,6 +81,8 @@ export default function MemberHome() {
       {!d.emailChosen && !isLoginId(me.profile.email) && <div className="p-card m-email-nudge"><strong>Get email updates?</strong> Choose emails for the weekly reading, new discussions, prayer needs, and more. <Link to="/portal/account#email-updates">Choose your emails</Link></div>}
       {d.answered.length > 0 && <Notice tone="success">The pastor has answered your question. <Link to="/portal/ask">Read the answer</Link></Notice>}
       <ForYou />
+      <NewMembers />
+      <PrayForOne />
       <DailyQuestion />
       <div className="p-dash-grid">
         <div className="p-card">
@@ -104,7 +107,7 @@ export default function MemberHome() {
           {d.gatherings.length ? <ul className="p-team-list">{d.gatherings.map((g) => <li key={g.id}><strong>{g.title}</strong><br /><span className="p-meta">{fmtDateTime(g.starts_at)}</span></li>)}</ul> : <p className="p-muted">Nothing planned. <Link to="/portal/gatherings">Host something</Link></p>}
         </div>
         <div className="p-card">
-          <h2 className="p-card-title">Pray for</h2>
+          <h2 className="p-card-title">Prayer needs</h2>
           {d.prayers.length ? <ul className="p-team-list">{d.prayers.map((p) => <li key={p.id}>{p.title} <span className="p-meta">· {name(p.author) || 'a member'}, {fmtDate(p.created_at)}</span></li>)}</ul> : <p className="p-muted">No needs shared right now.</p>}
           <Link to="/portal/pray">Prayer wall</Link>
         </div>
@@ -119,6 +122,7 @@ export default function MemberHome() {
         </div>
       )}
       <Celebrations compact />
+      <InviteNudge />
     </>
   )
 }
